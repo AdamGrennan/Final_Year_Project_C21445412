@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Global Styles */
+html, body {
+  font-family: 'Inter', sans-serif; /* Example of a custom font */
+  background-color: #f9fafb; /* Light background color */
+  margin: 0;
+  padding: 0;
+}
+
+/* Other global styles */
+a {
+  color: #1a202c; /* Tailwind color for dark text */
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}

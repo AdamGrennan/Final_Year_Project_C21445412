@@ -1,13 +1,16 @@
+'use client'
 import React, { useState } from "react";
+import { useUser } from "@/context/UserContext";
 
 const Chat = () => {
+    const { user } = useUser();
 
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
 
     const onSend = () => {
         if (input.trim() === '') return; 
-        setMessages([...messages, { text: input, sender: 'user' }]);
+        setMessages([...messages, { text: input, sender: user.name }]);
         setInput('');
     };
 
