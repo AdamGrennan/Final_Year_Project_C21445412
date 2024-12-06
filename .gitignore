@@ -1,2 +1,2 @@
-/backend/models
-/backend/data_generation
+backend/models/saved_model/
+/backend/data_generation/
