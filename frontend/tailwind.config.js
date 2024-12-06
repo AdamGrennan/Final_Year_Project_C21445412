@@ -11,7 +11,8 @@ module.exports = {
   		colors: {
 			  PRIMARY: '#9747FF',
         SECONDARY: '#2B86E8',
-        MERGE: '#735CF7'
+        MERGE: '#735CF7',
+        GRAAY: '#F2F2F2',
   		},
       fontFamily: {
         urbanist: ["Urbanist", "sans-serif"],

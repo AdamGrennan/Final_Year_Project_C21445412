@@ -1,10 +1,14 @@
 "use client"
 import * as React from "react";
-import { useRouter } from 'next/navigation';// To handle redirection
+import { useRouter } from 'next/navigation';
 import { signOut } from "firebase/auth";
-import { auth } from "../config/firebase"; // Adjust the path as per your project structure
+import { auth } from "../config/firebase";
 import { useUser } from "@/context/UserContext";
-import { VersionSwitcher } from "@/components/version-switcher";
+import { IoExitOutline } from "react-icons/io5";
+import { MdDashboard } from "react-icons/md";
+import { MdBubbleChart } from "react-icons/md";
+import { FaUser } from "react-icons/fa";
+import { RiHomeFill } from "react-icons/ri";
 import {
   Sidebar,
   SidebarContent,
@@ -22,12 +26,13 @@ import {
 const data = {
   navMain: [
     {
-      title: "Tools",
       url: "#",
       items: [
-        { title: "Installation", url: "#" },
-        { title: "Project Structure", url: "#" },
-        { title: "Log Out", url: "#" }, // We will replace this with a logout function
+        { title: "Account", url: "#" },
+        { title: "Home", url: "#" },
+        { title: "New", url: "#" },
+        { title: "Dashboard", url: "#" },
+        { title: "Log Out", url: "#" },
       ],
     },
   ],
@@ -38,43 +43,72 @@ export function AppSidebar({ ...props }) {
   const router = useRouter();
 
   const logOut = async (e) => {
-    e.preventDefault(); // Prevent default link behavior
+    e.preventDefault();
     try {
-      await signOut(auth); // Sign the user out
-      router.push("/"); // Redirect to the login page
+      await signOut(auth);
+      router.push("/");
     } catch (error) {
       console.error("Error logging out:", error);
     }
   };
 
   return (
-    <Sidebar {...props} className="bg-PRIMARY">
+    <Sidebar {...props} className="bg-PRIMARY text-white">
       <SidebarHeader>
         SONUS
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent >
         {data.navMain.map((item) => (
           <SidebarGroup key={item.title}>
-            <SidebarGroupLabel>{item.title}</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-white">{item.title}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {item.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    {item.title === "Log Out" ? (
-                      <SidebarMenuButton asChild isActive={item.isActive}>
-                        {/* Log out onClick instead of href */}
+                    {item.title === "Home" ? (
+                      <SidebarMenuButton asChild isActive={item.isActive} className="text-white flex items-center gap-2">
+                        <a href="#" onClick={(e) => { e.preventDefault(); router.push("/Main"); }}>
+                          <RiHomeFill className="text-white mr-2" />
+                          {item.title}
+                        </a>
+                      </SidebarMenuButton>
+                    ) : item.title === "Log Out" ? (
+                      <SidebarMenuButton asChild isActive={item.isActive} className="text-white">
                         <a href="#" onClick={logOut}>
+                          <IoExitOutline className="text-white mr-2" />
+                          {item.title}
+                        </a>
+                      </SidebarMenuButton>
+                    ) : item.title === "New" ? (
+                      <SidebarMenuButton asChild isActive={item.isActive} className="text-white">
+                        <a href="#" onClick={(e) => { e.preventDefault(); router.push("/Judgement"); }}>
+                          <MdBubbleChart className="text-white mr-2" />
+                          {item.title}
+                        </a>
+                      </SidebarMenuButton>
+                    ) :  item.title === "Dashboard" ? (
+                      <SidebarMenuButton asChild isActive={item.isActive} className="text-white">
+                        <a href="#">
+                          <MdDashboard className="text-white mr-2" />
+                          {item.title}
+                        </a>
+                      </SidebarMenuButton>
+                    ) :  item.title === "Account" ? (
+                      <SidebarMenuButton asChild isActive={item.isActive} className="text-white">
+                      <a href="#" onClick={(e) => { e.preventDefault(); router.push("/Profile"); }}>
+                          <FaUser className="text-white mr-2" />
                           {item.title}
                         </a>
                       </SidebarMenuButton>
                     ) : (
-                      <SidebarMenuButton asChild isActive={item.isActive}>
+                      <SidebarMenuButton asChild isActive={item.isActive} className="text-white">
                         <a href={item.url}>{item.title}</a>
                       </SidebarMenuButton>
                     )}
                   </SidebarMenuItem>
                 ))}
               </SidebarMenu>
+
             </SidebarGroupContent>
           </SidebarGroup>
         ))}

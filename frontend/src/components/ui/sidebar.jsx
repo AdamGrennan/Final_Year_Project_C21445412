@@ -179,7 +179,7 @@ const Sidebar = React.forwardRef((
       ref={ref}
       className="group peer hidden md:block"
       data-state={state}
-      data-collapsible={state === "collapsed" ? collapsible : ""}
+      data-collapsible={state === "collapsed" ? collapsible : undefined}
       data-variant={variant}
       data-side={side}>
       {/* This is what handles the sidebar gap on desktop */}

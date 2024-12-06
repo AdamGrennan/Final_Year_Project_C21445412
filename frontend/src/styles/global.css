@@ -2,17 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom Global Styles */
 html, body {
-  font-family: 'Inter', sans-serif; /* Example of a custom font */
-  background-color: #f9fafb; /* Light background color */
+  font-family: 'Inter', sans-serif; 
+  background-color: #f9fafb; 
   margin: 0;
   padding: 0;
 }
 
-/* Other global styles */
 a {
-  color: #1a202c; /* Tailwind color for dark text */
+  color: #1a202c; 
   text-decoration: none;
 }
 

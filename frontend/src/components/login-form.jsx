@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import Spinner from "./spinner";
 import {
   Card,
   CardContent,
@@ -22,12 +23,28 @@ export function LoginForm() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { userInfo } = useUser();
 
   const onSubmit = async (e) => {
     e.preventDefault();
+
+  setEmailError();
+  setPasswordError();
+
+  if (!email) {
+    setEmailError("Invalid Email");
+    return;
+  }
+
+  if (!password) {
+    setPasswordError("Invalid Password");
+    return;
+  }
+
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
@@ -36,22 +53,32 @@ export function LoginForm() {
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
+          setLoading(true);
           const userData = docSnap.data();
 
           userInfo({ name: userData.name, uid: user.uid });
           router.push('/Main');
-        }else{
-          console.error("No such document!");
+        } else {
+          setEmailError("No user details found. Please signup!.");
         }
     } catch (error) {
         const errorMessage = error.message;
-        console.error("Error signing in:", errorMessage);
-        setError(errorMessage); 
+
+        if (errorMessage.includes("user-not-found")) {
+          setEmailError("No account found with this email. Please sign up.");
+        } else if (errorMessage.includes("wrong-password")) {
+          setPasswordError("Incorrect password");
+        } else {
+          setPasswordError("Failed to log in. Please try again.");
+        }
     }
+    setLoading(false);
+   
 };
 
   return ( 
-      
+       
+    
     (<Card className="mx-auto max-w-sm">
       <CardHeader>
         <CardTitle className="text-2xl text-PRIMARY font-urbanist font-bold">Login</CardTitle>
@@ -69,13 +96,11 @@ export function LoginForm() {
             value={email} 
             onChange={(e) => setEmail(e.target.value)}
             required />
+             {emailError && <p className="text-red-500 text-xs mt-1 font-urbanist">{emailError}</p>}
           </div>
           <div className="grid gap-2">
             <div className="flex items-center">
               <Label htmlFor="password" className="font-semibold font-urbanist">Password</Label>
-              <Link href="#" className="ml-auto inline-block text-sm underline">
-                Forgot your password?
-              </Link>
             </div>
             <Input
              id="password" 
@@ -83,14 +108,15 @@ export function LoginForm() {
             value={password} 
             onChange={(e) => setPassword(e.target.value)} 
             required />
+             {passwordError && <p className="text-red-500 text-xs mt-1 font-urbanist">{passwordError}</p>}
           </div>
-          <Button type="submit" className="w-full text-white bg-PRIMARY" onClick={onSubmit}>
+          <Button type="submit" className="w-full text-white bg-PRIMARY hover:bg-opacity-80" onClick={onSubmit}>
             LOGIN
           </Button>
         </div>
         <div className="mt-4 text-center text-sm font-semibold font-urbanist">
           Dont have an account?{" "}
-          <Link href="/Register" className="underline font-semibold font-urbanist text-PRIMARY">
+          <Link href="/Register" className="hover:underline font-semibold font-urbanist text-PRIMARY">
             Sign up
           </Link>
         </div>
