@@ -27,59 +27,6 @@ def bert_endpoint():
         return jsonify({"predictions": detected_biases})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
-@app.route('/gpt', methods=['POST'])
-def gpt_endpoint():
-    data = request.json
-    statement = data.get("input", "")
-    if not statement:
-        return jsonify({"ERROR": "No input provided"}), 400
-
-    try:
-        detected_biases = predict_bias(model, tokenizer, statement, bias_labels, threshold=0.6)
-
-        feedback = {}
-        for bias in detected_biases:
-            if bias in BIAS_TYPES and bias != "Neutral":
-  
-                bias_prompt = f"""
-                The user has shown signs of {bias}. Their input was:
-                "{statement}"
-                Provide:
-                1. An explanation of {bias}.
-                2. Its potential impact on decision-making.
-                3. Suggestions for improving their judgment.
-                4. Any additional details they would like to provide or follow up on.
-                """
-                response = openai.Completion.create(
-                    model="gpt-4",
-                    prompt=bias_prompt,
-                    max_tokens=150,
-                    temperature=0.7
-                )
-                feedback[bias] = response.choices[0].text.strip()
-
-        situation_prompt = f"""
-        The user has shared the following statement:
-        "{statement}"
-        Generate a response that provides real-world facts, advice, or discussion points
-        relevant to the situation they are describing.
-        """
-        situation_response = openai.Completion.create(
-            model="gpt-4",
-            prompt=situation_prompt,
-            max_tokens=200,
-            temperature=0.8
-        )
-        situation_response = situation_response.choices[0].text.strip()
-
-        return jsonify({
-            "predictions": detected_biases,
-            "bias_feedback": feedback,
-            "situation_response": situation_response
-        })
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == '__main__':
