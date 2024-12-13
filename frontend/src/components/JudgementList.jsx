@@ -1,14 +1,21 @@
+"use client";
+import { useRouter } from 'next/navigation';
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/config/firebase";
 import { useEffect, useState } from "react";
 import { useUser } from "@/context/UserContext";
+import { Button } from './ui/button';
 
 const JudgementList = () => {
+    const router = useRouter();
     const [judgements, setJudgements] = useState([]);
     const { user } = useUser();
-    
 
+    const openChat = (judgementId) => {
+      router.push(`/Chat_Page/${judgementId}`);
+    }
+    
     useEffect(() => {
         const fetchJudgements = async () => {
         if (user && user.uid) { 
@@ -33,15 +40,16 @@ const JudgementList = () => {
       }, [user]);
 
 return(
-    <ScrollArea className="h-[200px] w-[350px] rounded-md border p-4 bg-GRAAY">
+    <ScrollArea className="h-[400px] w-[500px] rounded-md border p-4 bg-GRAAY">
       {judgements.length > 0 ? (
             judgements.map((judgement) => (
-                <button
+                <Button 
+                    onClick={() => openChat(judgement.id)} 
                     key={judgement.id}
                     className="mb-2 w-full text-left p-2 bg-blue-500 text-white rounded-md"
                 >
                     {judgement.title}
-                </button>
+                </Button>
             ))
         ) : (
             <p className="text-gray-500">No judgments found for this user.</p>

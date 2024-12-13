@@ -61,7 +61,7 @@ export default function Page() {
       console.error("Error saving judgement:", error);
       alert("Failed to save judgement.");
     }
-    router.push('/Detection');
+    router.push('/Chat_Page');
   };
 
   return (
@@ -149,7 +149,7 @@ export default function Page() {
                       {level}
                     </button>
                   ))}
-                    <Link href="/Detection" className="underline font-semibold font-urbanist text-PRIMARY">
+                    <Link href="/Chat_Page" className="underline font-semibold font-urbanist text-PRIMARY">
             CHAT PAGE
           </Link>
                 </div>

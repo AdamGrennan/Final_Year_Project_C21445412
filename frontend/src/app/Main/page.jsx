@@ -1,5 +1,7 @@
 "use client";
 import { useRouter } from 'next/navigation';
+import JudgementButton from '@/components/judgement-button';
+import DashboardButton from '@/components/dashboard-button';
 import { Label } from "@/components/ui/label"
 import JudgementList from "@/components/JudgementList";
 import {
@@ -24,7 +26,7 @@ export default function Page() {
   const [judgement, setJudgements] = useState([]);
 
   const newJudgement = () => {
-    router.push('/Judgement');
+    router.push('/Judgement_Form');
   }
 
   return (
@@ -35,14 +37,12 @@ export default function Page() {
             <JudgementList/>
         </div>
 
-        <div className="flex flex-col gap-4 w-full md:w-1/2">
+        <div className="flex items-end flex-col w-full md:w-1/2">
           <Label htmlFor="terms" className="font-urbanist text-PRIMARY text-2xl font-bold mb-2 ">Tools</Label>
-          <button className="bg-green-500 text-white text-lg p-4 rounded-lg hover:bg-green-600" onClick={newJudgement}>
-            Create New
-          </button>
-          <button className="bg-red-500 text-white text-lg p-4 rounded-lg hover:bg-red-600">
-            Small Button 2
-          </button>
+          <div className="flex flex-col space-y-[50px]">
+        <JudgementButton onClick={newJudgement} />
+        <DashboardButton />
+    </div>
         </div>
       </div>
 

@@ -1,6 +1,7 @@
 // layout.jsx in src/app
 "use client";
 import { UserProvider } from "@/context/UserContext";
+import { BiasProvider } from "@/context/BiasContext";
 import { MainSidebar } from "@/components/main-sidebar";
 import { usePathname } from "next/navigation";
 import "@/styles/global.css";
@@ -19,6 +20,7 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         <UserProvider>
+          <BiasProvider>
           {isNoSidebarRoute ? (
             <main className="min-h-screen flex flex-col justify-center items-center">
               {children}
@@ -26,6 +28,7 @@ export default function RootLayout({ children }) {
           ) : (
             <MainSidebar>{children}</MainSidebar>
           )}
+          </BiasProvider>
         </UserProvider>
       </body>
     </html>

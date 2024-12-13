@@ -22,7 +22,6 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 
-// Sample data
 const data = {
   navMain: [
     {
@@ -81,7 +80,7 @@ export function AppSidebar({ ...props }) {
                       </SidebarMenuButton>
                     ) : item.title === "New" ? (
                       <SidebarMenuButton asChild isActive={item.isActive} className="text-white">
-                        <a href="#" onClick={(e) => { e.preventDefault(); router.push("/Judgement"); }}>
+                        <a href="#" onClick={(e) => { e.preventDefault(); router.push("/Judgement_Form"); }}>
                           <MdBubbleChart className="text-white mr-2" />
                           {item.title}
                         </a>
