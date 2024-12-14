@@ -6,7 +6,7 @@ import { FaArrowUpLong } from "react-icons/fa6";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { useBias } from "@/context/BiasContext";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, doc, getDocs, query, where, writeBatch, orderBy } from "firebase/firestore";
 import { db } from "@/config/firebase";
 
 const Chat = ({ judgementId }) => {
@@ -22,28 +22,42 @@ const Chat = ({ judgementId }) => {
     }
   };
 
-  const saveChats = async ( newMessage ) => {
+  const saveChats = async (newMessages) => {
+    if (!user?.uid) {
+      console.error("User not authenticated");
+      return;
+    }
+  
+    if (!judgementId) {
+      console.error("Judgement ID is missing");
+      return;
+    }
+  
     try {
-      const batch = db.batch();
-
-      newMessage.forEach(msg => {
+      const batch = writeBatch(db);
+      console.log("Starting batch operation...");
+  
+      newMessages.forEach((msg, index) => {
+        console.log(`Processing message #${index}:`, msg);
         const chatRef = doc(collection(db, "chat"));
-        batch.set(chatRef,
-          {
-            judgementId,
-            messages: msg,
-            createdAt: new Date(),
-            userId: userId
-          }
-        );
+        batch.set(chatRef, {
+          judgementId,
+          messages: msg,
+          createdAt: new Date(),
+          userId: user.uid,
+        });
       });
+  
+      console.log("Committing batch...");
       await batch.commit();
+      console.log("Batch commit successful");
       alert("Chat saved successfully!");
     } catch (error) {
       console.error("Error saving chat:", error);
       alert("Failed to save chat.");
     }
   };
+  
 
   const onSend = async () => {
     if (input.trim() === "") return;
@@ -73,8 +87,8 @@ const Chat = ({ judgementId }) => {
 
         console.log("Adding to messages:", bertResponse);
        
-        setMessages((prev) => [...prev, ...bertResponse]);
-        saveChats([newMessage, ...bertResponse]);
+        setMessages((prev) => [...prev, bertResponse]);
+        saveChats([newMessage, bertResponse]);
       } else if(bertData.error){
         console.error(bertData.error || "ERROR, No response from BERT")      
       }
@@ -97,8 +111,8 @@ const Chat = ({ judgementId }) => {
         console.log("Generated GPT Messages:", gptResponse);
 
         console.log("Adding to messages:", gptResponse);
-        setMessages((prev) => [...prev, ...gptResponses]);
-        saveChats([newMessage, ...gptResponses]);
+        setMessages((prev) => [...prev, ...gptResponse]);
+        saveChats([newMessage, ...gptResponse]);
       } else if(gptData.error){
         console.error(gptData.error || "ERROR, No response from GPT")      
       }
@@ -115,7 +129,8 @@ const Chat = ({ judgementId }) => {
       try {
         const chatsQuery = query(
           collection(db, "chat"),
-          where("judgementId", "==", judgementId)
+          where("judgementId", "==", judgementId),
+          orderBy("createdAt", "asc")
         );
         const querySnapshot = await getDocs(chatsQuery);
         

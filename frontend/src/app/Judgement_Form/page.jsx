@@ -51,17 +51,19 @@ export default function Page() {
 
   const onSubmit = async (data) => {
     try {
-      await addDoc(collection(db, "judgement"), {
+      const judgeRef = await addDoc(collection(db, "judgement"), {
         ...data,
         createdAt: new Date(),
         userId: userId
       });
       alert("Judgement saved successfully!");
+      router.push(`/Chat_Page/${judgeRef.id}`);
+      
     } catch (error) {
       console.error("Error saving judgement:", error);
       alert("Failed to save judgement.");
     }
-    router.push('/Chat_Page');
+  
   };
 
   return (

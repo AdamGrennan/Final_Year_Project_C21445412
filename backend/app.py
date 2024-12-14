@@ -3,7 +3,6 @@ from flask_cors import CORS
 from src.load_model import load_model
 from src.predict import predict_bias
 import openai
-import os
 
 app = Flask(__name__)
 CORS(app)
