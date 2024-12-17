@@ -1,12 +1,13 @@
 "use client";
 import { useRouter } from 'next/navigation';
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { collection, query, where, getDocs } from "firebase/firestore";
-import { db } from "@/config/firebase";
+import { doc, collection, query, where, getDocs, deleteDoc } from "firebase/firestore";
+import { auth, db } from "@/config/firebase";
 import { useEffect, useState } from "react";
 import { useUser } from "@/context/UserContext";
 import { Button } from './ui/button';
 import { FaPlus } from "react-icons/fa";
+import { IoTrashBin } from "react-icons/io5";
 
 const JudgementList = ( { templates, addTemplate }) => {
     const router = useRouter();
@@ -16,9 +17,23 @@ const JudgementList = ( { templates, addTemplate }) => {
     const openChat = (judgementId) => {
       router.push(`/Chat_Page/${judgementId}`);
     }
+
+    const handleDelete = async (judgementId) =>{
+      try {
+            const judgeRef = doc(db, "judgement", judgementId);
+            await deleteDoc(judgeRef);
+            console.log("Judgement deleted successfully.")
+            fetchJudgements();
+          } catch (error) {
+            console.log(error)
+          }
+    }
     
     useEffect(() => {
-        const fetchJudgements = async () => {
+        fetchJudgements();
+      }, [user]);
+
+      const fetchJudgements = async () => {
         if (user && user.uid) { 
           try {
             const judgementsQuery = query(
@@ -37,8 +52,6 @@ const JudgementList = ( { templates, addTemplate }) => {
           }
         }
         };
-        fetchJudgements();
-      }, [user]);
 
 
       const filterTemplates = ({ template }) => {
@@ -78,16 +91,23 @@ return(
     <ScrollArea className="h-[400px] w-[500px] rounded-md border p-4 bg-GRAAY">
       {judgements.length > 0 ? (
             judgements.map((judgement) => (
+              <div className="flex justify-between ">
                 <Button 
                     onClick={() => openChat(judgement.id)} 
                     key={judgement.id}
                     className="mb-2 w-full text-left p-2 bg-white text-black rounded-md font-urbanist"
                 >
-                 <div>
+                 <div className="flex justify-between items-center w-full">
                  <div className="font-medium">{judgement.title}</div>
                  <div className="font-light">{judgement.description}</div>
                  </div>
                 </Button>
+                <Button onClick={() => handleDelete(judgement.id)} >
+                  <IoTrashBin className='text-PRIMARY'/>
+                 </Button>
+                </div>
+                
+                
             ))
         ) : (
             <p className="text-gray-500">No judgments found for this user.</p>

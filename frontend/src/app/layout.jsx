@@ -2,7 +2,7 @@
 "use client";
 import { UserProvider } from "@/context/UserContext";
 import { BiasProvider } from "@/context/BiasContext";
-import { MainSidebar } from "@/components/main-sidebar";
+import { MainSidebar } from "@/components/MainSidebar";
 import { usePathname } from "next/navigation";
 import "@/styles/global.css";
 

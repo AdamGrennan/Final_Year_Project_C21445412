@@ -5,6 +5,7 @@ const BiasContext = createContext();
 
 export const BiasProvider = ({ children }) => {
     const [biasCount, setBiasCount] = useState([]);
+    const [detectedBias, setDetectedBias] = useState([]);
 
     const countBias = (bias) => {
         setBiasCount((prevCounts) => {
@@ -14,8 +15,12 @@ export const BiasProvider = ({ children }) => {
         });
     }
 
+    const detectBias = (bias) => {
+        setDetectedBias((prev) => [...prev, bias]);
+    }
+
     return (
-        <BiasContext.Provider value={{countBias, biasCount}}>
+        <BiasContext.Provider value={{countBias, biasCount, detectBias, detectedBias}}>
             {children}
         </BiasContext.Provider>
     );

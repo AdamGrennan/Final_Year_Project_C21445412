@@ -11,7 +11,7 @@ import { db } from "@/config/firebase";
 
 const Chat = ({ judgementId }) => {
   const { user } = useUser();
-  const { countBias } = useBias();
+  const { countBias, detectBias } = useBias();
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -77,7 +77,11 @@ const Chat = ({ judgementId }) => {
 
       if (bertData.predictions) {
         for(const bias of bertData.predictions){
-          countBias(bias);
+          if(bias != "neutral"){
+            countBias(bias);
+            detectBias(bias);  
+          }
+          
         }
         
         const bertResponse = {
@@ -130,7 +134,7 @@ const Chat = ({ judgementId }) => {
         const chatsQuery = query(
           collection(db, "chat"),
           where("judgementId", "==", judgementId),
-          orderBy("createdAt", "asc")
+          orderBy("createdAt", "desc")
         );
         const querySnapshot = await getDocs(chatsQuery);
         

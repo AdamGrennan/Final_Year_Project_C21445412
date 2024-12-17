@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from 'next/navigation';
-import JudgementButton from '@/components/judgement-button';
-import DashboardButton from '@/components/dashboard-button';
+import JudgementButton from '@/components/JudgementButton';
+import DashboardButton from '@/components/DashboardButton';
 import { Label } from "@/components/ui/label"
 import JudgementList from "@/components/JudgementList";
 import { addDoc, collection, query, where, getDocs } from "firebase/firestore";

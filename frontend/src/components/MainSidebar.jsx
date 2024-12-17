@@ -1,6 +1,6 @@
 "use client"
 import { PiHandWavingFill } from "react-icons/pi";
-import { AppSidebar } from "@/components/app-sidebar"
+import { AppSidebar } from "@/components/AppSidebar"
 import { useUser } from "@/context/UserContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {

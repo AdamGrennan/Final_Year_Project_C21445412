@@ -1,37 +1,46 @@
-"use client";
-
+"use client"
 import * as React from "react";
-import { useRouter } from 'next/navigation';
-import { useForm, FormProvider} from "react-hook-form";
+import { useRouter } from "next/navigation";
+import { useForm, FormProvider } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { addDoc, collection } from "firebase/firestore";
 import { db, auth } from "@/config/firebase";
-import { onAuthStateChanged } from "firebase/auth"; 
+import { onAuthStateChanged } from "firebase/auth";
 import { Button } from "@/components/ui/button";
+import TemplateSelect from "@/components/TemplateSelect";
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 
 const formSchema = z.object({
-  title: z.string().min(2, { message: "Title must be at least 2 characters." }).max(50, { message: "Title must be at most 50 characters." }),
-  template: z.string().min(2, { message: "Template must be at least 2 characters." }),
-  description: z.string().min(2, { message: "Description must be at least 2 characters." }),
-  outcome: z.string().min(2, { message: "Expected outcome must be at least 2 characters." }),
-  confidenceLevel: z.enum(["Low", "Medium", "High"], { message: "Please select a confidence level." })
+  title: z
+    .string()
+    .min(2, { message: "Title must be at least 2 characters." })
+    .max(50, { message: "Title must be at most 50 characters." }),
+  template: z.string().min(2, { message: "Please select a template." }),
+  description: z
+    .string()
+    .min(2, { message: "Description must be at least 2 characters." }),
+  outcome: z
+    .string()
+    .min(2, { message: "Expected outcome must be at least 2 characters." }),
+  confidenceLevel: z.enum(["Low", "Medium", "High"], {
+    message: "Please select a confidence level.",
+  }),
 });
 
 export default function Page() {
   const router = useRouter();
   const form = useForm({
     resolver: zodResolver(formSchema),
-    mode: "onChange"
+    mode: "onChange",
   });
 
   const [userId, setUserId] = React.useState(null);
@@ -39,7 +48,7 @@ export default function Page() {
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        setUserId(user.uid); 
+        setUserId(user.uid);
       } else {
         setUserId(null);
       }
@@ -48,22 +57,19 @@ export default function Page() {
     return () => unsubscribe();
   }, []);
 
-
   const onSubmit = async (data) => {
     try {
       const judgeRef = await addDoc(collection(db, "judgement"), {
         ...data,
         createdAt: new Date(),
-        userId: userId
+        userId: userId,
       });
       alert("Judgement saved successfully!");
       router.push(`/Chat_Page/${judgeRef.id}`);
-      
     } catch (error) {
       console.error("Error saving judgement:", error);
       alert("Failed to save judgement.");
     }
-  
   };
 
   return (
@@ -90,7 +96,9 @@ export default function Page() {
             <FormItem>
               <FormLabel>Template</FormLabel>
               <FormControl>
-                <Input placeholder="Template" {...field} />
+                <TemplateSelect
+                  onSelect={(value) => field.onChange(value)} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -151,9 +159,6 @@ export default function Page() {
                       {level}
                     </button>
                   ))}
-                    <Link href="/Chat_Page" className="underline font-semibold font-urbanist text-PRIMARY">
-            CHAT PAGE
-          </Link>
                 </div>
               </FormControl>
               <FormMessage />
@@ -164,6 +169,5 @@ export default function Page() {
         <Button type="submit">Submit</Button>
       </form>
     </FormProvider>
-    
   );
 }
