@@ -5,14 +5,19 @@ import { Label } from './ui/label';
 
 const FeedSideBar = ({ bias }) => {
 
+  const detectedBias = Array.from(
+    new Set(bias.filter((b) => b !== "neutral"))
+  );
+
+
     return (
-        <div className="w-[250px] p-4 border-l bg-gray-100">
+        <div className="w-[250px] p-4">
            <Label className="font-urbanist font-medium">Detected Bias</Label>
             <div className="w-[150px] border-b border-PRIMARY my-1"></div>
           <div>
             <ul className="list-disc pl-4">
-              {bias.length > 0 ? (
-                bias.map((bias, index) => <li key={index}>{bias}</li>)
+              {detectedBias.length > 0 ? (
+                detectedBias.map((detectedBias, index) => <li key={index}>{detectedBias}</li>)
               ) : (
                 <li>No biases detected</li>
               )}

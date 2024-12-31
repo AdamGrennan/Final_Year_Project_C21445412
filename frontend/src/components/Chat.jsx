@@ -6,14 +6,15 @@ import { FaArrowUpLong } from "react-icons/fa6";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { useBias } from "@/context/BiasContext";
-import { collection, doc, getDocs, query, where, writeBatch, orderBy } from "firebase/firestore";
+import { collection, doc, getDocs, query, where, writeBatch, orderBy, serverTimestamp } from "firebase/firestore";
 import { db } from "@/config/firebase";
 
 const Chat = ({ judgementId }) => {
   const { user } = useUser();
   const { countBias, detectBias } = useBias();
 
-  const [messages, setMessages] = useState([]);
+  const welcomeMessage = "Welcome to Sonus! I help you reflect on your judgments by analyzing noise and bias, detecting patterns, and providing feedback to improve your decision-making skills over time\n🧠 Receive insights on detected biases and potential noise.\n 📊 Review your decision trends and refine your approach.\n 🌟 Start typing to get started";
+  const [messages, setMessages] = useState([{ text: welcomeMessage , sender: "GPT"}]);
   const [input, setInput] = useState("");
 
   const handleKeyPress = (event) => {
@@ -43,15 +44,23 @@ const Chat = ({ judgementId }) => {
         batch.set(chatRef, {
           judgementId,
           messages: msg,
-          createdAt: new Date(),
+          createdAt: serverTimestamp(),
           userId: user.uid,
         });
       });
+
+    const detectedBiases = detectBias();
+    if (detectedBiases && detectedBiases.length > 0) {
+      const judgeRef = doc(db, "judgment", judgementId);
+      batch.update(judgeRef, {
+        biases: Array.from(new Set(detectedBiases)),
+        updatedAt: serverTimestamp(),
+      });
+    }
   
       console.log("Committing batch...");
       await batch.commit();
       console.log("Batch commit successful");
-      alert("Chat saved successfully!");
     } catch (error) {
       console.error("Error saving chat:", error);
       alert("Failed to save chat.");
@@ -77,7 +86,7 @@ const Chat = ({ judgementId }) => {
 
       if (bertData.predictions) {
         for(const bias of bertData.predictions){
-          if(bias != "neutral"){
+          if(bias != "Neutral"){
             countBias(bias);
             detectBias(bias);  
           }
@@ -107,17 +116,19 @@ const Chat = ({ judgementId }) => {
       console.log("GPT Response:", gptData);
 
       if (gptData.bias_feedback) {
-        const gptResponse = Object.entries(gptData.bias_feedback).map(([key, value]) => ({
-            text: `Feedback for ${key}: ${value}`,
-            sender: 'GPT',
-        }));
 
-        console.log("Generated GPT Messages:", gptResponse);
-
-        console.log("Adding to messages:", gptResponse);
-        setMessages((prev) => [...prev, ...gptResponse]);
-        saveChats([newMessage, ...gptResponse]);
-      } else if(gptData.error){
+        const gptResponse = {
+          text: gptData.bias_feedback, 
+          sender: "GPT",
+        };
+      
+        console.log("Generated GPT Message:", gptResponse);
+      
+        setMessages((prev) => [...prev, gptResponse]);
+      
+        saveChats([newMessage, gptResponse]);
+      }
+       else if(gptData.error){
         console.error(gptData.error || "ERROR, No response from GPT")      
       }
 
@@ -134,13 +145,13 @@ const Chat = ({ judgementId }) => {
         const chatsQuery = query(
           collection(db, "chat"),
           where("judgementId", "==", judgementId),
-          orderBy("createdAt", "desc")
+          orderBy("createdAt", "asc")
         );
         const querySnapshot = await getDocs(chatsQuery);
         
         const fetchedMessages = querySnapshot.docs.map(doc => doc.data().messages).flat();
-        setMessages(fetchedMessages);
-        console.log("Fetched chats:", data);
+        setMessages((prev) => [...prev, ...fetchedMessages]);
+        console.log("Fetched chats");
       } catch (error) {
         console.log(error);
       }
@@ -151,7 +162,7 @@ const Chat = ({ judgementId }) => {
 
   
   return (
-    <div className="flex flex-col w-[400px] h-[500px] rounded-md mx-auto bg-GRAAY">
+    <div className="flex flex-col w-[750px] h-[450px] rounded-md mx-auto bg-GRAAY">
       <div className="flex-1 p-4 overflow-y-auto bg-GRAAY">
         {messages.map((message, index) => (
           <div

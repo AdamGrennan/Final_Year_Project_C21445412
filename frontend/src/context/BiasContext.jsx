@@ -19,8 +19,13 @@ export const BiasProvider = ({ children }) => {
         setDetectedBias((prev) => [...prev, bias]);
     }
 
+    const clearBias = () => {
+        setBiasCount([]);
+        setDetectedBias([]);
+    }
+
     return (
-        <BiasContext.Provider value={{countBias, biasCount, detectBias, detectedBias}}>
+        <BiasContext.Provider value={{countBias, biasCount, detectBias, detectedBias, clearBias}}>
             {children}
         </BiasContext.Provider>
     );

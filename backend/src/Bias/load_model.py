@@ -1,9 +1,9 @@
 from transformers import BertForSequenceClassification, BertTokenizer
-from src.data_load import load_data
+from src.Bias.data_load import load_data
 import torch
 
 #Thiss class loads my saved models
-def load_model():
+def load_bias_model():
     #Retreive saved model and tokenizer
     model = BertForSequenceClassification.from_pretrained("./models/saved_model")
     tokenizer = BertTokenizer.from_pretrained("./models/saved_tokenizer")

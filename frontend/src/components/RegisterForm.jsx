@@ -24,7 +24,6 @@ export function RegisterForm() {
   const [name, setName] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [emailError, setEmailError] = useState('');
-  const [error, setError] = useState('');
   const { userInfo } = useUser(); 
   const router = useRouter();
 
@@ -67,16 +66,15 @@ export function RegisterForm() {
         const errorCode = error.code;
         const errorMessage = error.message;
         console.log(errorCode, errorMessage);
-        setError(errorMessage);
     });
     }else{
-      setError("Invalid Inputs!");
+      console.log("Invalid Inputs!");
     }     
 }
 
   return ( 
       
-    (<Card className="mx-auto max-w-sm">
+    (<Card className="w-[400px] h-[450px]">
       <CardHeader>
         <CardTitle className="text-2xl text-PRIMARY font-urbanist font-bold">Sign Up</CardTitle>
         <CardDescription>

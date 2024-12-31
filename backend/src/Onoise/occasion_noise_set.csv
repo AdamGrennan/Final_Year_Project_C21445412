@@ -1,0 +1,23 @@
+sentence,label
+"After a long day of work, my exhaustion, coupled with the chilly evening air, prompted me to skip the gym and head straight home.",OccasionNoise
+"Even though it was sunny and I was in a great mood because it was lunchtime, I found myself postponing the tough decision of whether or not to take on a new role at work.",OccasionNoise
+"""After a long day at work, my tiredness and the gloomy weather outside significantly influenced my decision to order takeout instead of cooking dinner.""",OccasionNoise
+"Despite the pouring rain and my sour mood after a long day at work, I found myself impulsively deciding to order a decadent dessert at dinner.",OccasionNoise
+"1. ""Even though it was raining and gloomy outside, I still decided to go for a run, influenced more by my upbeat mood this morning than the weather.""
+2. ""Despite it being late at night, I found myself agreeing to take on an extra workload, my decision swayed more by my relentless drive than the ticking clock.""
+3. ""Given the sunny weather and my cheerful disposition",OccasionNoise
+"Despite the sunny weather and the upbeat music in the cafe during lunch break, my foul mood led me to reject the proposal put forward in the meeting.",OccasionNoise
+"Despite the bustling noise of the morning rush hour, my gloomy mood from the overcast weather, and the pressures of a looming deadline at work, I decided to take the longer, scenic route to the office.",OccasionNoise
+"""I noticed my willingness to invest in risky stocks fluctuates with the weather: I'm more cautious on gloomy days, and more adventurous when it's sunny outside, indicating that external factors like weather might be subtly influencing my financial decisions.""",OccasionNoise
+"After seeing a dip in productivity amongst my team during the gloomy weather this afternoon, I've started to realize that even factors such as the time of day and current weather conditions substantially impact our decision-making processes at work.",OccasionNoise
+"Despite the relentless rain outside and my sour mood from a sleepless night, I decided to push through and finish the project before the due date.",OccasionNoise
+"After careful consideration and weighing all the options, I've decided that it's time to follow my dreams and start my own business.",No Noise
+"With a clear mind and steady breath, I closely examined the options before me, prepared to make my final choice.",No Noise
+"With a clear mind and a steady heart, I am sitting in serenity, ready to finally choose the path that will shape my future.",No Noise
+"In the serene tranquility of my study, I sat down, the weight of the decision laying on my mind, poised to finally make a firm choice.",No Noise
+"With a quiet resolve, I lay my options out before me, ready to make a pivotal choice in the serene silence of the morning.",No Noise
+"Sitting in my quiet office, I took a deep breath, gathered my thoughts, and prepared myself to make the crucial decision.",No Noise
+"With a mind as clear as a tranquil lake, I am ready to choose the best course for our new project.",No Noise
+"In the quiet stillness of my home office, I poured over the data one last time before confidently locking in my final decision.",No Noise
+"As I sat, quietly immersed in my thoughts, the silence around me swelled, allowing me to finally decide on the best course of action for my business venture.",No Noise
+"In the tranquility of the softly lit room, I confidently weighed the options in my mind before settling on the best course of action.",No Noise

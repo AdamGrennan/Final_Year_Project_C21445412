@@ -56,6 +56,7 @@ export function LoginForm() {
           const userData = docSnap.data();
 
           userInfo({ name: userData.name, uid: user.uid });
+          console.log("User logged in:", user.uid);
           router.push('/Main');
         } else {
           setEmailError("No user details found. Please signup!.");
@@ -78,7 +79,7 @@ export function LoginForm() {
   return ( 
        
     
-    (<Card className="mx-auto max-w-sm">
+    (<Card className="w-[400px] h-[400px]">
       <CardHeader>
         <CardTitle className="text-2xl text-PRIMARY font-urbanist font-bold">Login</CardTitle>
         <CardDescription>

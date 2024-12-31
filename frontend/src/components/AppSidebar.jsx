@@ -52,7 +52,7 @@ export function AppSidebar({ ...props }) {
   };
 
   return (
-    <Sidebar {...props} className="bg-PRIMARY text-white">
+    <Sidebar {...props} className="bg-gradient-to-br from-PRIMARY via-MERGE to-SECONDARY from-30% via-50% to-70% text-white">
       <SidebarHeader>
         SONUS
       </SidebarHeader>
@@ -65,35 +65,35 @@ export function AppSidebar({ ...props }) {
                 {item.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     {item.title === "Home" ? (
-                      <SidebarMenuButton asChild isActive={item.isActive} className="text-white flex items-center gap-2">
+                      <SidebarMenuButton asChild isActive={item.isActive} className="text-white flex items-center gap-2 hover:bg-indigo-700 hover:no-underline">
                         <a href="#" onClick={(e) => { e.preventDefault(); router.push("/Main"); }}>
                           <RiHomeFill className="text-white mr-2" />
                           {item.title}
                         </a>
                       </SidebarMenuButton>
                     ) : item.title === "Log Out" ? (
-                      <SidebarMenuButton asChild isActive={item.isActive} className="text-white">
+                      <SidebarMenuButton asChild isActive={item.isActive} className="text-white hover:bg-indigo-700 hover:no-underline">
                         <a href="#" onClick={logOut}>
                           <IoExitOutline className="text-white mr-2" />
                           {item.title}
                         </a>
                       </SidebarMenuButton>
                     ) : item.title === "New" ? (
-                      <SidebarMenuButton asChild isActive={item.isActive} className="text-white">
+                      <SidebarMenuButton asChild isActive={item.isActive} className="text-white hover:bg-indigo-700 hover:no-underline">
                         <a href="#" onClick={(e) => { e.preventDefault(); router.push("/Judgement_Form"); }}>
                           <MdBubbleChart className="text-white mr-2" />
                           {item.title}
                         </a>
                       </SidebarMenuButton>
                     ) :  item.title === "Dashboard" ? (
-                      <SidebarMenuButton asChild isActive={item.isActive} className="text-white">
+                      <SidebarMenuButton asChild isActive={item.isActive} className="text-white hover:bg-indigo-700 hover:no-underline">
                         <a href="#">
                           <MdDashboard className="text-white mr-2" />
                           {item.title}
                         </a>
                       </SidebarMenuButton>
                     ) :  item.title === "Account" ? (
-                      <SidebarMenuButton asChild isActive={item.isActive} className="text-white">
+                      <SidebarMenuButton asChild isActive={item.isActive} className="text-white hover:bg-indigo-700 hover:no-underline">
                       <a href="#" onClick={(e) => { e.preventDefault(); router.push("/Profile"); }}>
                           <FaUser className="text-white mr-2" />
                           {item.title}

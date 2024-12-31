@@ -2,7 +2,6 @@
 import { PiHandWavingFill } from "react-icons/pi";
 import { AppSidebar } from "@/components/AppSidebar"
 import { useUser } from "@/context/UserContext";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -37,10 +36,6 @@ export function MainSidebar( { children }){
                 <PiHandWavingFill className="text-PRIMARY"/>
               </BreadcrumbList>
             </Breadcrumb>
-            <Avatar>
-              <AvatarImage/>
-               <AvatarFallback>CN</AvatarFallback>
-            </Avatar>
           </header>
           <main className="flex flex-1 flex-col gap-4 p-4">{children}</main>
           </SidebarInset>

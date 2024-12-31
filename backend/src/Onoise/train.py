@@ -6,22 +6,22 @@ import torch
 import numpy as np
 from sklearn.metrics import f1_score, precision_score, recall_score
 from sklearn.model_selection import train_test_split 
-from src.dataset import BiasDataset
-from src.data_load import load_data
+from src.Onoise.dataset import NoiseDataset
+from src.Onoise.data_load import load_data
 
 #TO-Do up the btach size for tests
-def train_model(csv_file, model_name='bert-base-uncased', batch_size=8, epochs=5):
+def train_model(csv_file, model_name='bert-base-uncased', batch_size=16, epochs=5):
     #Load tokenizer
     tokenizer = BertTokenizer.from_pretrained(model_name)
 
     #load data
-    sentences, labels, bias_labels = load_data(csv_file)
+    sentences, labels, noise_labels = load_data(csv_file)
     
     #Split my data into training and validation set
     sentence_train, sentence_val, label_train, label_val = train_test_split(sentences, labels, test_size=0.15, random_state=42)
 
-    train_dataset = BiasDataset(sentence_train, label_train, tokenizer)
-    val_dataset = BiasDataset(sentence_val, label_val, tokenizer)
+    train_dataset = NoiseDataset(sentence_train, label_train, tokenizer)
+    val_dataset = NoiseDataset(sentence_val, label_val, tokenizer)
 
     #Shuffle just randomises my order of labels in tarining set
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
@@ -30,7 +30,7 @@ def train_model(csv_file, model_name='bert-base-uncased', batch_size=8, epochs=5
     #Intialize the model
     model = BertForSequenceClassification.from_pretrained(
         model_name, 
-        num_labels=len(bias_labels),
+        num_labels=len(noise_labels),
         attention_probs_dropout_prob=0.3, 
         hidden_dropout_prob=0.3 
     )
@@ -96,7 +96,7 @@ def train_model(csv_file, model_name='bert-base-uncased', batch_size=8, epochs=5
             patience_counter += 1
     
     #Save model and tokenizer
-    model.save_pretrained('./models/saved_model')
-    tokenizer.save_pretrained('./models/saved_tokenizer')
+    model.save_pretrained('./models/saved_noise_model')
+    tokenizer.save_pretrained('./models/saved_noise_tokenizer')
     
-    return model, tokenizer, bias_labels
+    return model, tokenizer, noise_labels

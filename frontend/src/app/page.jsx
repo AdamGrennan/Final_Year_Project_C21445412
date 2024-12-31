@@ -13,7 +13,7 @@ export default function Page() {
       <Link href="/Main" className="underline font-semibold font-urbanist text-PRIMARY">
         HOME PAGE
       </Link>
-      <Link href="/Final_Report" className="underline font-semibold font-urbanist text-PRIMARY">
+      <Link href={`/Final_Report/${1}`} className="font-semibold font-urbanist text-PRIMARY">  
         FINAL PAGE
       </Link>
       <Link href="/Chat_Page" className="underline font-semibold font-urbanist text-PRIMARY">

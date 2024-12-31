@@ -5,6 +5,14 @@ import { Label } from "./ui/label";
 
 const Breakdown = () => {
 
+  const fetchBreakdown = async () => {
+  const responseGPT = await fetch('http://127.0.0.1:5000/gpt', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ input: input.trim() }),
+  })
+};
+
     return (
         <div>
         <div>
@@ -12,7 +20,7 @@ const Breakdown = () => {
         <div className="w-[150px] border-b border-PRIMARY my-1"></div>
         </div>
        <div>
-           <ScrollArea className="h-[200px] w-[100px] rounded-md border p-4 bg-GRAAY">
+           <ScrollArea className="h-[100px] w-[300px] rounded-md border p-4 bg-GRAAY">
           </ScrollArea>
 
         </div>
