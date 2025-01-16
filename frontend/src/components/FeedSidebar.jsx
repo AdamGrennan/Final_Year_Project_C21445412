@@ -3,10 +3,15 @@
 import React from "react";
 import { Label } from './ui/label';
 
-const FeedSideBar = ({ bias }) => {
+
+const FeedSideBar = ({ bias, noise }) => {
 
   const detectedBias = Array.from(
     new Set(bias.filter((b) => b !== "neutral"))
+  );
+
+  const detectedNoise = Array.from(
+    new Set(noise)
   );
 
 
@@ -19,13 +24,22 @@ const FeedSideBar = ({ bias }) => {
               {detectedBias.length > 0 ? (
                 detectedBias.map((detectedBias, index) => <li key={index}>{detectedBias}</li>)
               ) : (
-                <li>No biases detected</li>
+                <p>No bias detected</p>
               )}
             </ul>
           </div>
           <div className="mt-4">
           <Label className="font-urbanist font-medium">Detected Noise</Label>
           <div className="w-[150px] border-b border-PRIMARY my-1"></div>
+          <div>
+            <ul className="list-disc pl-4">
+              {detectedNoise.length > 0 ? (
+                detectedNoise.map((detectedNoise, index) => <li key={index}>{detectedNoise}</li>)
+              ) : (
+                <p>No noise detected</p>
+              )}
+            </ul>
+          </div>
           </div>
         </div>
       );

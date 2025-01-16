@@ -1,5 +1,5 @@
 import { Doughnut } from "react-chartjs-2";
-import { useBias } from "@/context/BiasContext";
+import { useDecision } from '@/context/DecisionContext';
 import {
     Chart as Chart,
     ArcElement,
@@ -14,7 +14,7 @@ Chart.register({
 });
 
 const DoughnutChart = () => {
-    const { biasCount } = useBias();
+    const { biasCount } = useDecision();
     
     const labels = Object.keys(biasCount);
     const values = Object.values(biasCount);

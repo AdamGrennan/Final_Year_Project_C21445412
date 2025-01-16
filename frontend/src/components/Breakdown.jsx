@@ -1,17 +1,10 @@
 "use client"
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Label } from "./ui/label";
 
-const Breakdown = () => {
-
-  const fetchBreakdown = async () => {
-  const responseGPT = await fetch('http://127.0.0.1:5000/gpt', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ input: input.trim() }),
-  })
-};
+const Breakdown = ({ breakdown }) => {
+  const[breakdownText, setBreakdownText] = useState("");
 
     return (
         <div>
@@ -21,8 +14,8 @@ const Breakdown = () => {
         </div>
        <div>
            <ScrollArea className="h-[100px] w-[300px] rounded-md border p-4 bg-GRAAY">
+            {breakdown}
           </ScrollArea>
-
         </div>
         </div>
       );

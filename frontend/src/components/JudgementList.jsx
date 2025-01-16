@@ -67,19 +67,22 @@ const JudgementList = () => {
                 onClick={() => openChat(judgement.id)}
                 className="w-full text-left p-4 bg-white text-black rounded-md font-urbanist h-auto"
               >
-                <div className="flex justify-between items-center w-full">
-                  <div className="flex flex-col">
-                    <div className="font-bold text-sm">{judgement.title}</div>
-                    <div className="font-light text-sm">{judgement.description}</div>
+                <div className="flex flex-col w-full">
+                  <div className="font-bold text-sm break-words">{judgement.title}</div>
+                  <div className="font-light text-sm break-words whitespace-normal">
+                    {judgement.description}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">
                     {judgement.createdAt?.toDate()?.toLocaleDateString("en-US", {
                       year: "numeric",
                       month: "short",
                       day: "numeric",
-                    }) || "No Date"}
+                    })}
                   </div>
-                  <div className="font-light">{judgement.template}</div>
                 </div>
               </Button>
+
+
               <Button
                 onClick={() => handleDelete(judgement.id)}
                 className="flex items-center justify-center p-2 bg-transparent"

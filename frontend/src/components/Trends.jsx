@@ -9,6 +9,8 @@ const Trends = () => {
         <div>
         <Label className="font-urbanist font-medium">Trends & Patterns</Label>
         <div className="w-[150px] border-b border-PRIMARY my-1"></div>
+          <ScrollArea className="h-[100px] w-[300px] p-4">
+          </ScrollArea>
         </div>
       );
 };

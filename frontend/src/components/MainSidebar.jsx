@@ -31,7 +31,7 @@ export function MainSidebar( { children }){
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block font-urbanist">
-                    Welcome {user.name || 'Guest'}!
+                  Welcome {user?.name || 'Guest'}!
                 </BreadcrumbItem>
                 <PiHandWavingFill className="text-PRIMARY"/>
               </BreadcrumbList>

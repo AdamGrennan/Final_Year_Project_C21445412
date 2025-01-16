@@ -38,13 +38,14 @@ const data = {
 };
 
 export function AppSidebar({ ...props }) {
-  const { user } = useUser();
+  const { userInfo } = useUser();
   const router = useRouter();
 
   const logOut = async (e) => {
     e.preventDefault();
     try {
       await signOut(auth);
+      userInfo(null);
       router.push("/");
     } catch (error) {
       console.error("Error logging out:", error);

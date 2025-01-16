@@ -17,6 +17,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "./ui/textarea";
+import { Calendar } from "./ui/calendar";
+import { Switch } from "./ui/switch";
 
 const formSchema = z.object({
   title: z
@@ -27,15 +30,12 @@ const formSchema = z.object({
   description: z
     .string()
     .min(2, { message: "Description must be at least 8 characters." }),
-  outcome: z
-    .string()
-    .min(2, { message: "Expected outcome must be at least 2 characters." }),
-  confidenceLevel: z.enum(["Low", "Medium", "High"], {
-    message: "Please select a confidence level.",
-  }),
+  isDecisionMade: z.boolean().default(false),
+  calendar: z.date().optional(),
 });
 
 const JudgementForm = () => {
+  const [date, setDate] = React.useState(new Date());
   const { user } = useUser();
   const router = useRouter();
   const form = useForm({
@@ -59,7 +59,8 @@ const JudgementForm = () => {
 
   return (
     <FormProvider {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <div className="flex space-x-4 gap-60">
         <FormField
           control={form.control}
           name="title"
@@ -73,7 +74,7 @@ const JudgementForm = () => {
             </FormItem>
           )}
         />
-
+  
         <FormField
           control={form.control}
           name="template"
@@ -82,97 +83,77 @@ const JudgementForm = () => {
               <FormLabel>Template</FormLabel>
               <FormControl>
                 <TemplateSelect
-                  onSelect={(value) => field.onChange(value)} 
+                  onSelect={(value) => field.onChange(value)}
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
+      </div>
+      <FormField
+        control={form.control}
+        name="description"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Description</FormLabel>
+            <FormControl>
+              <Textarea placeholder="Description" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={form.control}
+        name="isDecisionMade"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Decision Status</FormLabel>
+            <FormControl>
+              <div className="flex items-center space-x-4">
+                <Switch
+                  className="data-[state=checked]:bg-PRIMARY data-[state=unchecked]:bg-GRAAY"
+                  checked={field.value || false}
+                  onCheckedChange={(checked) => {
+                    field.onChange(checked);
+                  }}
+                />
+                <span className="text-sm text-gray-700 font-urbanist">
+                  {field.value ? "Decision Made" : "Decision Unresolved"}
+                </span>
+              </div>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={form.control}
+        name="calendar"
+        render={({ field }) => (
+          !form.watch("isDecisionMade") && ( 
             <FormItem>
-              <FormLabel>Description</FormLabel>
+              <FormLabel>Decision Deadline (Optional)</FormLabel>
               <FormControl>
-                <Input placeholder="Description" {...field} />
+                <Calendar
+                  mode="single"
+                  selected={field.value || date}
+                  onSelect={(selectedDate) => {
+                    setDate(selectedDate);
+                    field.onChange(selectedDate);
+                  }}
+                  className="rounded-md border"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="outcome"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Expected Outcome</FormLabel>
-              <FormControl>
-                <div className="flex space-x-4">
-                  {["Bad", "Neutral", "Good"].map((level) => (
-                    <button
-                      type="button"
-                      key={level}
-                      onClick={() => field.onChange(level)}
-                      className={`px-4 py-2 rounded ${
-                        field.value === level
-                          ? level === "Low"
-                            ? "bg-red-500 text-white"
-                            : level === "Medium"
-                            ? "bg-yellow-500 text-white"
-                            : "bg-green-500 text-white"
-                          : "bg-gray-200"
-                      }`}
-                    >
-                      {level}
-                    </button>
-                  ))}
-                </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="confidenceLevel"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Confidence Level</FormLabel>
-              <FormControl>
-                <div className="flex space-x-4">
-                  {["Low", "Medium", "High"].map((level) => (
-                    <button
-                      type="button"
-                      key={level}
-                      onClick={() => field.onChange(level)}
-                      className={`px-4 py-2 rounded ${
-                        field.value === level
-                          ? level === "Low"
-                            ? "bg-red-500 text-white"
-                            : level === "Medium"
-                            ? "bg-yellow-500 text-white"
-                            : "bg-green-500 text-white"
-                          : "bg-gray-200"
-                      }`}
-                    >
-                      {level}
-                    </button>
-                  ))}
-                </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <Button type="submit">Submit</Button>
-      </form>
-    </FormProvider>
+          )
+        )}
+      />
+      <Button type="submit" className="bg-PRIMARY text-white">Submit</Button>
+    </form>
+  </FormProvider>
   );
 };
 export default JudgementForm;

@@ -5,15 +5,23 @@ import { useUser } from "@/context/UserContext";
 import { FaArrowUpLong } from "react-icons/fa6";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { useBias } from "@/context/BiasContext";
+import { useDecision } from '@/context/DecisionContext';
 import { collection, doc, getDocs, query, where, writeBatch, orderBy, serverTimestamp } from "firebase/firestore";
 import { db } from "@/config/firebase";
 
 const Chat = ({ judgementId }) => {
   const { user } = useUser();
-  const { countBias, detectBias } = useBias();
+  const { countBias, detectBias } = useDecision();
 
-  const welcomeMessage = "Welcome to Sonus! I help you reflect on your judgments by analyzing noise and bias, detecting patterns, and providing feedback to improve your decision-making skills over time\n🧠 Receive insights on detected biases and potential noise.\n 📊 Review your decision trends and refine your approach.\n 🌟 Start typing to get started";
+  const welcomeMessage = (
+    <>
+      Welcome to Sonus! I help you reflect on your decisions by analyzing noise and bias, detecting patterns, and providing feedback to improve your decision-making skills over time.
+      <br/>
+      <br />🧠 Receive insights on detected biases and potential noise.
+      <br />📊 Review your decision trends and refine your approach.
+      <br />🌟 Start typing to get started.
+    </>
+  );
   const [messages, setMessages] = useState([{ text: welcomeMessage , sender: "GPT"}]);
   const [input, setInput] = useState("");
 
@@ -137,7 +145,6 @@ const Chat = ({ judgementId }) => {
     }
   };
 
-  //Logic for retreing chats
   useEffect(() => {
     const fetchChats = async () => {
     if (user && user.uid) { 
@@ -167,7 +174,7 @@ const Chat = ({ judgementId }) => {
         {messages.map((message, index) => (
           <div
             key={index}
-            className={`px-4 py-2 my-2 max-w-[80%] break-words rounded-lg 
+            className={`px-4 py-2 my-2 max-w-[80%] break-words rounded-lg font-urbanist
               ${message.sender === "BERT" || message.sender === "GPT"
                 ? "bg-white text-black ml-auto"
                 : "bg-PRIMARY text-white mr-auto"

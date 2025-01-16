@@ -9,12 +9,8 @@ export const UserProvider = ({ children }) => {
         setUser(userData); 
     };
 
-    const logout = () => {
-        setUser({ name: '', uid: '' }); 
-    };
-
     return (
-        <UserContext.Provider value={{ user, userInfo, logout }}>
+        <UserContext.Provider value={{ user, userInfo }}>
             {children}
         </UserContext.Provider>
     );
