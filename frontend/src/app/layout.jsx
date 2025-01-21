@@ -2,7 +2,8 @@
 "use client";
 import { UserProvider } from "@/context/UserContext";
 import { DecisionProvider } from "@/context/DecisionContext";
-import { MainSidebar } from "@/components/MainSidebar";
+import { JudgmentProvider } from "@/context/JudgementContext";
+import { MainSidebar } from "@/components/sidebar_components/MainSidebar";
 import { usePathname } from "next/navigation";
 import "@/styles/global.css";
 
@@ -21,13 +22,15 @@ export default function RootLayout({ children }) {
       <body>
         <UserProvider>
           <DecisionProvider>
+            <JudgmentProvider>
           {isNoSidebarRoute ? (
-            <main className="min-h-screen flex flex-col justify-center items-center">
+            <main className="min-h-screen flex flex-col justify-center items-center ">
               {children}
             </main>
           ) : (
             <MainSidebar>{children}</MainSidebar>
           )}
+            </JudgmentProvider>
           </DecisionProvider>
         </UserProvider>
       </body>

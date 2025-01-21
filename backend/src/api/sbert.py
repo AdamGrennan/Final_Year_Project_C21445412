@@ -1,5 +1,5 @@
 from flask import request, jsonify
-from src.Sbert.sbert_reflect import reflect_judgements
+from src.PatternNoise.sbert_reflect import reflect_judgements
 
 def sbert_endpoint(db):
     try:
@@ -10,9 +10,10 @@ def sbert_endpoint(db):
         print("Incoming Data:", data)
 
         user_id = data.get("user_id")
+        judgment_id = data.get("judgmentId")
         breakdown = data.get("breakdown")
-        detected_bias = data.get("detectedBiasesArray", [])
-        detected_noise = data.get("detectedNoiseArray", [])
+        detected_bias = data.get("detectedBias", [])
+        detected_noise = data.get("detectedNoise", [])
 
         print(f"user_id: {user_id}, breakdown: {breakdown}, detected_biases: {detected_bias}, detected_noises: {detected_noise}")
 
@@ -21,12 +22,11 @@ def sbert_endpoint(db):
             return jsonify({"error": "Missing 'user_id' or 'breakdown'"}), 400
 
         print("Calling reflect_judgements...")
-        insights = reflect_judgements(user_id, breakdown, db)
+        insights = reflect_judgements(user_id, judgment_id, breakdown, detected_bias, detected_noise, db)
         print("Generated Insights:", insights)
 
         return jsonify({"insights": insights}), 200
 
-    except Exception as e:
-     
+    except Exception as e: 
         print(f"Unhandled Exception in /sbert: {e}")
         return jsonify({"error": str(e)}), 500

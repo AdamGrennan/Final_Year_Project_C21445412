@@ -1,6 +1,5 @@
-import { RegisterForm } from "@/components/RegisterForm";
+import { RegisterForm } from "@/components/register_components/RegisterForm";
 import Image from "next/image";
-import SONUS_LOGO from "@/images/SONUS_LOGO.png";
 
 export default function Page(){
     
@@ -10,7 +9,7 @@ export default function Page(){
       <RegisterForm />
        </div>
        <div className="bg-gradient-to-br from-PRIMARY via-MERGE to-SECONDARY from-30% via-50% to-70% flex items-center justify-center">
-               <Image src={SONUS_LOGO} alt="Sonus Logo" width={250} height={250}/>
+               <Image src="/images/SONUS_LOGO.png" alt="Sonus Logo" width={250} height={250}/>
     </div>
     </div>
       );

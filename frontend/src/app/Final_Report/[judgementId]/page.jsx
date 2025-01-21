@@ -1,27 +1,34 @@
 "use client";
-import Breakdown from "@/components/Breakdown";
+import Breakdown from "@/components/report_components/Breakdown";
 import { useRouter } from "next/navigation";
-import FeedSideBar from "@/components/FeedSidebar";
-import Snapshot from "@/components/Snapshot";
-import SummarySideBar from "@/components/SummarySidebar";
-import Trends from "@/components/Trends";
+import FeedSideBar from "@/components/report_components/FeedSidebar";
+import Snapshot from "@/components/report_components/Snapshot";
+import SummarySideBar from "@/components/report_components/SummarySidebar";
+import Trends from "@/components/report_components/Trends";
 import { useDecision } from '@/context/DecisionContext';
 import { Label } from "@radix-ui/react-dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useParams } from "next/navigation";
 import { useUser } from '@/context/UserContext';
 import { useEffect } from "react";
-import { writeBatch } from "firebase/firestore";
+import { writeBatch, doc } from "firebase/firestore";
 import { db } from "@/config/firebase";
+import { useState } from "react";
+
 
 export default function Page() {
-  const { biasCount, detectBias, detectNoise, breakdown, detectedBias, detectedNoise } = useDecision();
+  const { detectBias, detectNoise, breakdown, detectedBias, detectedNoise } = useDecision();
+  const [similiarDecisions, setSimilarDecisions] = useState([]); 
   const router = useRouter();
   const { judgementId } = useParams();
   const { user } = useUser();
 
   const openHome = () => {
-    router.push('/Main');
+    setTimeout (async () => {
+      router.push('/Main');
+      detectNoise(null);
+      detectBias(null);
+    }, 700);
   };
 
   const fetchBreakdown = async (judgementId) => {
@@ -58,6 +65,7 @@ export default function Page() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         user_id: user.uid,
+        judgmentId: judgementId,
         breakdown: breakdown,
         detectedBiases: detectedBiasesArray,
         detectedNoise: detectedNoiseArray,
@@ -70,7 +78,9 @@ export default function Page() {
     if (insights.similarJudgments && insights.similarJudgments.length > 0) {
       console.log("Pattern Noise detected: Similar past decisions found.");
       detectNoise("Pattern Noise");
+      setSimilarDecisions(insights.similarJudgments);
     } else {
+      setSimilarDecisions([]);
       console.log("No Pattern Noise detected.");
     }
 
@@ -78,10 +88,6 @@ export default function Page() {
 
     const judgeRef = doc(collection(db, "judgement"));
     batch.update(judgeRef, {
-      judgementId,
-      insights: insights,
-      detectedBias: detectedBiasesArray,
-      detectedNoise: detectedNoiseArray,
       updatedAt: serverTimestamp(),
     });
     await batch.commit();
@@ -101,23 +107,24 @@ export default function Page() {
               Summary
             </Label>
             <FeedSideBar bias={detectedBias} noise={detectedNoise} />
-            <Snapshot />
+            <Snapshot bias={detectedBias}/>
           </div>
 
-          <div className="flex flex-col w-full md:w-1/2 space-y-6">
+          <div className="flex flex-col w-full md:w-1/2 space-y-6 -ml-16">
             <Label htmlFor="terms" className="font-urbanist text-PRIMARY text-2xl font-bold">
               Analysis
             </Label>
             <Breakdown breakdown={breakdown} />
-            <Trends />
+            <SummarySideBar />
           </div>
 
           <div className="flex flex-col w-full md:w-1/2 space-y-6">
             <Label htmlFor="terms" className="font-urbanist text-PRIMARY text-2xl font-bold">
               Feedback
             </Label>
-            <SummarySideBar />
-            <Button onClick={openHome} className="bg-PRIMARY text-white font-urbanist mt-4">
+            <Trends similiarDecisions={similiarDecisions}/>
+            <Button onClick={openHome} 
+              className="bg-PRIMARY text-white font-urbanist mt-4 w-[100px] transform transition-transform duration-300 active:scale-[1.2]">
               Finish
             </Button>
           </div>

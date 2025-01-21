@@ -10,16 +10,17 @@ export const DecisionProvider = ({ children }) => {
     const [detectedNoise, setDetectedNoise] = useState([]);
     const [breakdown, setBreakdown] = useState("");
 
-    const countBias = (bias) => {
-        setBiasCount((prevCounts) => {
-            const updatedCounts = { ...prevCounts };
-            updatedCounts[bias] = (updatedCounts[bias] || 0) + 1; 
-            return updatedCounts;
-        });
-    };
+    const formatBias = (bias) => {
+        const result = bias.replace(/([A-Z])/g, " $1");
+        const finalResult = result.charAt(0).toUpperCase() + result.slice(1);
+        return finalResult.trim();
+    }
 
     const detectBias = (bias) => {
-        setDetectedBias((prev) => [...prev, bias]);
+        if (bias) {
+            const formattedBias = formatBias(bias)
+            setDetectedBias((prev) => [...prev, formattedBias]);
+          }
     };
 
     const clearBias = () => {
@@ -36,7 +37,9 @@ export const DecisionProvider = ({ children }) => {
     };
 
     const detectNoise = (noise) => {
-        setDetectedNoise((prev) => [...prev, noise]);
+        if(noise){
+            setDetectedNoise((prev) => [...prev, noise]);
+        }
     };
 
     const clearNoise = () => {
@@ -45,11 +48,11 @@ export const DecisionProvider = ({ children }) => {
     };
 
     const createBreakdown = (breakdown) => {
-        setBreakDown(breakdown);
+        setBreakdown(breakdown);
     };
 
     return (
-        <DecisionContext.Provider value={{countBias, 
+        <DecisionContext.Provider value={{ 
         biasCount, 
         detectNoise,
         detectBias, 

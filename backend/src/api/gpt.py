@@ -8,59 +8,61 @@ BIAS_TYPES = ["OverconfidenceBias", "ConfirmationBias", "AnchoringBias", "Neutra
 
 def gpt_endpoint(model, tokenizer, bias_labels):
     data = request.json
-    statement = data.get("input", "")
-    if not statement:
-        return jsonify({"error": "No input provided. Could you share more about the situation or decision you’re reflecting on?"}), 400
+    title = data.get("title", "").strip()
+    description = data.get("description", "").strip()
+    template = data.get("template", "").strip()
+    deadline = data.get("deadline", "").strip()
+    statement = data.get("input", "").strip()
+    context = data.get("context", [])
+    current_stage = data.get("currentStage", 1)
 
     try:
         detected_biases = predict_bias(model, tokenizer, statement, bias_labels, threshold=0.6)
-        print(f"Detected Biases (BERT): {detected_biases}")
+        detected_biases = [bias for bias in detected_biases if bias in BIAS_TYPES]
 
-        biases = []
-        for bias in detected_biases:
-             if bias in BIAS_TYPES and bias:
-                biases.append(bias)
+        bias_hints = {
+            "OverconfidenceBias": "Consider exploring alternative perspectives or risks.",
+            "ConfirmationBias": "You might want to evaluate information that challenges your assumptions.",
+            "AnchoringBias": "Think about how initial impressions may have influenced your decision.",
+            "Neutral": ""
+        }
+        hints = " ".join(bias_hints.get(bias, "") for bias in detected_biases)
 
-        detected_biases = biases
+        stage_prompts = {
+            1: f"Hi! I’m SONUS, your decision-support assistant. How can I assist you with your decision today?",
+            2: f"User has shared their decision: {statement}. {hints} Could you explain the reasoning behind this?",
+            3: f"You mentioned: {statement}. {hints} What other factors or considerations are influencing your thoughts?",
+            4: f"You're nearing the end of your analysis. {hints} Is there anything else you'd like to add?",
+            5: "Thank you for sharing. Let's summarize your decision and prepare the final report."
+        }
+        
+        if current_stage == 1 and not context and not statement:
+            return jsonify({"bias_feedback": stage_prompts[1]})
 
-        if not detected_biases:
-            return jsonify({"bias_feedback": "No significant biases detected. Feel free to elaborate or share more details."})
-
-        combined_biases = ", ".join(detected_biases)
         messages = [
-            {
-                "role": "system",
-                "content": (
-                    "You are a helpful assistant providing concise feedback on biases. "
-                    "Keep responses brief, focusing on acknowledgment and a follow-up question."
-                )
-            },
-            {
-                "role": "user",
-                "content": (
-                    f"The user has shown signs of the following biases: {combined_biases}. Their input was:\n"
-                    f"\"{statement}\"\n"
-                    "Provide concise feedback as described."
-                )
-            }
-        ]
+            {"role": "system",
+             "content": 
+                "You are SONUS, a decision-support assistant that helps users reflect and identify biases."
+                 "Your job is to guide users through reflecting on decisions, asking meaningful questions, "
+                 "and offering thoughtful insights. You are professional, empathetic, and concise in your responses."}
+        ]   
+        messages.extend(
+            {"role": "assistant" if chat["sender"] == "GPT" else "user", "content": chat["content"]}
+            for chat in context
+        )
+        if statement:
+            messages.append({"role": "user", "content": statement})
+        messages.append({"role": "user", "content": stage_prompts.get(current_stage, "Provide a stage-specific response.")})
 
         response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=messages,
-            max_tokens=70,
-            temperature=0.7
+            max_tokens=200,
+            temperature=0.7, 
         )
 
-        print(f"Full GPT response: {response}")
-
-        if response.choices and len(response.choices) > 0:
-            feedback = response.choices[0].message['content'].strip()
-        else:
-            feedback = "No valid feedback generated."
-
+        feedback = response.choices[0].message['content'].strip() if response.choices else "I'm sorry, I couldn't generate a response. Please try again."
         return jsonify({"bias_feedback": feedback})
 
     except Exception as e:
-        print(f"Unhandled exception: {e}")
         return jsonify({"error": str(e)}), 500
