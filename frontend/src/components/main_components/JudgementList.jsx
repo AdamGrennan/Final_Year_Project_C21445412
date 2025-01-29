@@ -14,12 +14,12 @@ const JudgementList = () => {
   const router = useRouter();
   const [judgements, setJudgements] = useState([]);
   const { user } = useUser();
-  const [filter, setFilter] = useState(false);
+  const [filter, setFilter] = useState(true);
   const { detectedBias, detectedNoise } = useDecision();
 
-  const openDecision = (judgementId, isCompleted) => {
-    if (isCompleted === true) {
-      router.push(`/Final_Report/${judgementId}`);
+    const openDecision = (judgementId, isCompleted) => {
+    if (isCompleted) {
+      router.push(`/Final_Report/${judgementId}?revisited=true`);
     } else {
       router.push(`/Chat_Page/${judgementId}`);
     }
@@ -78,7 +78,7 @@ const JudgementList = () => {
         </Button>
         <Button
           onClick={() => setFilter(false)}
-          className={`px-4 py-2 font-urbanist ${filter === false ? "bg-PRIMARY text-white" : "bg-gray-200 text-black"}`}
+          className={`px-4 py-2 font-urbanist transform transition-transform duration-300 active:scale-[1.1] ${filter === false ? "bg-PRIMARY text-white" : "bg-gray-200 text-black"}`}
         >
           Not Completed
         </Button>
@@ -98,6 +98,7 @@ const JudgementList = () => {
           ) : (
             <div className="flex flex-col">
               {judgements.map((judgement) => (
+                
                 <div
                   key={judgement.id}
                   className="flex items-center justify-start mt-4"

@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState } from 'react';
 const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
-    const [user, setUser] = useState({ name: '', uid: '' }); 
+    const [user, setUser] = useState({ name: "" , email: "", uid: "" }); 
     const userInfo = (userData) => {
         setUser(userData); 
     };

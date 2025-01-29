@@ -1,13 +1,13 @@
 from flask import Flask
 from flask_cors import CORS
+from sentence_transformers import SentenceTransformer
 from src.Bias.load_model import load_bias_model
-from src.Onoise.load_model import load_noise_model
-from src.LevelNoise.levelNoise import level_noise_endpoint
+from src.LevelNoise.level_noise import level_noise_endpoint
 from src.api.bert import bert_endpoint
-from src.api.occasion_noise import occasion_noise_endpoint
+from src.OccasionNoise.occasion_noise import occasion_noise_endpoint
 from src.api.gpt import gpt_endpoint
 from src.api.breakdown import breakdown_endpoint
-from src.api.sbert import sbert_endpoint
+from src.PatternNoise.pattern_noise import pattern_noise_endpoint
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
@@ -22,9 +22,14 @@ db = firestore.client()
 #LevelNoise zero point model
 pipe = pipeline(model="facebook/bart-large-mnli")
 
+#SBERT model
+#sbert_model = SentenceTransformer("occasion_noise_sbert")
+sbert_model = SentenceTransformer("all-MiniLM-L6-v2")
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
+#Flask session key
+app.secret_key = 'NOISY_KEY'
 
 model, tokenizer, bias_labels = load_bias_model()
 
@@ -32,13 +37,13 @@ model, tokenizer, bias_labels = load_bias_model()
 def bert():
     return bert_endpoint(model, tokenizer, bias_labels)
 
-@app.route('/sbert', methods=['POST'])
-def sbert():
-    return sbert_endpoint(db)
+@app.route('/pattern_noise', methods=['POST'])
+def pattern_noise():
+    return pattern_noise_endpoint(sbert_model, db)
 
 @app.route('/occasion_noise', methods=['POST'])
 def occasion_noise():
-    return occasion_noise_endpoint(model, tokenizer, bias_labels)
+    return occasion_noise_endpoint(sbert_model)
 
 @app.route('/level_noise', methods=['POST'])
 def level_noise():

@@ -13,10 +13,10 @@ const TemplateSelect = ({ onSelect }) => {
   return (
     <div className="w-[300px]">
       <Select onValueChange={(value) => onSelect(value)}>
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder="Choose a template" />
+        <SelectTrigger className="w-full font-urbanist text-gray-700">
+          <SelectValue placeholder="Enter a theme" />
         </SelectTrigger>
-        <SelectContent className="bg-white">
+        <SelectContent className="bg-white font-urbanist text-gray-700">
           {templates.map((template) => (
             <SelectItem key={template} value={template}>
               {template}

@@ -1,135 +1,257 @@
 "use client";
 import Breakdown from "@/components/report_components/Breakdown";
 import { useRouter } from "next/navigation";
-import FeedSideBar from "@/components/report_components/FeedSidebar";
-import Snapshot from "@/components/report_components/Snapshot";
+import Snapshot from "@/components/report_components/chart-components/Snapshot";
 import SummarySideBar from "@/components/report_components/SummarySidebar";
 import Trends from "@/components/report_components/Trends";
 import { useDecision } from '@/context/DecisionContext';
-import { Label } from "@radix-ui/react-dropdown-menu";
+import { useJudgment } from "@/context/JudgementContext";
 import { Button } from "@/components/ui/button";
 import { useParams } from "next/navigation";
 import { useUser } from '@/context/UserContext';
-import { useEffect } from "react";
-import { writeBatch, doc } from "firebase/firestore";
+import { useEffect, useRef } from "react";
+import { writeBatch, doc, updateDoc, serverTimestamp, getDoc } from "firebase/firestore";
 import { db } from "@/config/firebase";
 import { useState } from "react";
+import { Pagination, } from 'swiper/modules';
+import { fetchPatternNoise } from "@/services/ApiService";
+import PrevButton from "@/components/report_components/swiper_components/PreviousButton";
+import NextButton from "@/components/report_components/swiper_components/NextButton";
 
+import { Swiper, SwiperSlide } from 'swiper/react';
+
+
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import 'swiper/css/scrollbar';
+import BiasCard from "@/components/report_components/BiasCard";
+import NoiseCard from "@/components/report_components/NoiseCard";
+import { useSearchParams } from "next/navigation";
 
 export default function Page() {
-  const { detectBias, detectNoise, breakdown, detectedBias, detectedNoise } = useDecision();
-  const [similiarDecisions, setSimilarDecisions] = useState([]); 
+  const { detectBias, detectNoise,
+     breakdown, detectedBias,
+      detectedNoise, occasionNoiseScore,
+       patternNoiseScore, levelNoiseScore,
+        setDetectedNoise, setDetectedBias,
+      setOccasionNoiseScore, setPatterNoiseScore, setLevelNoiseScore } = useDecision();
+
+  const [similiarDecisions, setSimilarDecisions] = useState([]);
   const router = useRouter();
-  const { judgementId } = useParams();
   const { user } = useUser();
+  const { judgmentData } = useJudgment();
+  const swiperRef = useRef(null);
+  const searchParams = useSearchParams();
+  const isRevisited = searchParams.get("revisited") === "true";
+  const { judgementId } = useParams();
 
   const openHome = () => {
-    setTimeout (async () => {
+    setTimeout(async () => {
       router.push('/Main');
       detectNoise(null);
       detectBias(null);
     }, 700);
   };
 
-  const fetchBreakdown = async (judgementId) => {
-    try {
-      const judgeRef = doc(db, "judgement", judgementId);
-      const docSnap = await getDoc(judgeRef);
-      if (docSnap.exists()) {
-        return docSnap.data().breakdown;
+  useEffect(() => {
+    const handleDecisionData = async () => {
+      if (isRevisited) {
+        console.log("db:", db);
+        console.log("judgementId:", judgementId);
+
+        try {
+          const docRef = doc(db, "judgement", judgementId);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            const decisionData = docSnap.data();
+
+            const detectedBiasesArray = Array.isArray(decisionData.detectedBias)
+              ? Array.from(new Set(decisionData.detectedBias))
+              : [];
+            const detectedNoiseArray = Array.isArray(decisionData.detectedNoise)
+              ? Array.from(new Set(decisionData.detectedNoise))
+              : [];
+
+            console.log("Unique Biases:", detectedBiasesArray);
+            console.log("Unique Noises:", detectedNoiseArray);
+
+            setDetectedBias(detectedBiasesArray);
+            setDetectedNoise(detectedNoiseArray);
+            setOccasionNoiseScore(decisionData.occasionNoiseScore);
+            setPatternNoiseScore(decisionData.patternNoiseScore);
+            setLevelNoiseScore(decisionData.levelNoiseScore);
+            
+          } else {
+            console.error("No such document!");
+          }
+        } catch (error) {
+          console.error("Error fetching revisited decision:", error);
+        }
       } else {
-        console.error("No breakdown found!");
-        return null;
+
+        await finalReport();
       }
-    } catch (error) {
-      console.error("Error fetching judgment breakdown:", error);
-      return null;
-    }
-  };
+    };
+
+    handleDecisionData();
+  }, [isRevisited, judgementId]);
+
+
 
   const finalReport = async () => {
-    const detectedBiases = detectBias();
-    const detectedNoise = detectNoise();
-    const detectedBiasesArray = Array.from(new Set(detectedBiases));
+    const detectedBiasesArray = Array.from(new Set(detectedBias));
     const detectedNoiseArray = Array.from(new Set(detectedNoise));
 
-    console.log("Info at /sbert:", {
-      user_id: user.uid,
-      breakdown: breakdown,
-      detectedBiases: detectedBiasesArray,
-      detectedNoise: detectedNoiseArray,
-    });
+    const patternNoiseData = await fetchPatternNoise(
+      user.uid,
+      judgementId,
+      judgmentData.title,
+      judgmentData.description,
+      judgmentData.theme,
+      "Breakdown",
+      detectBias,
+      detectedNoise
+    );
 
-    const sBERT = await fetch('http://127.0.0.1:5000/sbert', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        user_id: user.uid,
-        judgmentId: judgementId,
-        breakdown: breakdown,
-        detectedBiases: detectedBiasesArray,
-        detectedNoise: detectedNoiseArray,
-      }),
-    });
+    if (patternNoiseData) {
+      const { pattern_noise_percentage, similarDecisions } = patternNoiseData;
 
-    const { insights } = await sBERT.json();
-    console.log("sBERT Response:", insights);
-
-    if (insights.similarJudgments && insights.similarJudgments.length > 0) {
-      console.log("Pattern Noise detected: Similar past decisions found.");
-      detectNoise("Pattern Noise");
-      setSimilarDecisions(insights.similarJudgments);
-    } else {
-      setSimilarDecisions([]);
-      console.log("No Pattern Noise detected.");
+      if (pattern_noise_percentage !== undefined) {
+        console.log("Pattern Noise Score:", pattern_noise_percentage);
+        detectNoise("Pattern Noise", pattern_noise_percentage);
+      }
+      if (similarDecisions && similarDecisions.length > 0) {
+        console.log("Pattern Noise detected: Similar past decisions found.", similarDecisions);
+        setSimilarDecisions(similarDecisions);
+      } else {
+        console.log("No Pattern Noise detected.");
+        setSimilarDecisions([]);
+      }
     }
 
-    const batch = writeBatch(db);
-
-    const judgeRef = doc(collection(db, "judgement"));
-    batch.update(judgeRef, {
+    const judgeRef = doc(db, "judgement", judgementId);
+    await updateDoc(judgeRef, {
+      breakdown,
+      detectedBias: detectedBiasesArray,
+      detectedNoise: detectedNoiseArray,
+      occasionNoiseScore: occasionNoiseScore,
+      patternNoiseScore: patternNoiseScore,
+      levelNoiseScore: levelNoiseScore,
       updatedAt: serverTimestamp(),
     });
-    await batch.commit();
   };
 
-  useEffect(() => {
-    finalReport();
-  }, []);
-
   return (
-    <div className="min-h-screen p-6">
-      <div className="flex flex-1 flex-col gap-8">
-        <div className="flex gap-8">
-
-          <div className="flex flex-col w-full md:w-1/2 space-y-6">
-            <Label htmlFor="terms" className="font-urbanist text-PRIMARY text-2xl font-bold">
-              Summary
-            </Label>
-            <FeedSideBar bias={detectedBias} noise={detectedNoise} />
-            <Snapshot bias={detectedBias}/>
+    <div className="container">
+      <Swiper
+        onSwiper={(swiper) => (swiperRef.current = swiper)}
+        modules={[Pagination]}
+        spaceBetween={50}
+        slidesPerView={1}
+        pagination={{
+          clickable: true
+        }}
+        className="mySwiper"
+      >
+        <SwiperSlide>
+          <div className="w-full text-center">
+            <h2 className="font-urbanist text-2xl font-semibold text-PRIMARY">
+              Decision Analysis
+            </h2>
+            <p className="text-gray-600 text-base mt-1">
+              Explore detected biases, noise, and key insights from your decisions.
+            </p>
           </div>
-
-          <div className="flex flex-col w-full md:w-1/2 space-y-6 -ml-16">
-            <Label htmlFor="terms" className="font-urbanist text-PRIMARY text-2xl font-bold">
-              Analysis
-            </Label>
-            <Breakdown breakdown={breakdown} />
-            <SummarySideBar />
+          <div className="h-auto flex flex-col md:flex-row items-start justify-between p-8 space-y-8 md:space-y-0 md:space-x-8 bg-gray-50 rounded-lg shadow-lg">
+            <div className="w-full md:w-1/3 h-[350px] bg-white rounded-lg shadow-md p-6 space-y-4">
+              <h3 className="font-urbanist text-black text-xl font-semibold border-b border-PRIMARY pb-2">
+                Detected Bias
+              </h3>
+              <BiasCard bias={detectedBias} />
+            </div>
+            <div className="w-full md:w-1/3  h-[350px] bg-white rounded-lg shadow-md p-6 space-y-4">
+              <h3 className="font-urbanist text-black text-xl font-semibold border-b border-PRIMARY pb-2">
+                Detected Noise
+              </h3>
+              <NoiseCard noise={detectedNoise} />
+            </div>
+            <div className="w-full md:w-1/3 h-[350px] bg-white rounded-lg shadow-md p-6">
+              <h3 className="font-urbanist text-black text-xl font-semibold border-b border-PRIMARY pb-2">
+                Insight Graphs
+              </h3>
+              <Snapshot bias={detectedBias}
+                occasionNoise={occasionNoiseScore}
+                patternNoise={patternNoiseScore}
+                levelNoise={levelNoiseScore} />
+            </div>
           </div>
+        </SwiperSlide>
 
-          <div className="flex flex-col w-full md:w-1/2 space-y-6">
-            <Label htmlFor="terms" className="font-urbanist text-PRIMARY text-2xl font-bold">
-              Feedback
-            </Label>
-            <Trends similiarDecisions={similiarDecisions}/>
-            <Button onClick={openHome} 
-              className="bg-PRIMARY text-white font-urbanist mt-4 w-[100px] transform transition-transform duration-300 active:scale-[1.2]">
+        <SwiperSlide>
+          <div className="w-full text-center">
+            <h2 className="font-urbanist text-2xl font-semibold text-PRIMARY">
+              Trends and Patterns
+            </h2>
+            <p className="text-gray-600 text-base mt-2">
+              A placeholder
+            </p>
+            <div className="h-auto flex flex-col md:flex-row items-start justify-between p-8 space-y-8 md:space-y-0 md:space-x-8 bg-gray-50 rounded-lg shadow-lg">
+              <div className="w-full md:w-2/3 h-[350px] bg-white rounded-lg shadow-md p-6 space-y-4">
+                <h3 className="font-urbanist text-black text-xl font-semibold border-b border-PRIMARY pb-2">
+                  Key Trends
+                </h3>
+                <Trends similiarDecisions={similiarDecisions} user={user} bias={detectedBias} noise={detectedNoise}/>
+              </div>
+              <div className="w-full md:w-1/3  h-[350px] bg-white rounded-lg shadow-md p-6 space-y-4">
+                <h3 className="font-urbanist text-black text-xl font-semibold border-b border-PRIMARY pb-2">
+                 Charts
+                </h3>
+
+              </div>
+            </div>
+          </div>
+        </SwiperSlide>
+
+        <SwiperSlide>
+          <div className="w-full text-center">
+            <h2 className="font-urbanist text-3xl font-semibold text-PRIMARY">
+              End Slde
+            </h2>
+            <p className="text-gray-600 text-base mt-2">
+              A placeholder
+            </p>
+          </div>
+          <div className="flex flex-col md:flex-row items-start justify-between w-full space-y-6 md:space-y-0 md:space-x-6 mt-8">
+            <div className="w-full md:w-1/2 h-[350px] bg-white rounded-lg shadow-md p-6 space-y-4">
+              <h3 className="font-urbanist text-black text-xl font-semibold border-b border-PRIMARY pb-2">
+                Decision Breakdown
+              </h3>
+              <Breakdown breakdown={breakdown} />
+            </div>
+            <div className="w-full md:w-1/2 h-[350px] bg-white rounded-lg shadow-md p-6 space-y-4">
+              <h3 className="font-urbanist text-black text-xl font-semibold border-b border-PRIMARY pb-2">
+                Suggestions
+              </h3>
+              <SummarySideBar />
+            </div>
+          </div>
+          <div className="flex justify-center mt-8">
+            <Button
+              onClick={openHome}
+              className="bg-PRIMARY text-white font-urbanist py-2 px-6 rounded-md transform transition-transform duration-300 active:scale-[1.1]"
+            >
               Finish
             </Button>
           </div>
-        </div>
+        </SwiperSlide>
+      </Swiper>
+      <div className="w-full flex justify-between items-center absolute top-20 px-4 z-10">
+        <PrevButton swiperRef={swiperRef} />
+        <NextButton swiperRef={swiperRef} />
       </div>
     </div>
+
   );
 }
+

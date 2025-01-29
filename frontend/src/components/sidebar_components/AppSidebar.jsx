@@ -41,7 +41,7 @@ const data = {
 
 export function AppSidebar({ ...props }) {
   const { userInfo } = useUser();
-  const {detectBias, detectNoise} = useDecision();
+  const {setDetectedBias, setDetectedNoise} = useDecision();
   const router = useRouter();
 
   const logOut = async (e) => {
@@ -49,8 +49,8 @@ export function AppSidebar({ ...props }) {
     try {
       await signOut(auth);
       userInfo(null);
-      detectBias(null);
-      detectNoise(null);
+      setDetectedBias([]);
+      setDetectedNoise([]);
       router.push("/");
     } catch (error) {
       console.error("Error logging out:", error);

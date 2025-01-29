@@ -1,6 +1,76 @@
+@import "swiper/css";
+@import "swiper/css/navigation";
+@import "swiper/css/pagination";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.container {
+  width: 1010px; 
+  height: 480px; 
+  display: flex;
+  justify-content: center; 
+  align-items: center;
+  background: #ffffff; 
+  overflow: visible;
+}
+
+.mySwiper {
+  width: 100%; 
+  height: 100%;
+  background: #f5f5f5;
+  border: 1px solid #ddd; 
+}
+
+
+.swiper-slide {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+  color: #333;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.swiper-pagination {
+  bottom: auto;
+  top: 10px; 
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.swiper-pagination-bullet {
+  background: #ddd; 
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin: 0 4px;
+  transition: background 0.3s ease;
+}
+
+.swiper-pagination-bullet-active {
+  background: #9747FF !important; 
+  width: 16px;
+  height: 16px;
+}
+
+.swiper-button-next,
+.swiper-button-prev {
+  color: #9747FF !important;
+  font-weight: bold;
+}
+
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+  color: #550b8e; 
+}
+
+.swiper-button-next::after,
+.swiper-button-prev::after {
+  font-size: 18px;
+}
 
 html, body {
   font-family: 'Inter', sans-serif; 

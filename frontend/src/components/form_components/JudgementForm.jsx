@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, FormProvider } from "react-hook-form";
 import { z } from "zod";
@@ -36,7 +36,7 @@ const formSchema = z.object({
     .string()
     .min(4, { message: "Title must be at least 4 characters." })
     .max(20, { message: "Title must be at most 20 characters." }),
-  template: z.string().min(2, { message: "Please select a template." }),
+  theme: z.string().min(2, { message: "Please select a template." }),
   description: z
     .string()
     .min(4, { message: "Description must be at least 4 characters." })
@@ -47,7 +47,7 @@ const formSchema = z.object({
 
 const JudgementForm = () => {
   const { judgmentInfo } = useJudgment();
-  const [date, setDate] = React.useState(new Date());
+  const [date, setDate] = useState(new Date());
   const { user } = useUser();
   const router = useRouter();
   const form = useForm({
@@ -86,8 +86,8 @@ const JudgementForm = () => {
                 control={form.control}
                 name="title"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="font-urbanist">Title</FormLabel>
+                  <FormItem className="font-urbanist">
+                    <FormLabel>Title</FormLabel>
                     <FormControl>
                       <Input className="font-urbanist" placeholder="Enter a title" {...field} />
                     </FormControl>
@@ -97,10 +97,10 @@ const JudgementForm = () => {
               />
               <FormField
                 control={form.control}
-                name="template"
+                name="theme"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="font-urbanist">Template</FormLabel>
+                    <FormLabel className="font-urbanist">Theme</FormLabel>
                     <FormControl>
                       <TemplateSelect onSelect={(value) => field.onChange(value)} />
                     </FormControl>
@@ -119,7 +119,7 @@ const JudgementForm = () => {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel className="font-urbanist">Description</FormLabel>
                   <FormControl>
                     <Textarea
                       className="font-urbanist"
@@ -183,6 +183,8 @@ const JudgementForm = () => {
                                 selected={date}
                                 onSelect={setDate}
                                 initialFocus
+                                fromMonth={new Date()} 
+                                toMonth={new Date()}
                               />
                             </PopoverContent>
                           </Popover>

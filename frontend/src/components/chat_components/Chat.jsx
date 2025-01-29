@@ -1,74 +1,58 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useUser } from "@/context/UserContext";
 import { useDecision } from '@/context/DecisionContext';
 import { fetchChats, saveChats } from "@/services/FirebaseService";
 import MessageList from "./MessageList";
 import MessageSender from "./MessageSender";
-import PromptManager from "../../services/PromptService";
 import { useJudgment } from "@/context/JudgementContext";
-import { openingMessage, fetchBERTResponse, fetchGPTResponse, fetchLevelNoise } from "@/services/ApiService";
+import { openingMessage, fetchBERTResponse, fetchGPTResponse, fetchLevelNoise, fetchOccasionNoise } from "@/services/ApiService";
 
-const Chat = ({ judgementId, stage }) => {
+const Chat = ({ judgementId }) => {
   const { user } = useUser();
   const { judgmentData } = useJudgment();
   const { detectBias, detectNoise } = useDecision();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
-  const [currentStage, setCurrentStage] = useState(1);
   const [buttonDisable, setButtonDisable] = useState(false);
-  const promptManager = new PromptManager();
+  const hasInitialized = useRef(false); 
 
-  const isLastStage = currentStage >= 5;
+useEffect(() => {
+  console.log("Opening message triggered", judgementId);
 
-  useEffect(() => {
-    let hasInitialized = false;
-    const createChat = async () => {
-      if (hasInitialized || messages.length > 0) {
-        return;
-      }
+  if (hasInitialized.current) {
+    console.log("Already initialized, skipping...");
+    return;
+  }
 
-      hasInitialized = true;
+  hasInitialized.current = true; 
 
-      if (user && user.uid) {
-        try {
-          const openMessage = await openingMessage(judgmentData);
+  const createChat = async () => {
+    if (messages.length > 0) return;
 
-          if (openMessage.bias_feedback) {
-            const openingMessage = {
-              text: openMessage.bias_feedback,
-              sender: "GPT",
-            };
+    if (user?.uid) {
+      try {
+        const openMessage = await openingMessage(judgmentData);
+        console.log("✅ GPT Opening Message Received:", openMessage);
 
-            stage(1);
-            setMessages([openingMessage]);
-            saveChats(user, judgementId, [openingMessage], detectBias);
-          }
-          const now = new Date();
-          const prompt = promptManager.checkIfTired(now);
+        if (openMessage.bias_feedback) {
+          const openingMessage = {
+            text: openMessage.bias_feedback,
+            sender: "GPT",
+          };
 
-          if (prompt) {
-            const promptMessage = {
-              ...prompt,
-              sender: "System",
-              createdAt: now.toISOString(),
-              type: "prompt"
-            };
-
-            setButtonDisable(true);
-            setMessages((prev) => [...prev, promptMessage]);
-            saveChats(user, judgementId, [promptMessage], detectBias);
-          }
-        } catch (error) {
-          console.log(error);
+          setMessages([openingMessage]);
+          saveChats(user, judgementId, [openingMessage], detectBias);
         }
+      } catch (error) {
+        console.log(error);
       }
-    };
-    if (!hasInitialized) {
-      createChat();
     }
-  }, [user, judgementId]);
+  };
+
+  createChat();
+}, []);
 
   const onSend = async ( option ) => {
     setButtonDisable(true);
@@ -98,7 +82,7 @@ const Chat = ({ judgementId, stage }) => {
         console.error(bertData.error || "ERROR, No response from BERT")
       }
 
-      const gptData = await fetchGPTResponse(messageContent, messages, currentStage);
+      const gptData = await fetchGPTResponse(messageContent, messages);
   
       if (gptData.bias_feedback) {
         const gptResponse = {
@@ -113,20 +97,20 @@ const Chat = ({ judgementId, stage }) => {
       }
 
       const levelNoiseData = await fetchLevelNoise(messageContent);
-      const { labels, scores } = levelNoiseData;
-      const maxScoreIndex = scores.indexOf(Math.max(...scores));
-      const detectedLevelNoise = labels[maxScoreIndex];
-      if (detectedLevelNoise === "harsh") {
-        detectNoise("Level Noise");
+
+      if (levelNoiseData) {
+        const { level_noise_percentage, confidence_scores } = levelNoiseData;     
+        console.log("Level Noise Confidence Scores:", confidence_scores);
+        console.log("Level Noise Percentage:", level_noise_percentage);
+        detectNoise("Level Noise", level_noise_percentage);
       }
-  
-      if (currentStage < 5) {
-        const newStage = currentStage + 1;
-        setCurrentStage(newStage);
-        stage(newStage);
-      } else {
-        alert("Invalid input detected; not advancing stage.");
-      }
+      
+      const occasionNoiseData = await fetchOccasionNoise(messageContent);
+      if (occasionNoiseData) {
+        const { occasion_noise_percentages } = occasionNoiseData;
+        console.log("Occasion Noise Score", occasion_noise_percentages);
+        detectNoise("Occasion Noise", occasion_noise_percentages); 
+    }
 
     } catch (error) {
       console.error("ERROR,Cant connect to BERT OR GPT", error.message || error)
@@ -136,16 +120,22 @@ const Chat = ({ judgementId, stage }) => {
 
   useEffect(() => {
     const fetchPreviousChats = async () => {
+      if (!user?.uid || hasInitialized.current) return; 
+  
       const fetchedMessages = await fetchChats(user, judgementId);
-      setMessages((prev) => [...prev, ...fetchedMessages]);
+      if (fetchedMessages.length > 0) {
+        setMessages((prev) => [...prev, ...fetchedMessages]);
+      }
     };
+  
     fetchPreviousChats();
-  }, [judgementId]);
+  }, [judgementId]); 
+  
 
   return (
     <div className="h-[425px]">
       <MessageList messages={messages} onSend={onSend}/>
-      <MessageSender input={input} setInput={setInput} isLastStage={isLastStage} onSend={onSend} buttonDisable={buttonDisable}/>
+      <MessageSender input={input} setInput={setInput} onSend={onSend} buttonDisable={buttonDisable}/>
     </div>
 
   );

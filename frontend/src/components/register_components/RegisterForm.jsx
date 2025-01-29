@@ -64,7 +64,7 @@ export function RegisterForm() {
         }).catch((error) => {
           console.log("Error writing document: ", error);
         });
-        userInfo({ name: name, uid: user.uid });
+        userInfo({ name: name, email: email, uid: user.uid });
 
         console.log("User registered:", user.uid);
         router.push('/Main');
@@ -107,7 +107,6 @@ export function RegisterForm() {
               <Label htmlFor="name" className="font-semibold font-urbanist">Name</Label>
               <Input id="name"
                 type="text"
-                className="font-urbanist"
                 value={name}
                 onKeyPress={handleKeyPress}
                 onChange={(e) => setName(e.target.value)}

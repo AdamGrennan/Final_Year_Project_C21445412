@@ -61,7 +61,7 @@ export function LoginForm() {
           setLoading(true);
           const userData = docSnap.data();
 
-          userInfo({ name: userData.name, uid: user.uid });
+          userInfo({ name: userData.name, email: userData.email, uid: user.uid });
           console.log("User logged in:", user.uid);
           router.push('/Main');
         } else {
@@ -113,7 +113,6 @@ export function LoginForm() {
             <Input
              id="password" 
             type="password" 
-            className="font-urbanist"
             value={password} 
             onKeyPress={handleKeyPress}
             onChange={(e) => setPassword(e.target.value)} 

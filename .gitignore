@@ -1,3 +1,4 @@
 backend/models/saved_model/
 backend/models/saved_tokenizer/
-/backend/data_generation/
+backend/generate.py
+backend/gen.py

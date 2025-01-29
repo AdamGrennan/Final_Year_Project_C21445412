@@ -51,6 +51,10 @@ const DoughnutChart = ({ bias }) => {
     ],
   };
 
+  if (bias.length === 0) {
+    return <p>No data to display.</p>;
+  }
+
   return <Doughnut data={data} />;
 };
 
