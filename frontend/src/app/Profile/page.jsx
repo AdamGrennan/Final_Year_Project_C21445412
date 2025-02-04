@@ -27,14 +27,15 @@ export default function ProfilePage() {
     try {
       if (fieldToEdit === "name") {
         await updateDoc(doc(db, "users", user.uid), { name: value });
-        setSuccess("Name updated successfully.");
+        alert("Name updated successfully.");
       } else if (fieldToEdit === "password") {
         await updatePassword(auth.currentUser, value);
-        setSuccess("Password updated successfully.");
+        alert("Password updated successfully.");
       }
       setShowEditModal(false);
-    } catch (err) {
-      setError("Failed to update. Please try again.");
+    } catch (error) {
+    alert("Failed to update. Please try again.");
+    console.log("PROFILE", error);
     }
   };
 

@@ -13,23 +13,20 @@ Chart.register({
   Legend,
 });
 
-const DoughnutChart = ({ bias }) => {
+const NoiseDoughnutChart = ({ noise }) => {
 
-  const mockBiasCount = {
-    "Overconfidence Bias": 5,
-    "Confirmation Bias": 8,
-    "Anchoring Bias": 3,
-    "Availability Bias": 6,
+  const mockNoiseCount = {
+    "Patten Noise": 1,
+    "Level Noise": 2,
   };
 
-  const biasCounts = bias.reduce((acc, bias) => {
-    acc[bias] = (acc[bias] || 0) + 1; 
+  const noiseCounts = noise.reduce((acc, noise) => {
+    acc[noise] = (acc[noise] || 0) + 1; 
     return acc;
   }, {});
 
-
-  const labels = Object.keys(biasCounts);
-  const counts = Object.values(biasCounts);
+  const labels = Object.keys(noiseCounts);
+  const counts = Object.values(noiseCounts);
 
   const total = counts.reduce((sum, count) => sum + count, 0);
   const percentages = counts.map((count) => Math.round((count / total) * 100));
@@ -38,12 +35,11 @@ const DoughnutChart = ({ bias }) => {
     labels: labels,
     datasets: [
       {
-        label: "Bias Occurrence (%)",
+        label: "Noise Occurrence (%)",
         data: percentages,
         backgroundColor: [
           "rgb(255, 99, 132)",
-          "rgb(54, 162, 235)",
-          "rgb(255, 205, 86)",
+          "rgb(14, 246, 176)",
           "rgb(153, 102, 255)",
         ],
         hoverOffset: 4,
@@ -51,11 +47,11 @@ const DoughnutChart = ({ bias }) => {
     ],
   };
 
-  if (bias.length === 0) {
-    return <p>No data to display.</p>;
+  if (noise.length === 0) {
+    return <p>No noise data to display.</p>;
   }
 
   return <Doughnut data={data} />;
 };
 
-export default DoughnutChart;
+export default NoiseDoughnutChart;

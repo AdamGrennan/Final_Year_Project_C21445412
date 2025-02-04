@@ -1,16 +1,18 @@
-from backend.src.Bias.train import train_model
+from src.Bias.train import train_model
 from src.Bias.predict import predict_bias
 import os
 from src.Bias.load_model import load_bias_model
 
 if __name__ == "__main__":
     
-    if(os.path.exists('./models/saved_model') and os.path.exists('./models/saved_tokenizer')):
+    if(os.path.exists('./models/sonus_model') and os.path.exists('./models/sonus_tokenizer')):
         print("Loading the model...")
         model, tokenizer, bias_labels = load_bias_model()
     else:
         print("Training the model...")
-        model, tokenizer, bias_labels = train_model('./data/bias_set.csv')
+        model, tokenizer, bias_labels = load_bias_model() 
+
+      
     
     print("Type a statement to identify the type of bias (or type 'exit' to quit):")
     while True:

@@ -16,18 +16,15 @@ class BiasDataset(Dataset):
 
 #Processes sentences in a format for BERT to understand
     def __getitem__(self, index):
-        sentence = self.sentences[index]
-        labels = self.labels[index]
         encoding = self.tokenizer.encode_plus(
-            sentence,
-            add_special_tokens=True,
+            self.sentences[index],
             max_length=self.max_length,
             padding='max_length',
             truncation=True,
             return_tensors='pt'
         )
         return {
-            'input_ids': encoding['input_ids'].flatten(),
-            'attention_mask': encoding['attention_mask'].flatten(),
-            'labels': torch.tensor(labels, dtype=torch.float)
+            'input_ids': encoding['input_ids'].squeeze(),
+            'attention_mask': encoding['attention_mask'].squeeze(),
+            'labels': self.labels[index]
         }

@@ -7,7 +7,7 @@ import { fetchChats, saveChats } from "@/services/FirebaseService";
 import MessageList from "./MessageList";
 import MessageSender from "./MessageSender";
 import { useJudgment } from "@/context/JudgementContext";
-import { openingMessage, fetchBERTResponse, fetchGPTResponse, fetchLevelNoise, fetchOccasionNoise } from "@/services/ApiService";
+import { openingMessage, fetchBERTResponse, fetchGPTResponse, fetchLevelNoise, fetchPatternNoise, fetchSource } from "@/services/ApiService";
 
 const Chat = ({ judgementId }) => {
   const { user } = useUser();
@@ -16,25 +16,15 @@ const Chat = ({ judgementId }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [buttonDisable, setButtonDisable] = useState(false);
-  const hasInitialized = useRef(false); 
-
-useEffect(() => {
-  console.log("Opening message triggered", judgementId);
-
-  if (hasInitialized.current) {
-    console.log("Already initialized, skipping...");
-    return;
-  }
-
-  hasInitialized.current = true; 
+  const hasInitialized = useRef(false);
 
   const createChat = async () => {
     if (messages.length > 0) return;
 
     if (user?.uid) {
       try {
-        const openMessage = await openingMessage(judgmentData);
-        console.log("✅ GPT Opening Message Received:", openMessage);
+        const openMessage = await openingMessage(judgmentData, user.name);
+        console.log("GPT Opening Message Received:", openMessage);
 
         if (openMessage.bias_feedback) {
           const openingMessage = {
@@ -43,7 +33,7 @@ useEffect(() => {
           };
 
           setMessages([openingMessage]);
-          saveChats(user, judgementId, [openingMessage], detectBias);
+          saveChats(user, judgementId, [openingMessage]);
         }
       } catch (error) {
         console.log(error);
@@ -51,10 +41,7 @@ useEffect(() => {
     }
   };
 
-  createChat();
-}, []);
-
-  const onSend = async ( option ) => {
+  const onSend = async (option) => {
     setButtonDisable(true);
     const messageContent = option || input.trim();
     if (!messageContent) return;
@@ -64,11 +51,25 @@ useEffect(() => {
     setInput("");
 
     try {
+      let detectedBias = [];
+      let detectedNoise = [];
+
+      await saveChats(user, judgementId, [newMessage]);
       const bertData = await fetchBERTResponse(messageContent);
+
+      const summary = await fetchSource(messageContent, bertData.predictions);
 
       if (bertData.predictions) {
         bertData.predictions.forEach((bias) => {
-          if (bias !== "Neutral") detectBias(bias);
+
+          if (bias !== "Neutral" && bias !== "OccasionNoise") {
+            detectBias(bias, summary);
+            detectedBias.push(bias);
+          }
+          if (bias === "OccasionNoise") {
+            detectNoise("Occasion Noise", summary);
+            detectedNoise.push("Occasion Noise");
+          }
         });
 
         const bertResponse = {
@@ -77,13 +78,13 @@ useEffect(() => {
         };
 
         setMessages((prev) => [...prev, bertResponse]);
-        saveChats(user, judgementId, [newMessage, bertResponse], detectBias);
+        saveChats(user, judgementId, [bertResponse], detectedBias, detectedNoise);
       } else if (bertData.error) {
         console.error(bertData.error || "ERROR, No response from BERT")
       }
 
       const gptData = await fetchGPTResponse(messageContent, messages);
-  
+
       if (gptData.bias_feedback) {
         const gptResponse = {
           text: gptData.bias_feedback,
@@ -91,26 +92,45 @@ useEffect(() => {
         };
 
         setMessages((prev) => [...prev, gptResponse]);
-        saveChats(user, judgementId, [newMessage, gptResponse], detectBias);
-      }else if (gptData.error) {
+        saveChats(user, judgementId, [gptResponse], detectedBias, detectedNoise);
+      } else if (gptData.error) {
         console.error(gptData.error || "ERROR, No response from GPT")
       }
 
       const levelNoiseData = await fetchLevelNoise(messageContent);
-
       if (levelNoiseData) {
-        const { level_noise_percentage, confidence_scores } = levelNoiseData;     
+        const { confidence_scores } = levelNoiseData;
         console.log("Level Noise Confidence Scores:", confidence_scores);
-        console.log("Level Noise Percentage:", level_noise_percentage);
-        detectNoise("Level Noise", level_noise_percentage);
+
+        const neutralScore = confidence_scores["neutral"];
+        const harshScore = confidence_scores["harsh"];
+
+        if (harshScore > neutralScore) {
+          detectNoise("Level Noise", "Harsh decision making detected");
+          detectedNoise.push("Level Noise");
+        }
+
       }
-      
-      const occasionNoiseData = await fetchOccasionNoise(messageContent);
-      if (occasionNoiseData) {
-        const { occasion_noise_percentages } = occasionNoiseData;
-        console.log("Occasion Noise Score", occasion_noise_percentages);
-        detectNoise("Occasion Noise", occasion_noise_percentages); 
-    }
+
+      const patternNoiseData = await fetchPatternNoise(
+        user.uid,
+        judgementId,
+        judgmentData.theme,
+      );
+  
+      if (patternNoiseData) {
+        const { similarDecisions } = patternNoiseData;
+  
+        if (similarDecisions && similarDecisions.length > 0) {
+          console.log("Pattern Noise detected: Similar past decisions found.", similarDecisions);
+          detectNoise("Pattern Noise");
+          setSimilarDecisions(similarDecisions);
+        } else {
+          console.log("No Pattern Noise detected.");
+          setSimilarDecisions([]);
+        }
+      }
+      await saveChats(user, judgementId, [{ ...newMessage }], detectedBias, detectedNoise);
 
     } catch (error) {
       console.error("ERROR,Cant connect to BERT OR GPT", error.message || error)
@@ -119,23 +139,28 @@ useEffect(() => {
   };
 
   useEffect(() => {
-    const fetchPreviousChats = async () => {
-      if (!user?.uid || hasInitialized.current) return; 
-  
+    const fetchPreviosChats = async () => {
+      if (!user?.uid) return;
+
+      setMessages([]);
+
       const fetchedMessages = await fetchChats(user, judgementId);
       if (fetchedMessages.length > 0) {
-        setMessages((prev) => [...prev, ...fetchedMessages]);
+        setMessages(fetchedMessages);
+      } else if (!hasInitialized.current) {
+        hasInitialized.current = true;
+        await createChat();
       }
     };
-  
-    fetchPreviousChats();
-  }, [judgementId]); 
-  
+
+    fetchPreviosChats();
+  }, [judgementId]);
+
 
   return (
     <div className="h-[425px]">
-      <MessageList messages={messages} onSend={onSend}/>
-      <MessageSender input={input} setInput={setInput} onSend={onSend} buttonDisable={buttonDisable}/>
+      <MessageList messages={messages} onSend={onSend} />
+      <MessageSender input={input} setInput={setInput} onSend={onSend} buttonDisable={buttonDisable} />
     </div>
 
   );

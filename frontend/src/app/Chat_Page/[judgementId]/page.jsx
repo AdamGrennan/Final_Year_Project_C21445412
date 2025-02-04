@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { db } from "@/config/firebase";
 import { writeBatch } from 'firebase/firestore';
 import { doc, serverTimestamp } from "firebase/firestore";
-import * as Progress from "@radix-ui/react-progress";
 import { useState } from 'react';
 import { Toaster } from "@/components/ui/toaster"
 import { useToast } from "@/hooks/use-toast"
@@ -16,35 +15,36 @@ import { useToast } from "@/hooks/use-toast"
 export default function Page() {
   const router = useRouter();
   const { judgementId } = useParams();
-  const { setBreakdown, detectedNoise , detectedBias } = useDecision();
+  const { detectedNoise , detectedBias } = useDecision();
   const [fade, setFade] = useState(false);
   const { toast } = useToast()
 
   const finalReport = async () => {
 
-    const response = await fetch('http://127.0.0.1:5000/generate_breakdown', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ judgementId: judgementId }),
-    })
-
-    const data = await response.json();
     console.log("Detected Bias:", detectedBias);
     console.log("Detected Noise:", detectedNoise);
 
     const batch = writeBatch(db);
 
+    const fbBias = detectedBias.map(bias => ({
+      bias,
+      sources: detectedBias[bias] || [] 
+  }));
+
+  const fbNoise = detectedNoise.map(noise => ({
+    noise,
+    sources: detectedNoise[noise] || []  
+}));
+
     const judgeRef = doc(db, "judgement", judgementId);
     batch.update(judgeRef, {
-      breakdown: data.breakdown,
+      breakdown: "breakdown",
       isCompleted: true,
-      detectedBias: detectedBias,
-      detectedNoise: detectedNoise,
+      detectedBias: fbBias,
+      detectedNoise: fbNoise,
       updatedAt: serverTimestamp(),
     });
     await batch.commit()
-
-    setBreakdown(data.breakdown);
 
     router.push(`/Final_Report/${judgementId}`);
   

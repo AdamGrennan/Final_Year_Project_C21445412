@@ -4,9 +4,8 @@ from sentence_transformers import SentenceTransformer
 from src.Bias.load_model import load_bias_model
 from src.LevelNoise.level_noise import level_noise_endpoint
 from src.api.bert import bert_endpoint
-from src.OccasionNoise.occasion_noise import occasion_noise_endpoint
 from src.api.gpt import gpt_endpoint
-from src.api.breakdown import breakdown_endpoint
+from src.api.source import source_endpoint
 from src.PatternNoise.pattern_noise import pattern_noise_endpoint
 import firebase_admin
 from firebase_admin import credentials
@@ -28,8 +27,6 @@ sbert_model = SentenceTransformer("all-MiniLM-L6-v2")
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
-#Flask session key
-app.secret_key = 'NOISY_KEY'
 
 model, tokenizer, bias_labels = load_bias_model()
 
@@ -41,10 +38,6 @@ def bert():
 def pattern_noise():
     return pattern_noise_endpoint(sbert_model, db)
 
-@app.route('/occasion_noise', methods=['POST'])
-def occasion_noise():
-    return occasion_noise_endpoint(sbert_model)
-
 @app.route('/level_noise', methods=['POST'])
 def level_noise():
     return level_noise_endpoint(pipe)
@@ -53,9 +46,9 @@ def level_noise():
 def gpt():
     return gpt_endpoint(model, tokenizer, bias_labels)
 
-@app.route('/generate_breakdown', methods=['POST'])
-def breakdown():
-    return breakdown_endpoint(db)
+@app.route('/source', methods=['POST'])
+def source():
+    return source_endpoint()
 
 if __name__ == '__main__':
     app.run(debug=True)

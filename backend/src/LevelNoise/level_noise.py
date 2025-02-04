@@ -3,30 +3,25 @@ from flask import request, jsonify
 def level_noise_endpoint(pipe):
     data = request.json
     statement = data.get("input", "").strip()
+
     try:
-   
         result = pipe(
             statement,
-            candidate_labels=["lenient", "neutral", "harsh"],
+            candidate_labels=["neutral", "harsh"],
         )
-        
-        scores = {label: score for label, score in zip(result["labels"], result["scores"])}
-        
-        level_noise_score = 0
-        if "lenient" in scores:
-            level_noise_score += scores["lenient"] * 100  
-        if "harsh" in scores:
-            level_noise_score += scores["harsh"] * 100  
 
-        if "neutral" in scores:
-            level_noise_score = max(level_noise_score - (scores["neutral"] * 50), 0)
-        
-        level_noise_score = round(level_noise_score, 2)
-        print("Level Noise Response:", level_noise_score)
+        scores = {}
+        for label, score in zip(result["labels"], result["scores"]):
+         scores[label] = score
 
+        detected_label = result["labels"][0] 
+        confidence = result["scores"][0]  
+        
         insights = {
-            "level_noise_percentage": level_noise_score,
             "confidence_scores": scores,
+            "detected_label": detected_label,
+            "confidence": confidence,
+            "statement": statement, 
         }
 
         return jsonify(insights), 200

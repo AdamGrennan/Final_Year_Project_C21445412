@@ -1,5 +1,4 @@
 "use client";
-import Breakdown from "@/components/report_components/Breakdown";
 import { useRouter } from "next/navigation";
 import Snapshot from "@/components/report_components/chart-components/Snapshot";
 import SummarySideBar from "@/components/report_components/SummarySidebar";
@@ -10,16 +9,15 @@ import { Button } from "@/components/ui/button";
 import { useParams } from "next/navigation";
 import { useUser } from '@/context/UserContext';
 import { useEffect, useRef } from "react";
-import { writeBatch, doc, updateDoc, serverTimestamp, getDoc } from "firebase/firestore";
+import { doc, updateDoc, serverTimestamp, getDoc } from "firebase/firestore";
 import { db } from "@/config/firebase";
 import { useState } from "react";
 import { Pagination, } from 'swiper/modules';
-import { fetchPatternNoise } from "@/services/ApiService";
 import PrevButton from "@/components/report_components/swiper_components/PreviousButton";
 import NextButton from "@/components/report_components/swiper_components/NextButton";
+import TrendCharts from "@/components/report_components/chart-components/TrendCharts";
 
 import { Swiper, SwiperSlide } from 'swiper/react';
-
 
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -30,17 +28,12 @@ import NoiseCard from "@/components/report_components/NoiseCard";
 import { useSearchParams } from "next/navigation";
 
 export default function Page() {
-  const { detectBias, detectNoise,
-     breakdown, detectedBias,
-      detectedNoise, occasionNoiseScore,
-       patternNoiseScore, levelNoiseScore,
-        setDetectedNoise, setDetectedBias,
-      setOccasionNoiseScore, setPatterNoiseScore, setLevelNoiseScore } = useDecision();
-
+  const { detectBias, detectNoise, detectedBias,
+    detectedNoise, setDetectedNoise, setDetectedBias,
+  biasSources, noiseSources } = useDecision();
   const [similiarDecisions, setSimilarDecisions] = useState([]);
   const router = useRouter();
   const { user } = useUser();
-  const { judgmentData } = useJudgment();
   const swiperRef = useRef(null);
   const searchParams = useSearchParams();
   const isRevisited = searchParams.get("revisited") === "true";
@@ -49,8 +42,6 @@ export default function Page() {
   const openHome = () => {
     setTimeout(async () => {
       router.push('/Main');
-      detectNoise(null);
-      detectBias(null);
     }, 700);
   };
 
@@ -78,10 +69,7 @@ export default function Page() {
 
             setDetectedBias(detectedBiasesArray);
             setDetectedNoise(detectedNoiseArray);
-            setOccasionNoiseScore(decisionData.occasionNoiseScore);
-            setPatternNoiseScore(decisionData.patternNoiseScore);
-            setLevelNoiseScore(decisionData.levelNoiseScore);
-            
+
           } else {
             console.error("No such document!");
           }
@@ -97,47 +85,14 @@ export default function Page() {
     handleDecisionData();
   }, [isRevisited, judgementId]);
 
-
-
   const finalReport = async () => {
     const detectedBiasesArray = Array.from(new Set(detectedBias));
     const detectedNoiseArray = Array.from(new Set(detectedNoise));
 
-    const patternNoiseData = await fetchPatternNoise(
-      user.uid,
-      judgementId,
-      judgmentData.title,
-      judgmentData.description,
-      judgmentData.theme,
-      "Breakdown",
-      detectBias,
-      detectedNoise
-    );
-
-    if (patternNoiseData) {
-      const { pattern_noise_percentage, similarDecisions } = patternNoiseData;
-
-      if (pattern_noise_percentage !== undefined) {
-        console.log("Pattern Noise Score:", pattern_noise_percentage);
-        detectNoise("Pattern Noise", pattern_noise_percentage);
-      }
-      if (similarDecisions && similarDecisions.length > 0) {
-        console.log("Pattern Noise detected: Similar past decisions found.", similarDecisions);
-        setSimilarDecisions(similarDecisions);
-      } else {
-        console.log("No Pattern Noise detected.");
-        setSimilarDecisions([]);
-      }
-    }
-
     const judgeRef = doc(db, "judgement", judgementId);
     await updateDoc(judgeRef, {
-      breakdown,
       detectedBias: detectedBiasesArray,
       detectedNoise: detectedNoiseArray,
-      occasionNoiseScore: occasionNoiseScore,
-      patternNoiseScore: patternNoiseScore,
-      levelNoiseScore: levelNoiseScore,
       updatedAt: serverTimestamp(),
     });
   };
@@ -159,31 +114,25 @@ export default function Page() {
             <h2 className="font-urbanist text-2xl font-semibold text-PRIMARY">
               Decision Analysis
             </h2>
-            <p className="text-gray-600 text-base mt-1">
-              Explore detected biases, noise, and key insights from your decisions.
-            </p>
           </div>
-          <div className="h-auto flex flex-col md:flex-row items-start justify-between p-8 space-y-8 md:space-y-0 md:space-x-8 bg-gray-50 rounded-lg shadow-lg">
+          <div className="h-auto flex flex-col md:flex-row items-start justify-between p-8 space-y-8 md:space-y-0 md:space-x-8 bg-gray-50 ">
             <div className="w-full md:w-1/3 h-[350px] bg-white rounded-lg shadow-md p-6 space-y-4">
-              <h3 className="font-urbanist text-black text-xl font-semibold border-b border-PRIMARY pb-2">
+              <h3 className="text-center font-urbanist text-black text-base font-semibold border-b border-PRIMARY pb-2">
                 Detected Bias
               </h3>
-              <BiasCard bias={detectedBias} />
+              <BiasCard bias={detectedBias} biasSources={biasSources}/>
             </div>
             <div className="w-full md:w-1/3  h-[350px] bg-white rounded-lg shadow-md p-6 space-y-4">
-              <h3 className="font-urbanist text-black text-xl font-semibold border-b border-PRIMARY pb-2">
+              <h3 className="text-center font-urbanist text-black text-base font-semibold border-b border-PRIMARY pb-2">
                 Detected Noise
               </h3>
-              <NoiseCard noise={detectedNoise} />
+              <NoiseCard noise={detectedNoise} noiseSources={noiseSources}/>
             </div>
             <div className="w-full md:w-1/3 h-[350px] bg-white rounded-lg shadow-md p-6">
-              <h3 className="font-urbanist text-black text-xl font-semibold border-b border-PRIMARY pb-2">
+              <h3 className="text-center font-urbanist text-black text-base font-semibold border-b border-PRIMARY pb-2">
                 Insight Graphs
               </h3>
-              <Snapshot bias={detectedBias}
-                occasionNoise={occasionNoiseScore}
-                patternNoise={patternNoiseScore}
-                levelNoise={levelNoiseScore} />
+              <Snapshot bias={detectedBias} noise={detectedNoise}/>
             </div>
           </div>
         </SwiperSlide>
@@ -193,21 +142,18 @@ export default function Page() {
             <h2 className="font-urbanist text-2xl font-semibold text-PRIMARY">
               Trends and Patterns
             </h2>
-            <p className="text-gray-600 text-base mt-2">
-              A placeholder
-            </p>
             <div className="h-auto flex flex-col md:flex-row items-start justify-between p-8 space-y-8 md:space-y-0 md:space-x-8 bg-gray-50 rounded-lg shadow-lg">
-              <div className="w-full md:w-2/3 h-[350px] bg-white rounded-lg shadow-md p-6 space-y-4">
-                <h3 className="font-urbanist text-black text-xl font-semibold border-b border-PRIMARY pb-2">
+              <div className="w-full md:w-1/3 h-[400px] bg-white rounded-lg shadow-md p-6 space-y-4">
+                <h3 className="font-urbanist text-black text-base font-semibold border-b border-PRIMARY pb-2">
                   Key Trends
                 </h3>
-                <Trends similiarDecisions={similiarDecisions} user={user} bias={detectedBias} noise={detectedNoise}/>
+                <Trends similiarDecisions={similiarDecisions} user={user} bias={detectedBias} noise={detectedNoise} />
               </div>
-              <div className="w-full md:w-1/3  h-[350px] bg-white rounded-lg shadow-md p-6 space-y-4">
-                <h3 className="font-urbanist text-black text-xl font-semibold border-b border-PRIMARY pb-2">
-                 Charts
+              <div className="w-full md:w-2/3  h-[400px] bg-white rounded-lg shadow-md p-6 space-y-4">
+                <h3 className="font-urbanist text-black text-base font-semibold border-b border-PRIMARY pb-2">
+                  Charts
                 </h3>
-
+                <TrendCharts bias={detectedBias} noise={detectedNoise}/>
               </div>
             </div>
           </div>
@@ -215,22 +161,10 @@ export default function Page() {
 
         <SwiperSlide>
           <div className="w-full text-center">
-            <h2 className="font-urbanist text-3xl font-semibold text-PRIMARY">
-              End Slde
-            </h2>
-            <p className="text-gray-600 text-base mt-2">
-              A placeholder
-            </p>
           </div>
           <div className="flex flex-col md:flex-row items-start justify-between w-full space-y-6 md:space-y-0 md:space-x-6 mt-8">
-            <div className="w-full md:w-1/2 h-[350px] bg-white rounded-lg shadow-md p-6 space-y-4">
-              <h3 className="font-urbanist text-black text-xl font-semibold border-b border-PRIMARY pb-2">
-                Decision Breakdown
-              </h3>
-              <Breakdown breakdown={breakdown} />
-            </div>
-            <div className="w-full md:w-1/2 h-[350px] bg-white rounded-lg shadow-md p-6 space-y-4">
-              <h3 className="font-urbanist text-black text-xl font-semibold border-b border-PRIMARY pb-2">
+            <div className="w-full md:w-full h-[350px] bg-white rounded-lg shadow-md p-6 space-y-4">
+              <h3 className="text-center font-urbanist text-black text-xl font-semibold border-b border-PRIMARY pb-2">
                 Suggestions
               </h3>
               <SummarySideBar />

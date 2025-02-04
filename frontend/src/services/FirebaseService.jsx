@@ -1,68 +1,62 @@
-import { collection, doc, getDocs, query, where, writeBatch, orderBy, serverTimestamp } from "firebase/firestore";
+import { collection, doc, addDoc, getDocs, query, where, writeBatch, orderBy, serverTimestamp, arrayUnion } from "firebase/firestore";
 import { db } from "@/config/firebase";
 
-export const saveChats = async (user, judgementId, newMessages, detectBias) => {
-    if (!user?.uid) {
-      console.error("User not authenticated");
-      return;
-    }
+export const saveChats = async (user, judgementId, newMessages, detectedBias = [], detectedNoise =[]) => {
+  if (!user?.uid || !judgementId) {
+    console.error("Invalid user or judgementId.");
+    return;
+  }
 
-    if (!judgementId) {
-      console.error("Judgement ID is missing");
-      return;
-    }
+  try {
+    const chatCollection = collection(db, "chat");
 
-    try {
-      const batch = writeBatch(db);
-      console.log("Starting batch operation...");
-
-      newMessages.forEach((msg, index) => {
-        console.log(`Processing message #${index}:`, msg);
-        const chatRef = doc(collection(db, "chat"));
-        batch.set(chatRef, {
-          judgementId,
-          messages: msg,
-          createdAt: serverTimestamp(),
-          userId: user.uid,
-        });
+    for (const msg of newMessages) {
+      await addDoc(chatCollection, {
+        judgementId, 
+        userId: user.uid,
+        text: msg.text,
+        sender: msg.sender || user.name, 
+        detectedBias : detectedBias,
+        detectedNoise : detectedNoise,
+        createdAt: serverTimestamp(), 
       });
-
-      const judgeRef = doc(db, "judgement", judgementId);
-      batch.update(judgeRef, { hasMessages: true });
-
-      const detectedBiases = detectBias();
-      if (detectedBiases && detectedBiases.length > 0) {
-        const judgeRef = doc(db, "judgment", judgementId);
-        batch.update(judgeRef, {
-          biases: Array.from(new Set(detectedBiases)),
-          updatedAt: serverTimestamp(),
-        });
-      }
-
-      console.log("Committing batch...");
-      await batch.commit();
-      console.log("Batch commit successful");
-    } catch (error) {
-      console.error("Error saving chat:", error);
-      alert("Failed to save chat.");
     }
-  };
+  } catch (error) {
+    console.error("Failed to save chat:", error);
+  }
+};
+
 
 export const fetchChats = async (user, judgementId) => {
-    if (!user?.uid || !judgementId) {
-        console.error("Invalid user or judgementId.");
-        return []; 
-      }
-          try {
-            const chatsQuery = query(
-              collection(db, "chat"),
-              where("judgementId", "==", judgementId),
-              orderBy("createdAt", "asc")
-            );
-            const querySnapshot = await getDocs(chatsQuery);
-  
-            return querySnapshot.docs.map(doc => doc.data().messages || []).flat();
-          } catch (error) {
-            console.log(error);
-          }
+  if (!user?.uid || !judgementId) {
+    console.error("Invalid user or judgementId.");
+    return [];
+  }
+
+  try {
+    const chatQuery = query(
+      collection(db, "chat"),
+      where("judgementId", "==", judgementId),
+      orderBy("createdAt", "asc")
+    );
+
+    const chatSnapshot = await getDocs(chatQuery);
+
+    const messages = chatSnapshot.docs.map((doc) => {
+      const chatData = doc.data();
+      return {
+        id: doc.id,
+        text: chatData.text || "",
+        sender: chatData.sender || "Unknown",
+        createdAt: chatData.createdAt ? chatData.createdAt.toDate() : new Date(),
       };
+    });
+
+    console.log("Fetched Messages:", messages); 
+    return messages;
+
+  } catch (error) {
+    console.error("Error fetching chats:", error);
+    return [];
+  }
+};

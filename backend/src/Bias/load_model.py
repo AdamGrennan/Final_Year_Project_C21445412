@@ -1,28 +1,17 @@
 from transformers import BertForSequenceClassification, BertTokenizer
 from src.Bias.data_load import load_data
-import torch
+import pandas as pd
 
-#Thiss class loads my saved models
 def load_bias_model():
-    #Retreive saved model and tokenizer
-    model = BertForSequenceClassification.from_pretrained("./models/saved_model")
-    tokenizer = BertTokenizer.from_pretrained("./models/saved_tokenizer")
-        
-    #Load my dataset
-    bias_labels = load_data('./data/bias_set.csv', return_labels_only=True)
+    # Load model and tokenizer
+    model = BertForSequenceClassification.from_pretrained("./models/sonus_model")
+    tokenizer = BertTokenizer.from_pretrained("./models/sonus_tokenizer")
 
-    statement = "This is a test."
-    #Prepare statement as a token for BERT to process
-    inputs = tokenizer(statement, return_tensors='pt', padding=True, truncation=True, max_length=128)
-    print(f"Inputs: {inputs}")
+    # Load dataset to retrieve bias labels
+    data = pd.read_csv("./data/dataset.csv", engine="python")  
 
-    #No grad saves memory running model in eval mode
-    with torch.no_grad():
-        #Inputs id is sentence in tokenized format
-        #Attention mask tells model what tokens r real and what r padded
-        outputs = model(input_ids=inputs['input_ids'], attention_mask=inputs['attention_mask'])
+    # Extract bias labels from columsn
+    bias_labels = data.columns[1:].tolist()
 
-    #Raw scores for each bias and how it applies to statement
-    print(f"Logits: {outputs.logits}")
-
+    print(f"Bias Labels: {bias_labels}") 
     return model, tokenizer, bias_labels

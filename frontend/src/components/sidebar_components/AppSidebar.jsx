@@ -41,7 +41,7 @@ const data = {
 
 export function AppSidebar({ ...props }) {
   const { userInfo } = useUser();
-  const {setDetectedBias, setDetectedNoise} = useDecision();
+  const { setDetectedBias, setDetectedNoise } = useDecision();
   const router = useRouter();
 
   const logOut = async (e) => {
@@ -58,10 +58,18 @@ export function AppSidebar({ ...props }) {
   };
 
   return (
-    <Sidebar {...props} className="bg-gradient-to-br from-PRIMARY via-MERGE to-SECONDARY from-30% via-50% to-70% text-white">
-      <SidebarHeader>
-       SONUS
+    <Sidebar {...props} className="w-64 bg-gradient-to-br from-PRIMARY via-MERGE to-SECONDARY from-30% via-50% to-70% text-white">
+      <SidebarHeader className="flex flex-col items-center justify-center py-2">
+        <Image
+          src="/images/SONUS_LOGO_NO_TEXT.png"
+          alt="Sonus Logo"
+          width={40}
+          height={40}
+          className="mb-2"
+        />
+        <span className="font-urbanist text-lg font-semibold">SONUS</span>
       </SidebarHeader>
+
       <SidebarContent >
         {data.navMain.map((item) => (
           <SidebarGroup key={item.title}>
@@ -71,36 +79,36 @@ export function AppSidebar({ ...props }) {
                 {item.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     {item.title === "Home" ? (
-                      <SidebarMenuButton asChild isActive={item.isActive} className="font-urbanist text-white flex items-center gap-2 hover:bg-indigo-700 hover:no-underline">
+                      <SidebarMenuButton asChild isActive={item.isActive} className="font-urbanist text-white flex items-center gap-2 hover:bg-MERGE hover:no-underline">
                         <a href="#" onClick={(e) => { e.preventDefault(); router.push("/Main"); }}>
                           <RiHomeFill className="text-white mr-2" />
                           {item.title}
                         </a>
                       </SidebarMenuButton>
                     ) : item.title === "Log Out" ? (
-                      <SidebarMenuButton asChild isActive={item.isActive} className="font-urbanist text-white hover:bg-indigo-700 hover:no-underline">
+                      <SidebarMenuButton asChild isActive={item.isActive} className="font-urbanist text-white hover:bg-MERGE hover:no-underline">
                         <a href="#" onClick={logOut}>
                           <IoExitOutline className="text-white mr-2" />
                           {item.title}
                         </a>
                       </SidebarMenuButton>
                     ) : item.title === "New" ? (
-                      <SidebarMenuButton asChild isActive={item.isActive} className="font-urbanist text-white hover:bg-indigo-700 hover:no-underline">
+                      <SidebarMenuButton asChild isActive={item.isActive} className="font-urbanist text-white hover:bg-MERGE hover:no-underline">
                         <a href="#" onClick={(e) => { e.preventDefault(); router.push("/Judgement_Form"); }}>
                           <MdBubbleChart className="text-white mr-2" />
                           {item.title}
                         </a>
                       </SidebarMenuButton>
-                    ) :  item.title === "Dashboard" ? (
-                      <SidebarMenuButton asChild isActive={item.isActive} className="font-urbanist text-white hover:bg-indigo-700 hover:no-underline">
+                    ) : item.title === "Dashboard" ? (
+                      <SidebarMenuButton asChild isActive={item.isActive} className="font-urbanist text-white hover:bg-MERGE hover:no-underline">
                         <a href="#">
                           <MdDashboard className="text-white mr-2" />
                           {item.title}
                         </a>
                       </SidebarMenuButton>
-                    ) :  item.title === "Account" ? (
-                      <SidebarMenuButton asChild isActive={item.isActive} className="font-urbanist text-white hover:bg-indigo-700 hover:no-underline">
-                      <a href="#" onClick={(e) => { e.preventDefault(); router.push("/Profile"); }}>
+                    ) : item.title === "Account" ? (
+                      <SidebarMenuButton asChild isActive={item.isActive} className="font-urbanist text-white hover:bg-MERGE hover:no-underline">
+                        <a href="#" onClick={(e) => { e.preventDefault(); router.push("/Profile"); }}>
                           <FaUser className="text-white mr-2" />
                           {item.title}
                         </a>
