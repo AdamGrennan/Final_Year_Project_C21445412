@@ -13,7 +13,7 @@ import { useDecision } from '@/context/DecisionContext';
 
 export default function Page() {
   const router = useRouter();
-  const { setDetectedNoise , setDetectedBias, setNoiseSources, setBiasSources } = useDecision();
+  const { setDetectedNoise , setDetectedBias, setNoiseSources, setBiasSources, setAdvice } = useDecision();
   const [isModalOpen, setModalOpen] = useState(false);
   const welcomeMessage = (
     <>
@@ -35,7 +35,7 @@ export default function Page() {
       setDetectedNoise([]);
       setNoiseSources([]);
       setBiasSources([]);
-      
+      setAdvice([]);
     };
   
     resetContext();

@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from 'next/navigation';
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { doc, collection, query, where, getDocs, deleteDoc } from "firebase/firestore";
 import { db } from "@/config/firebase";
 import { useEffect, useState } from "react";
@@ -9,7 +9,6 @@ import { useDecision } from '@/context/DecisionContext';
 import { Button } from '../ui/button';
 import { IoTrashBin } from "react-icons/io5";
 
-
 const JudgementList = () => {
   const router = useRouter();
   const [judgements, setJudgements] = useState([]);
@@ -17,7 +16,7 @@ const JudgementList = () => {
   const [filter, setFilter] = useState(true);
   const { detectedBias, detectedNoise } = useDecision();
 
-    const openDecision = (judgementId, isCompleted) => {
+  const openDecision = (judgementId, isCompleted) => {
     if (isCompleted) {
       router.push(`/Final_Report/${judgementId}?revisited=true`);
     } else {
@@ -28,9 +27,18 @@ const JudgementList = () => {
   const handleDelete = (judgementId) => {
     try {
       setTimeout(async () => {
+        const chatQuery = query(collection(db, "chat"), where("judgementId", "==", judgementId));
+        const trendQuery = query(collection(db, "trends"), where("judgementId", "==", judgementId));
+        const chatDocs = await getDocs(chatQuery);
+        const trendDocs = await getDocs(trendQuery);
+
+        const deleteChats = chatDocs.docs.map((chatDoc) => deleteDoc(chatDoc.ref));
+        const deleteTrends = trendDocs.docs.map((trendDoc) => deleteDoc(trendDoc.ref));
+        await Promise.all(deleteChats, deleteTrends);
+    
         const judgeRef = doc(db, "judgement", judgementId);
         await deleteDoc(judgeRef);
-        console.log("Judgement deleted successfully.");
+        console.log("Decision deleted successfully.");
         fetchJudgements();
       }, 700);
     } catch (error) {
@@ -38,14 +46,11 @@ const JudgementList = () => {
     }
   };
 
-
   useEffect(() => {
     fetchJudgements();
   }, [user, filter]);
 
   const fetchJudgements = async () => {
-    console.log("Bias Context", detectedBias);
-    console.log("Noise Context", detectedNoise);
     if (user && user.uid) {
       try {
         console.log("Fetching judgements with filter:", filter, "for userId:", user.uid);
@@ -72,18 +77,19 @@ const JudgementList = () => {
       <div className="flex items-center justify-start mb-4">
         <Button
           onClick={() => setFilter(true)}
-          className={`px-4 py-2 mr-2 font-urbanist transform transition-transform duration-300 active:scale-[1.1] ${filter === true ? "bg-PRIMARY text-white" : "bg-gray-200 text-black"}`}
+          className={`px-6 py-2 text-sm font-urbanist transition duration-300 rounded-lg ${filter === true ? "bg-PRIMARY text-white" : "bg-gray-200 text-black"}`}
         >
           Completed
         </Button>
         <Button
           onClick={() => setFilter(false)}
-          className={`px-4 py-2 font-urbanist transform transition-transform duration-300 active:scale-[1.1] ${filter === false ? "bg-PRIMARY text-white" : "bg-gray-200 text-black"}`}
+          className={`px-6 py-2 text-sm font-urbanist transition duration-300 rounded-lg ${filter === false ? "bg-PRIMARY text-white" : "bg-gray-200 text-black"}`}
         >
           Not Completed
         </Button>
       </div>
-      <ScrollArea className="h-[325px] w-[550px] rounded-md border bg-GRAAY">
+      <ScrollArea className="h-[350px] w-[550px] rounded-md border bg-GRAAY">
+
         <div className="flex flex-col items-center text-gray-500">
           {judgements.length === 0 ? (
             <div className="flex flex-col items-center">
@@ -98,12 +104,12 @@ const JudgementList = () => {
           ) : (
             <div className="flex flex-col">
               {judgements.map((judgement) => (
-                
+
                 <div
                   key={judgement.id}
                   className="flex items-center justify-start mt-4"
                 >
-                  <Button
+                  <div
                     onClick={() => openDecision(judgement.id, judgement.isCompleted)}
                     className="w-[450px] text-left bg-white text-black rounded-md font-urbanist h-auto "
                   >
@@ -131,16 +137,16 @@ const JudgementList = () => {
                     >
                       <IoTrashBin className="text-PRIMARY transform transition-transform duration-300 group-active:scale-[1.7]" />
                     </Button>
-                  </Button>
+                  </div>
                 </div>
               ))}
             </div>
           )}
         </div>
+        <ScrollBar className="bg-SECONDARY" />
       </ScrollArea>
 
     </div>
-
 
   );
 }

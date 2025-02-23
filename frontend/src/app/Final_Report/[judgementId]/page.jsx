@@ -1,21 +1,15 @@
 "use client";
-import { useRouter } from "next/navigation";
 import Snapshot from "@/components/report_components/chart-components/Snapshot";
 import SummarySideBar from "@/components/report_components/SummarySidebar";
-import Trends from "@/components/report_components/Trends";
+import Trends from "@/components/report_components/trend-components/Trends";
 import { useDecision } from '@/context/DecisionContext';
-import { useJudgment } from "@/context/JudgementContext";
-import { Button } from "@/components/ui/button";
-import { useParams } from "next/navigation";
 import { useUser } from '@/context/UserContext';
-import { useEffect, useRef } from "react";
-import { doc, updateDoc, serverTimestamp, getDoc } from "firebase/firestore";
-import { db } from "@/config/firebase";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Pagination, } from 'swiper/modules';
-import PrevButton from "@/components/report_components/swiper_components/PreviousButton";
-import NextButton from "@/components/report_components/swiper_components/NextButton";
-import TrendCharts from "@/components/report_components/chart-components/TrendCharts";
+import InteractCard from "@/components/report_components/InteractCard";
+import SwiperNavigation from "@/components/report_components/swiper_components/SwiperNavigation";
+import useDecisionData from "@/hooks/useDecisionData";
+import { useParams } from "next/navigation";
 
 import { Swiper, SwiperSlide } from 'swiper/react';
 
@@ -24,83 +18,25 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/scrollbar';
 import BiasCard from "@/components/report_components/BiasCard";
-import NoiseCard from "@/components/report_components/NoiseCard";
-import { useSearchParams } from "next/navigation";
 
 export default function Page() {
-  const { detectBias, detectNoise, detectedBias,
+  useDecisionData();
+
+  const { detectedBias,
     detectedNoise, setDetectedNoise, setDetectedBias,
-  biasSources, noiseSources } = useDecision();
-  const [similiarDecisions, setSimilarDecisions] = useState([]);
-  const router = useRouter();
+    biasSources, noiseSources,
+    setBiasSources, setNoiseSources, advice } = useDecision();
+
+  const { judgementId } = useParams();
   const { user } = useUser();
   const swiperRef = useRef(null);
-  const searchParams = useSearchParams();
-  const isRevisited = searchParams.get("revisited") === "true";
-  const { judgementId } = useParams();
-
-  const openHome = () => {
-    setTimeout(async () => {
-      router.push('/Main');
-    }, 700);
-  };
-
-  useEffect(() => {
-    const handleDecisionData = async () => {
-      if (isRevisited) {
-        console.log("db:", db);
-        console.log("judgementId:", judgementId);
-
-        try {
-          const docRef = doc(db, "judgement", judgementId);
-          const docSnap = await getDoc(docRef);
-          if (docSnap.exists()) {
-            const decisionData = docSnap.data();
-
-            const detectedBiasesArray = Array.isArray(decisionData.detectedBias)
-              ? Array.from(new Set(decisionData.detectedBias))
-              : [];
-            const detectedNoiseArray = Array.isArray(decisionData.detectedNoise)
-              ? Array.from(new Set(decisionData.detectedNoise))
-              : [];
-
-            console.log("Unique Biases:", detectedBiasesArray);
-            console.log("Unique Noises:", detectedNoiseArray);
-
-            setDetectedBias(detectedBiasesArray);
-            setDetectedNoise(detectedNoiseArray);
-
-          } else {
-            console.error("No such document!");
-          }
-        } catch (error) {
-          console.error("Error fetching revisited decision:", error);
-        }
-      } else {
-
-        await finalReport();
-      }
-    };
-
-    handleDecisionData();
-  }, [isRevisited, judgementId]);
-
-  const finalReport = async () => {
-    const detectedBiasesArray = Array.from(new Set(detectedBias));
-    const detectedNoiseArray = Array.from(new Set(detectedNoise));
-
-    const judgeRef = doc(db, "judgement", judgementId);
-    await updateDoc(judgeRef, {
-      detectedBias: detectedBiasesArray,
-      detectedNoise: detectedNoiseArray,
-      updatedAt: serverTimestamp(),
-    });
-  };
+  const [isLastSlide, setIsLastSlide] = useState(false);
 
   return (
     <div className="container">
       <Swiper
         onSwiper={(swiper) => (swiperRef.current = swiper)}
+        onSlideChange={(swiper) => setIsLastSlide(swiper.isEnd)}
         modules={[Pagination]}
         spaceBetween={50}
         slidesPerView={1}
@@ -115,24 +51,22 @@ export default function Page() {
               Decision Analysis
             </h2>
           </div>
-          <div className="h-auto flex flex-col md:flex-row items-start justify-between p-8 space-y-8 md:space-y-0 md:space-x-8 bg-gray-50 ">
-            <div className="w-full md:w-1/3 h-[350px] bg-white rounded-lg shadow-md p-6 space-y-4">
+          <div className="h-auto flex flex-col md:flex-row items-start justify-between p-8 space-y-8 md:space-y-0 md:space-x-8 bg-white">
+            <div className="w-full md:w-2/3 h-[375px] max-h-[375px] bg-white rounded-lg shadow-md p-6 space-y-4 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-SECONDARY scrollbar-track-GRAAY">
               <h3 className="text-center font-urbanist text-black text-base font-semibold border-b border-PRIMARY pb-2">
-                Detected Bias
+                Detected Noise & Bias
               </h3>
-              <BiasCard bias={detectedBias} biasSources={biasSources}/>
+              <BiasCard bias={detectedBias} 
+              noise={detectedNoise} 
+              biasSources={biasSources} 
+              noiseSources={noiseSources}
+              advice={advice}/>
             </div>
-            <div className="w-full md:w-1/3  h-[350px] bg-white rounded-lg shadow-md p-6 space-y-4">
-              <h3 className="text-center font-urbanist text-black text-base font-semibold border-b border-PRIMARY pb-2">
-                Detected Noise
-              </h3>
-              <NoiseCard noise={detectedNoise} noiseSources={noiseSources}/>
-            </div>
-            <div className="w-full md:w-1/3 h-[350px] bg-white rounded-lg shadow-md p-6">
+            <div className="w-full md:w-1/3 h-[375px] bg-white rounded-lg shadow-md p-6">
               <h3 className="text-center font-urbanist text-black text-base font-semibold border-b border-PRIMARY pb-2">
                 Insight Graphs
               </h3>
-              <Snapshot bias={detectedBias} noise={detectedNoise}/>
+              <Snapshot bias={detectedBias} noise={detectedNoise} />
             </div>
           </div>
         </SwiperSlide>
@@ -142,18 +76,12 @@ export default function Page() {
             <h2 className="font-urbanist text-2xl font-semibold text-PRIMARY">
               Trends and Patterns
             </h2>
-            <div className="h-auto flex flex-col md:flex-row items-start justify-between p-8 space-y-8 md:space-y-0 md:space-x-8 bg-gray-50 rounded-lg shadow-lg">
-              <div className="w-full md:w-1/3 h-[400px] bg-white rounded-lg shadow-md p-6 space-y-4">
+            <div className="h-auto flex flex-col md:flex-row items-start justify-between p-8 space-y-8 md:space-y-0 md:space-x-8 bg-white">
+              <div className="w-full md:w-3/3 h-[375px] bg-white rounded-lg shadow-md p-6 space-y-4 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-SECONDARY scrollbar-track-GRAAY">
                 <h3 className="font-urbanist text-black text-base font-semibold border-b border-PRIMARY pb-2">
                   Key Trends
                 </h3>
-                <Trends similiarDecisions={similiarDecisions} user={user} bias={detectedBias} noise={detectedNoise} />
-              </div>
-              <div className="w-full md:w-2/3  h-[400px] bg-white rounded-lg shadow-md p-6 space-y-4">
-                <h3 className="font-urbanist text-black text-base font-semibold border-b border-PRIMARY pb-2">
-                  Charts
-                </h3>
-                <TrendCharts bias={detectedBias} noise={detectedNoise}/>
+                <Trends user={user} jid={judgementId} bias={detectedBias} noise={detectedNoise} />
               </div>
             </div>
           </div>
@@ -161,29 +89,27 @@ export default function Page() {
 
         <SwiperSlide>
           <div className="w-full text-center">
+          <h2 className="font-urbanist text-2xl font-semibold text-PRIMARY">
+              Trends and Patterns
+            </h2>
           </div>
           <div className="flex flex-col md:flex-row items-start justify-between w-full space-y-6 md:space-y-0 md:space-x-6 mt-8">
-            <div className="w-full md:w-full h-[350px] bg-white rounded-lg shadow-md p-6 space-y-4">
+            <div className="w-full md:w-1/2 h-[375px] bg-white rounded-lg shadow-md p-6 space-y-4">
               <h3 className="text-center font-urbanist text-black text-xl font-semibold border-b border-PRIMARY pb-2">
-                Suggestions
+              Reflections & Growth
               </h3>
               <SummarySideBar />
             </div>
-          </div>
-          <div className="flex justify-center mt-8">
-            <Button
-              onClick={openHome}
-              className="bg-PRIMARY text-white font-urbanist py-2 px-6 rounded-md transform transition-transform duration-300 active:scale-[1.1]"
-            >
-              Finish
-            </Button>
+            <div className="w-full md:w-1/2 h-[375px] bg-white rounded-lg shadow-md p-6 space-y-4">
+              <h3 className="text-center font-urbanist text-black text-xl font-semibold border-b border-PRIMARY pb-2">
+                Your Feedback
+              </h3>
+              <InteractCard/>
+            </div>
           </div>
         </SwiperSlide>
       </Swiper>
-      <div className="w-full flex justify-between items-center absolute top-20 px-4 z-10">
-        <PrevButton swiperRef={swiperRef} />
-        <NextButton swiperRef={swiperRef} />
-      </div>
+      <SwiperNavigation swiperRef={swiperRef} isLastSlide={isLastSlide} />
     </div>
 
   );

@@ -7,9 +7,10 @@ import { fetchChats, saveChats } from "@/services/FirebaseService";
 import MessageList from "./MessageList";
 import MessageSender from "./MessageSender";
 import { useJudgment } from "@/context/JudgementContext";
-import { openingMessage, fetchBERTResponse, fetchGPTResponse, fetchLevelNoise, fetchPatternNoise, fetchSource } from "@/services/ApiService";
+import { openingMessage, fetchBERTResponse, fetchGPTResponse, fetchLevelNoise, fetchPatternNoise, fetchSource, fetchNewsAPI } from "@/services/ApiService";
 
-const Chat = ({ judgementId }) => {
+const Chat = ({ judgementId, setFinishButtonDisable }) => {
+  const [similiarDecisions, setSimilarDecisions] = useState([]);
   const { user } = useUser();
   const { judgmentData } = useJudgment();
   const { detectBias, detectNoise } = useDecision();
@@ -33,7 +34,7 @@ const Chat = ({ judgementId }) => {
           };
 
           setMessages([openingMessage]);
-          saveChats(user, judgementId, [openingMessage]);
+          saveChats(user, judgementId, [openingMessage], [], []);
         }
       } catch (error) {
         console.log(error);
@@ -41,12 +42,17 @@ const Chat = ({ judgementId }) => {
     }
   };
 
+  useEffect(() => {
+    setFinishButtonDisable(buttonDisable);
+  }, [buttonDisable, setFinishButtonDisable]);
+
   const onSend = async (option) => {
     setButtonDisable(true);
+    setFinishButtonDisable(true);
     const messageContent = option || input.trim();
     if (!messageContent) return;
 
-    const newMessage = { text: messageContent, sender: user.name, createdAt: new Date() };
+    const newMessage = { text: messageContent, sender: "user", createdAt: new Date() };
     setMessages((prev) => [...prev, newMessage]);
     setInput("");
 
@@ -54,37 +60,59 @@ const Chat = ({ judgementId }) => {
       let detectedBias = [];
       let detectedNoise = [];
 
-      await saveChats(user, judgementId, [newMessage]);
+      //await saveChats(user, judgementId, [newMessage], [], []);
+
       const bertData = await fetchBERTResponse(messageContent);
-
-      const summary = await fetchSource(messageContent, bertData.predictions);
-
       if (bertData.predictions) {
-        bertData.predictions.forEach((bias) => {
+        detectedBias = bertData.predictions.filter((bias) => bias !== "Neutral" && bias !== "OccasionNoise");
+        console.log("Detected Bias", detectedBias)
+      }
 
-          if (bias !== "Neutral" && bias !== "OccasionNoise") {
-            detectBias(bias, summary);
-            detectedBias.push(bias);
+      const levelNoiseData = await fetchLevelNoise(messageContent);
+      if (levelNoiseData) {
+        const { confidence_scores } = levelNoiseData;
+        if (confidence_scores["harsh"] > confidence_scores["neutral"]) {
+          detectNoise("Level Noise", "Test");
+          detectedNoise.push("Level Noise");
+        }
+      }
+
+      const source = await fetchSource(messageContent, detectedBias, detectedNoise);
+      if (source.biasSummary !== "No bias source available.") {
+        detectedBias.forEach((bias) => detectBias(bias, source.biasSummary));
+      }
+      if (detectedNoise.length > 0 && source.noiseSummary !== "No noise source available.") {
+        detectedNoise.forEach((noise) => detectNoise(noise, source.noiseSummary));
+      }
+
+      console.log("Sending Pattern Noise Request with:", { detectedBias, detectedNoise });
+      const patternNoiseData = await fetchPatternNoise(
+        user.uid, 
+        judgementId, 
+        judgmentData.theme,
+        messageContent,
+        detectedBias,
+        detectedNoise
+      );
+
+      if (patternNoiseData) {
+        const { similarDecisions, patternNoiseSources } = patternNoiseData;
+        if (similarDecisions && similarDecisions.length > 0) {
+          console.log("Pattern Noise detected: Similar past decisions found.", similarDecisions);
+          console.log("Pattern Noise Sources:", patternNoiseSources);
+          if (patternNoiseSources && patternNoiseSources.length > 0) {
+            const patternNoiseSource = patternNoiseSources[0].source;
+            detectNoise("Pattern Noise", patternNoiseSource);
+            detectedNoise.push("Pattern Noise");
           }
-          if (bias === "OccasionNoise") {
-            detectNoise("Occasion Noise", summary);
-            detectedNoise.push("Occasion Noise");
-          }
-        });
-
-        const bertResponse = {
-          text: `Detected Bias: ${bertData.predictions.join(", ")}`,
-          sender: "BERT",
-        };
-
-        setMessages((prev) => [...prev, bertResponse]);
-        saveChats(user, judgementId, [bertResponse], detectedBias, detectedNoise);
-      } else if (bertData.error) {
-        console.error(bertData.error || "ERROR, No response from BERT")
+          setSimilarDecisions(similarDecisions);
+        } else {
+          console.log("No Pattern Noise detected.");
+          setSimilarDecisions([]);
+        }
       }
 
       const gptData = await fetchGPTResponse(messageContent, messages);
-
       if (gptData.bias_feedback) {
         const gptResponse = {
           text: gptData.bias_feedback,
@@ -92,54 +120,34 @@ const Chat = ({ judgementId }) => {
         };
 
         setMessages((prev) => [...prev, gptResponse]);
-        saveChats(user, judgementId, [gptResponse], detectedBias, detectedNoise);
+        await saveChats(user, judgementId, [gptResponse], detectedBias, detectedNoise);
       } else if (gptData.error) {
-        console.error(gptData.error || "ERROR, No response from GPT")
+        console.error(gptData.error || "ERROR, No response from GPT");
       }
 
-      const levelNoiseData = await fetchLevelNoise(messageContent);
-      if (levelNoiseData) {
-        const { confidence_scores } = levelNoiseData;
-        console.log("Level Noise Confidence Scores:", confidence_scores);
+      const newsAPI = await fetchNewsAPI(messageContent);
+      if (newsAPI?.most_similar_article) {
+        console.log("Possible Recency Bias detected:", newsAPI.most_similar_article.title);
 
-        const neutralScore = confidence_scores["neutral"];
-        const harshScore = confidence_scores["harsh"];
+        const recencySource = `It seems you may have read [${newsAPI.most_similar_article.title}], which could be affecting your judgment.`;
 
-        if (harshScore > neutralScore) {
-          detectNoise("Level Noise", "Harsh decision making detected");
-          detectedNoise.push("Level Noise");
-        }
-
+        detectBias("Recency Bias", recencySource);
+      } else {
+        console.log("No Recency Bias detected");
       }
 
-      const patternNoiseData = await fetchPatternNoise(
-        user.uid,
-        judgementId,
-        judgmentData.theme,
-      );
-  
-      if (patternNoiseData) {
-        const { similarDecisions } = patternNoiseData;
-  
-        if (similarDecisions && similarDecisions.length > 0) {
-          console.log("Pattern Noise detected: Similar past decisions found.", similarDecisions);
-          detectNoise("Pattern Noise");
-          setSimilarDecisions(similarDecisions);
-        } else {
-          console.log("No Pattern Noise detected.");
-          setSimilarDecisions([]);
-        }
-      }
       await saveChats(user, judgementId, [{ ...newMessage }], detectedBias, detectedNoise);
 
     } catch (error) {
-      console.error("ERROR,Cant connect to BERT OR GPT", error.message || error)
+      console.error("ERROR, Can't connect to BERT OR GPT", error.message || error);
     }
+
     setButtonDisable(false);
+    setFinishButtonDisable(false);
   };
 
   useEffect(() => {
-    const fetchPreviosChats = async () => {
+    const fetchPreviousChats = async () => {
       if (!user?.uid) return;
 
       setMessages([]);
@@ -153,16 +161,14 @@ const Chat = ({ judgementId }) => {
       }
     };
 
-    fetchPreviosChats();
+    fetchPreviousChats();
   }, [judgementId]);
-
 
   return (
     <div className="h-[425px]">
-      <MessageList messages={messages} onSend={onSend} />
+      <MessageList messages={messages} />
       <MessageSender input={input} setInput={setInput} onSend={onSend} buttonDisable={buttonDisable} />
     </div>
-
   );
 };
 

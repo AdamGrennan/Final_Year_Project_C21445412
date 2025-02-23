@@ -13,31 +13,31 @@ import {
 import { Card } from "../../ui/card";
 import { CardContent } from "../../ui/card";
 
-const Snapshot = ({ bias, noise}) => {
+const Snapshot = ({ bias, noise }) => {
 
     return (
         <div className="w-[250px]">
 
-            <Carousel className="w-full max-w-xs">
+            <Carousel className="w-full max-w-m">
                 <CarouselContent>
-                        <CarouselItem>
-                            <div className="p-1">
-                                <Card>
-                                    <CardContent className="flex aspect-square items-center justify-center p-6">
+                    <CarouselItem>
+                        <div className="p-1">
+                            <Card className="shadow-none border-none">
+                                <CardContent className="flex aspect-square items-center justify-center p-6">
                                     <BiasDoughnutChart bias={bias} />
-                                    </CardContent>
-                                </Card>
-                            </div>
-                        </CarouselItem>
-                        <CarouselItem>
-                            <div className="p-1">
-                                <Card>
-                                    <CardContent className="flex aspect-square items-center justify-center p-6">
-                                    <NoiseDoughnutChart noise={noise}/>
-                                    </CardContent>
-                                </Card>
-                            </div>
-                        </CarouselItem>
+                                </CardContent>
+                            </Card>
+                        </div>
+                    </CarouselItem>
+                    <CarouselItem>
+                        <div className="p-1">
+                            <Card className="shadow-none border-none">
+                                <CardContent className="flex aspect-square items-center justify-center p-6">
+                                    <NoiseDoughnutChart noise={noise} />
+                                </CardContent>
+                            </Card>
+                        </div>
+                    </CarouselItem>
                 </CarouselContent>
                 <div className="absolute bottom-[90%] -translate-y-1/2 w-full flex justify-between px-12">
                     <CarouselPrevious className="bg-gray-300 hover:bg-gray-400 text-black py-2 px-4 rounded-full transition relative mr-8" />

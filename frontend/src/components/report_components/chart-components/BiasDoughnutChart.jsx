@@ -1,5 +1,4 @@
 import { Doughnut } from "react-chartjs-2";
-import { useDecision } from "@/context/DecisionContext";
 import {
   Chart as Chart,
   ArcElement,
@@ -13,20 +12,12 @@ Chart.register({
   Legend,
 });
 
-const BiasDoughnutChart = ({ bias }) => {
-
-  const mockBiasCount = {
-    "Overconfidence Bias": 5,
-    "Confirmation Bias": 8,
-    "Anchoring Bias": 3,
-    "Availability Bias": 6,
-  };
+const BiasDoughnutChart = ({ bias = [] }) => {
 
   const biasCounts = bias.reduce((acc, bias) => {
     acc[bias] = (acc[bias] || 0) + 1; 
     return acc;
   }, {});
-
 
   const labels = Object.keys(biasCounts);
   const counts = Object.values(biasCounts);
@@ -38,11 +29,11 @@ const BiasDoughnutChart = ({ bias }) => {
     labels: labels,
     datasets: [
       {
-        label: "Bias Occurrence (%)",
+        label: "Occurrence (%)",
         data: percentages,
         backgroundColor: [
-          "rgb(255, 99, 132)",
-          "rgb(54, 162, 235)",
+          "rgb(0, 240, 181)",
+          "rgb(246, 16, 103)",
           "rgb(255, 205, 86)",
           "rgb(153, 102, 255)",
         ],
@@ -52,7 +43,7 @@ const BiasDoughnutChart = ({ bias }) => {
   };
 
   if (bias.length === 0) {
-    return <p>No data to display.</p>;
+    return <p className="text-center font-urbanist font-light">No Bias Data To Display.</p>;
   }
 
   return <Doughnut data={data} />;

@@ -48,7 +48,7 @@ export const fetchLevelNoise = async (input) => {
   return data;
 }
 
-export const fetchPatternNoise = async (userId, judgmentId, title, description, theme, breakdown, detectedBias, detectedNoise) => {
+export const fetchPatternNoise = async (userId, judgmentId, theme, message, detectedBias, detectedNoise) => {
   const response = await fetch('http://127.0.0.1:5000/pattern_noise', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -56,6 +56,9 @@ export const fetchPatternNoise = async (userId, judgmentId, title, description, 
       user_id: userId,
       judgmentId: judgmentId,
       theme: theme,
+      message: message,
+      detectedBias: detectedBias,
+      detectedNoise: detectedNoise,
     }),
   });
 
@@ -75,7 +78,7 @@ export const openingMessage = async (judgmentData, name) => {
         title: judgmentData?.title || "No Title Provided",
         name: name || "No Name Provided",
         description: judgmentData?.description || "No Description Provided",
-        template: judgmentData?.template || "No Template",
+        theme: judgmentData?.theme || "No Template",
         input: "",
         context: [],
       }),
@@ -101,20 +104,65 @@ export const openingMessage = async (judgmentData, name) => {
   }
 };
 
-export const fetchSource = async (messageContent, detectedBias) => {
+export const fetchSource = async (messageContent, detectedBias, detectedNoise) => {
   try {
     const response = await fetch("http://127.0.0.1:5000/source", {
 
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: messageContent, biases: detectedBias }),
+      body: JSON.stringify({ message: messageContent, 
+        detectedBias: detectedBias,
+        detectedNoise: detectedNoise }),
     });
 
     const data = await response.json();
-    console.log("SUMMARY:", data);
-    return data.summary || "Unable to detect source.";
+
+    return {
+      biasSummary: data.bias_summary || "No bias source available.",
+      noiseSummary: data.noise_summary || "No noise source available."
+    };
   } catch (error) {
-    console.error("Error summarizing message:", error);
-    return "Error generating summary.";
+    return {
+      biasSummary: "Error generating bias summary.",
+      noiseSummary: "Error generating noise summary."
+    };
+  }
+};
+
+export const fetchAdvice = async (title, messageContent, detectedBias, detectedNoise) => {
+  try {
+    const response = await fetch("http://127.0.0.1:5000/advice", {
+
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+        title: title,
+        messages: messageContent, 
+        detectedBias: detectedBias,
+        detectedNoise: detectedNoise }),
+    });
+
+    const data = await response.json();
+    console.log("ADVICE:", data);
+    return data;
+  } catch (error) {
+    return "Error generating advice.";
+  }
+};
+
+export const fetchNewsAPI = async (messageContent) => {
+  try {
+    const response = await fetch("http://127.0.0.1:5000/news_api", {
+
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ input: messageContent}),
+    });
+
+    const data = await response.json();
+    console.log("NEWS API:", data);
+    return data;
+  } catch (error) {
+    return "Error generating news articles.";
   }
 };

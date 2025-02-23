@@ -24,7 +24,7 @@ export function RegisterForm() {
   const [name, setName] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [emailError, setEmailError] = useState('');
-  const { userInfo } = useUser();
+  const { setUser } = useUser();
   const router = useRouter();
 
   const handleKeyPress = (event) => {
@@ -64,7 +64,7 @@ export function RegisterForm() {
         }).catch((error) => {
           console.log("Error writing document: ", error);
         });
-        userInfo({ name: name, email: email, uid: user.uid });
+        setUser({ name: name, email: email, uid: user.uid });
 
         console.log("User registered:", user.uid);
         router.push('/Main');
@@ -96,7 +96,7 @@ export function RegisterForm() {
               <Input id="email"
                 type="email"
                 placeholder="m@example.com"
-                className="font-urbanist"
+                className="font-urbanist focus:border-SECONDARY focus:ring-SECONDARY focus:outline-none"
                 value={email}
                 onKeyPress={handleKeyPress}
                 onChange={(e) => setEmail(e.target.value)}
@@ -107,6 +107,7 @@ export function RegisterForm() {
               <Label htmlFor="name" className="font-semibold font-urbanist">Name</Label>
               <Input id="name"
                 type="text"
+                className="font-urbanist focus:border-SECONDARY focus:ring-SECONDARY focus:outline-none"
                 value={name}
                 onKeyPress={handleKeyPress}
                 onChange={(e) => setName(e.target.value)}
@@ -119,7 +120,7 @@ export function RegisterForm() {
               <Input
                 id="password"
                 type="password"
-                className="font-urbanist"
+                className="font-urbanist focus:border-SECONDARY focus:ring-SECONDARY focus:outline-none"
                 value={password}
                 onKeyPress={handleKeyPress}
                 onChange={(e) => setPassword(e.target.value)}

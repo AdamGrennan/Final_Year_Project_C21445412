@@ -8,6 +8,7 @@ export const DecisionProvider = ({ children }) => {
     const [detectedNoise, setDetectedNoise] = useState([]);
     const [biasSources, setBiasSources] = useState({});
     const [noiseSources, setNoiseSources] = useState({});
+    const [advice, setAdvice] = useState({});
 
     const formatBias = (bias) => {
         if (typeof bias !== "string") {
@@ -55,7 +56,9 @@ export const DecisionProvider = ({ children }) => {
         biasSources,
         noiseSources,
         setBiasSources,
-        setNoiseSources
+        setNoiseSources,
+        advice,
+        setAdvice
         }}>
             {children}
         </DecisionContext.Provider>

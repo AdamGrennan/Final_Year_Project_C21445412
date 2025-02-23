@@ -1,7 +1,7 @@
-from src.Bias.train import train_model
-from src.Bias.predict import predict_bias
+from train import train_model
+from predict import predict_bias
 import os
-from src.Bias.load_model import load_bias_model
+from load_model import load_bias_model
 
 if __name__ == "__main__":
     
@@ -11,8 +11,6 @@ if __name__ == "__main__":
     else:
         print("Training the model...")
         model, tokenizer, bias_labels = load_bias_model() 
-
-      
     
     print("Type a statement to identify the type of bias (or type 'exit' to quit):")
     while True:

@@ -1,5 +1,5 @@
 from flask import request, jsonify
-from src.Bias.predict import predict_bias
+from bert.predict import predict_bias
 import traceback 
 import numpy as np
 
@@ -7,7 +7,7 @@ def bert_endpoint(model, tokenizer, bias_labels):
     data = request.json
     statement = data.get("input", "")
     if not statement:
-        return jsonify({"ERROR": "No input provided"}), 400
+        return jsonify({"ERROR at BERT": "No input provided"}), 400
 
     try:
         detected_biases = predict_bias(model, tokenizer, statement, bias_labels)

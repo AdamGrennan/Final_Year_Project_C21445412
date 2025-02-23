@@ -84,7 +84,7 @@ export default function ProfilePage() {
       <div className="flex items-center gap-4">
         <Button
           onClick={handleDelete}
-          className="px-4 py-2 bg-PRIMARY font-urbanist text-white rounded"
+          className="px-4 py-2 bg-PRIMARY font-urbanist text-white rounded hover:bg-opacity-80"
         >
           Delete Account
         </Button>

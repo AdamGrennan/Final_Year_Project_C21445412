@@ -26,7 +26,7 @@ export function LoginForm() {
   const [emailError, setEmailError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { userInfo } = useUser();
+  const { setUser } = useUser();
 
   const handleKeyPress = (event) => {
     if (event.key === 'Enter') {
@@ -61,7 +61,7 @@ export function LoginForm() {
           setLoading(true);
           const userData = docSnap.data();
 
-          userInfo({ name: userData.name, email: userData.email, uid: user.uid });
+          setUser({ name: userData.name, email: userData.email, uid: user.uid });
           console.log("User logged in:", user.uid);
           router.push('/Main');
         } else {
@@ -99,7 +99,7 @@ export function LoginForm() {
             <Input id="email" 
             type="email" 
             placeholder="m@example.com" 
-            className="font-urbanist"
+            className="font-urbanist focus:border-SECONDARY focus:ring-SECONDARY focus:outline-none"
             value={email} 
             onKeyPress={handleKeyPress}
             onChange={(e) => setEmail(e.target.value)}
@@ -113,6 +113,7 @@ export function LoginForm() {
             <Input
              id="password" 
             type="password" 
+            className="font-urbanist focus:border-SECONDARY focus:ring-SECONDARY focus:outline-none"
             value={password} 
             onKeyPress={handleKeyPress}
             onChange={(e) => setPassword(e.target.value)} 

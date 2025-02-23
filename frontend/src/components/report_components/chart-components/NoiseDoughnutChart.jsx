@@ -1,5 +1,4 @@
 import { Doughnut } from "react-chartjs-2";
-import { useDecision } from "@/context/DecisionContext";
 import {
   Chart as Chart,
   ArcElement,
@@ -14,11 +13,6 @@ Chart.register({
 });
 
 const NoiseDoughnutChart = ({ noise }) => {
-
-  const mockNoiseCount = {
-    "Patten Noise": 1,
-    "Level Noise": 2,
-  };
 
   const noiseCounts = noise.reduce((acc, noise) => {
     acc[noise] = (acc[noise] || 0) + 1; 
@@ -48,7 +42,7 @@ const NoiseDoughnutChart = ({ noise }) => {
   };
 
   if (noise.length === 0) {
-    return <p>No noise data to display.</p>;
+    return <p className="text-center font-urbanist font-light">No Noise Data To Display.</p>;
   }
 
   return <Doughnut data={data} />;

@@ -1,5 +1,4 @@
 from torch.utils.data import Dataset
-import torch
 
 #This class prepares my dataset in a format that BERT can understand
 class BiasDataset(Dataset):

@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState } from 'react';
 const JudgmentContext = createContext();
 
 export const JudgmentProvider = ({ children }) => {
-    const [judgmentData, setJudgmentData] = useState({ title: '', description: '' , template: '' });
+    const [judgmentData, setJudgmentData] = useState({ title: '', description: '' , theme: '' });
 
     const judgmentInfo = (judgmentData) => {
         setJudgmentData(judgmentData); 

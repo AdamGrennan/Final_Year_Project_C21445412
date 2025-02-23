@@ -12,30 +12,16 @@ import {
 import { PiScalesFill } from "react-icons/pi";
 import { MdOutlineShowChart } from "react-icons/md";
 import { FaCloudShowersHeavy } from "react-icons/fa";
+import { MdOutlineCheckCircle } from "react-icons/md";
 import { Button } from "../ui/button";
 
 const NoiseCard = ({ noise, noiseSources }) => {
   const sampleNoise = ["Level Noise", "Occasion Noise"];
 
-  const iconMap = {
-    "Level Noise": <PiScalesFill />,
-    "Pattern Noise": <MdOutlineShowChart />,
-    "Occasion Noise": <FaCloudShowersHeavy />,
-  }
-
-  const detailsMap = {
-    "Level Noise": "Level noise refers to consistent differences in judgment severity between individuals. Some people may consistently be harsher or more lenient in their decisions compared to others, even when evaluating the same situation.",
-
-    "Pattern Noise": "Pattern noise occurs when the same person makes inconsistent judgments in similar cases. This can be due to subconscious preferences, varying interpretations, or personal biases affecting different decisions unpredictably.",
-
-    "Occasion Noise": "Occasion noise happens when external factors such as mood, stress, fatigue, or time of day impact decision-making. For example, someone might make a harsher judgment when they are tired or hungry compared to when they are well-rested."
-  };
-
-
   const detectedNoise = Array.from(new Set(noise));
 
   return (
-    <div className="w-[250px]">
+    <div className="flex-1 overflow-y-auto h-[250px] p-4 scrollbar-thin scrollbar-thumb-SECONDARY scrollbar-track-GRAAY">
       <div>
         {detectedNoise.length > 0 ? (
           detectedNoise.map((noiseItem, index) => (
@@ -45,7 +31,7 @@ const NoiseCard = ({ noise, noiseSources }) => {
             >
               <div className="flex items-center space-x-2 mb-2">
                 <span>{iconMap[noiseItem]}</span>
-                <span className="text-gray-800 font-medium">{noiseItem}</span>
+                <span className="text-gray-800 font-light">{noiseItem}</span>
               </div>
 
               <ul className="list-disc pl-5">
@@ -76,7 +62,10 @@ const NoiseCard = ({ noise, noiseSources }) => {
             </div>
           ))
         ) : (
-          <p>No noise detected</p>
+          <div className="flex flex-col justify-center items-center text-center translate-y-8">
+          <MdOutlineCheckCircle className="w-32 h-32 text-SECONDARY"/>
+          <p className="font-urbanist font-light">No Noise Detected</p>
+          </div>
         )}
       </div>
     </div>

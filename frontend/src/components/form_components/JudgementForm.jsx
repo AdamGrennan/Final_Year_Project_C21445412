@@ -41,6 +41,11 @@ const JudgementForm = () => {
   const form = useForm({
     resolver: zodResolver(formSchema),
     mode: "onChange",
+    defaultValues: {
+      title: "",
+      theme: "",
+      description: "",
+    },
   });
 
   const onSubmit = async (data) => {
@@ -62,9 +67,9 @@ const JudgementForm = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-gray-50 shadow-md rounded-md">
+    <div className="mr-auto p-6 bg-GRAAY shadow-md w-[600px] h-[400px]">
       <FormProvider {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <section>
             <h3 className="text-xl font-semibold font-urbanist text-gray-700">Decision Details</h3>
             <div className="w-[150px] border-b border-PRIMARY"></div>
@@ -76,7 +81,7 @@ const JudgementForm = () => {
                   <FormItem className="font-urbanist">
                     <FormLabel>Title</FormLabel>
                     <FormControl>
-                      <Input className="font-urbanist" placeholder="Enter a title" {...field} />
+                      <Input  className="font-urbanist border-none focus:border-SECONDARY focus:ring-SECONDARY focus:outline-none bg-white" placeholder="Enter a title" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -107,7 +112,7 @@ const JudgementForm = () => {
                   <FormLabel className="font-urbanist">Description</FormLabel>
                   <FormControl>
                     <Textarea
-                      className="font-urbanist"
+                     className="font-urbanist border-none focus:border-SECONDARY focus:ring-SECONDARY focus:outline-none h-[150px] bg-white"
                       placeholder="Provide a detailed description"
                       {...field}
                     />
@@ -120,7 +125,7 @@ const JudgementForm = () => {
           <div className="flex justify-center items-center">
           <Button
             type="submit"
-            className="w-1/2 font-urbanist py-3 text-white bg-PRIMARY hover:bg-PRIMARY-dark rounded-md"
+            className="w-1/2 font-urbanist py-4 text-white bg-PRIMARY hover:bg-opacity-80 rounded-md"
           >
             Submit
           </Button>
