@@ -18,8 +18,6 @@ const useDecisionData = () => {
   useEffect(() => {
     const fetchDecisionData = async () => {
       if (isRevisited) {
-        console.log("db:", db);
-        console.log("judgementId:", judgementId);
 
         try {
           const docRef = doc(db, "judgement", judgementId);
@@ -44,12 +42,7 @@ const useDecisionData = () => {
             decisionData.detectedNoise?.forEach((n) => {
               noiseSources[n.noise] = n.sources || [];
             });
-
-            console.log("Extracted Bias Sources:", biasSources);
-            console.log("Extracted Noise Sources:", noiseSources);
-
             const adviceData = decisionData.advice || {};
-            console.log("Advice Data:", adviceData);
 
             setBiasSources({ ...biasSources });
             setNoiseSources({ ...noiseSources });

@@ -35,7 +35,7 @@ export default function Page() {
       setDetectedNoise([]);
       setNoiseSources([]);
       setBiasSources([]);
-      setAdvice([]);
+      setAdvice("");
     };
   
     resetContext();

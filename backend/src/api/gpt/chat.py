@@ -1,11 +1,10 @@
 from flask import request, jsonify
 from bert.predict import predict_bias
-from openai import OpenAI
 
 def get_created_at(chat):
     return chat.get("createdAt", "")
 
-def gpt_endpoint(model, tokenizer, bias_labels, client):
+def chat_endpoint(model, tokenizer, bias_labels, client):
     data = request.json
     name = data.get("name", "").strip()
     title = data.get("title", "").strip()

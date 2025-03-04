@@ -1,6 +1,6 @@
 
 export const fetchGPTResponse = async (input, messages, currentStage) => {
-  const response = await fetch('http://127.0.0.1:5000/gpt', {
+  const response = await fetch('http://127.0.0.1:5000/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -71,7 +71,7 @@ export const fetchPatternNoise = async (userId, judgmentId, theme, message, dete
 
 export const openingMessage = async (judgmentData, name) => {
   try {
-    const response = await fetch('http://127.0.0.1:5000/gpt', {
+    const response = await fetch('http://127.0.0.1:5000/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -147,6 +147,48 @@ export const fetchAdvice = async (title, messageContent, detectedBias, detectedN
     return data;
   } catch (error) {
     return "Error generating advice.";
+  }
+};
+
+export const fetchChatSummary = async (messageContent, detectedBias, detectedNoise, biasSources, noiseSources) => {
+  try {
+    const response = await fetch("http://127.0.0.1:5000/chat_summary", {
+
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+        messages: messageContent, 
+        detectedBias: detectedBias,
+        detectedNoise: detectedNoise,
+        biasSources: biasSources,
+        noiseSources: noiseSources,}),
+    });
+
+    const data = await response.json();
+    console.log("CHAT SUMMARY:", data);
+    return data;
+  } catch (error) {
+    console.error("CHAT SUMMARY", error)
+    return "Error generating chat summary.";
+  }
+}
+
+export const fetchSummary = async ({ currentChatSummary, previousChatSummaries }) => {
+  try {
+    const response = await fetch("http://127.0.0.1:5000/summary", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ currentChatSummary,
+         previousChatSummaries }),
+    });
+
+    const data = await response.json();
+    console.log("SUMMARY RESPONSE:", data);
+
+    return data;
+  } catch (error) {
+    console.log("ERROR in fetchSummary:", error);
+    return { Strengths: [], "Areas to Improve": [] };
   }
 };
 

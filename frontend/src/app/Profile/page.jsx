@@ -34,8 +34,7 @@ export default function ProfilePage() {
       }
       setShowEditModal(false);
     } catch (error) {
-    alert("Failed to update. Please try again.");
-    console.log("PROFILE", error);
+    console.error("PROFILE", error);
     }
   };
 

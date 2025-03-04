@@ -21,7 +21,7 @@ const InteractCard = ({ onSaveFeedback }) => {
     };
 
     return (
-        <div className="p-4 bg-white">
+        <div className="bg-white">
             <p className="mb-1 font-urbanist">Did you find this chat helpful?</p>
             <div className="flex space-x-2 mb-3">
                 <Button
@@ -63,28 +63,6 @@ const InteractCard = ({ onSaveFeedback }) => {
                     className={`px-4 py-2 rounded-lg ${feedback.perspectiveChanged === "Unsure" ? "bg-PRIMARY text-white" : "bg-gray-200 text-black"}`}
                 >
                     Unsure
-                </Button>
-            </div>
-
-            <p className="mb-1 font-urbanist">Would you like to review similar past decisions?</p>
-            <div className="flex space-x-2 mb-3">
-                <Button
-                    onClick={() => handleSelection("reviewSimilar", "Yes")}
-                    className={`px-4 py-2 rounded-lg ${feedback.reviewSimilar === "Yes" ? "bg-PRIMARY text-white" : "bg-gray-200 text-black"}`}
-                >
-                    Yes
-                </Button>
-                <Button
-                    onClick={() => handleSelection("reviewSimilar", "No")}
-                    className={`px-4 py-2 rounded-lg ${feedback.reviewSimilar === "No" ? "bg-PRIMARY text-white" : "bg-gray-200 text-black"}`}
-                >
-                    No
-                </Button>
-                <Button
-                    onClick={() => handleSelection("reviewSimilar", "Maybe")}
-                    className={`px-4 py-2 rounded-lg ${feedback.reviewSimilar === "Maybe" ? "bg-PRIMARY text-white" : "bg-gray-200 text-black"}`}
-                >
-                    Maybe
                 </Button>
             </div>
         </div>

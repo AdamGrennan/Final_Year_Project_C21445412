@@ -28,14 +28,14 @@ const JudgementList = () => {
     try {
       setTimeout(async () => {
         const chatQuery = query(collection(db, "chat"), where("judgementId", "==", judgementId));
-        const trendQuery = query(collection(db, "trends"), where("judgementId", "==", judgementId));
+        const trendQuery = query(collection(db, "trends"), where("jid", "==", judgementId));
         const chatDocs = await getDocs(chatQuery);
         const trendDocs = await getDocs(trendQuery);
 
         const deleteChats = chatDocs.docs.map((chatDoc) => deleteDoc(chatDoc.ref));
         const deleteTrends = trendDocs.docs.map((trendDoc) => deleteDoc(trendDoc.ref));
         await Promise.all(deleteChats, deleteTrends);
-    
+
         const judgeRef = doc(db, "judgement", judgementId);
         await deleteDoc(judgeRef);
         console.log("Decision deleted successfully.");
@@ -53,7 +53,7 @@ const JudgementList = () => {
   const fetchJudgements = async () => {
     if (user && user.uid) {
       try {
-        console.log("Fetching judgements with filter:", filter, "for userId:", user.uid);
+        console.log("Fetching judgements:", filter, "for userId:", user.uid);
         const judgementsQuery = query(
           collection(db, "judgement"),
           where("userId", "==", user.uid),
@@ -65,7 +65,6 @@ const JudgementList = () => {
           ...doc.data(),
         }));
         setJudgements(data);
-        console.log("Fetched judgments:", data);
       } catch (error) {
         console.log(error);
       }
@@ -73,23 +72,25 @@ const JudgementList = () => {
   };
 
   return (
-    <div className="w-[500px]">
-      <div className="flex items-center justify-start mb-4">
+    <div className="w-[500px] flex flex-col items-center">
+      <div className="flex items-center justify-center gap-4 mb-4">
         <Button
           onClick={() => setFilter(true)}
-          className={`px-6 py-2 text-sm font-urbanist transition duration-300 rounded-lg ${filter === true ? "bg-PRIMARY text-white" : "bg-gray-200 text-black"}`}
+          className={`px-6 py-2 text-sm font-urbanist transition duration-300 rounded-lg ${filter === true ? "bg-PRIMARY text-white shadow-md scale-105" : "bg-gray-200 text-black hover:bg-gray-300"
+            }`}
         >
           Completed
         </Button>
+
         <Button
           onClick={() => setFilter(false)}
-          className={`px-6 py-2 text-sm font-urbanist transition duration-300 rounded-lg ${filter === false ? "bg-PRIMARY text-white" : "bg-gray-200 text-black"}`}
+          className={`px-6 py-2 text-sm font-urbanist transition duration-300 rounded-lg ${filter === false ? "bg-PRIMARY text-white shadow-md scale-105" : "bg-gray-200 text-black hover:bg-gray-300"
+            }`}
         >
           Not Completed
         </Button>
       </div>
-      <ScrollArea className="h-[350px] w-[550px] rounded-md border bg-GRAAY">
-
+      <ScrollArea className="h-[350px] w-[550px] rounded-md border bg-GRAAY p-4">
         <div className="flex flex-col items-center text-gray-500">
           {judgements.length === 0 ? (
             <div className="flex flex-col items-center">
@@ -99,45 +100,43 @@ const JudgementList = () => {
                 className="w-[250px] object-contain mt-8"
               />
               <p className="text-sm font-urbanist font-medium text-PRIMARY">
-                No past decisions</p>
+                No past decisions
+              </p>
             </div>
           ) : (
-            <div className="flex flex-col">
+            <div className="flex flex-col w-full space-y-4">
               {judgements.map((judgement) => (
-
                 <div
                   key={judgement.id}
-                  className="flex items-center justify-start mt-4"
+                  className="flex items-center justify-between bg-white p-4 rounded-lg shadow-md hover:bg-gray-200 transition-all duration-300"
                 >
                   <div
                     onClick={() => openDecision(judgement.id, judgement.isCompleted)}
-                    className="w-[450px] text-left bg-white text-black rounded-md font-urbanist h-auto "
+                    className="flex flex-col w-full cursor-pointer"
                   >
-                    <div className="flex flex-col w-full">
-                      <div className="font-bold text-sm break-words">
-                        {judgement.title}
-                      </div>
-                      <div className="font-light text-sm break-words whitespace-normal">
-                        {judgement.description}
-                      </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        {judgement.createdAt?.toDate()?.toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                        })}
-                      </div>
+                    <div className="font-bold text-base text-black break-words">
+                      {judgement.title}
                     </div>
-                    <Button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(judgement.id);
-                      }}
-                      className="flex items-center justify-center rounded-lg shadow-sm transform transition-transform duration-300 active:scale-[1.7]"
-                    >
-                      <IoTrashBin className="text-PRIMARY transform transition-transform duration-300 group-active:scale-[1.7]" />
-                    </Button>
+                    <div className="font-light text-sm text-gray-700 break-words whitespace-normal mt-1">
+                      {judgement.description}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {judgement.createdAt?.toDate()?.toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </div>
                   </div>
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(judgement.id);
+                    }}
+                    className="ml-4 p-2 rounded-full bg-orange-100 hover:bg-orange-200 transition-all duration-300 shadow-sm"
+                  >
+                    <IoTrashBin className="text-orange-500 text-lg" />
+                  </Button>
                 </div>
               ))}
             </div>
@@ -145,7 +144,6 @@ const JudgementList = () => {
         </div>
         <ScrollBar className="bg-SECONDARY" />
       </ScrollArea>
-
     </div>
 
   );

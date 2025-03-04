@@ -25,7 +25,6 @@ const Chat = ({ judgementId, setFinishButtonDisable }) => {
     if (user?.uid) {
       try {
         const openMessage = await openingMessage(judgmentData, user.name);
-        console.log("GPT Opening Message Received:", openMessage);
 
         if (openMessage.bias_feedback) {
           const openingMessage = {
@@ -37,7 +36,7 @@ const Chat = ({ judgementId, setFinishButtonDisable }) => {
           saveChats(user, judgementId, [openingMessage], [], []);
         }
       } catch (error) {
-        console.log(error);
+        console.error("OPENING MESSAGE", error);
       }
     }
   };
@@ -68,15 +67,6 @@ const Chat = ({ judgementId, setFinishButtonDisable }) => {
         console.log("Detected Bias", detectedBias)
       }
 
-      const levelNoiseData = await fetchLevelNoise(messageContent);
-      if (levelNoiseData) {
-        const { confidence_scores } = levelNoiseData;
-        if (confidence_scores["harsh"] > confidence_scores["neutral"]) {
-          detectNoise("Level Noise", "Test");
-          detectedNoise.push("Level Noise");
-        }
-      }
-
       const source = await fetchSource(messageContent, detectedBias, detectedNoise);
       if (source.biasSummary !== "No bias source available.") {
         detectedBias.forEach((bias) => detectBias(bias, source.biasSummary));
@@ -85,7 +75,6 @@ const Chat = ({ judgementId, setFinishButtonDisable }) => {
         detectedNoise.forEach((noise) => detectNoise(noise, source.noiseSummary));
       }
 
-      console.log("Sending Pattern Noise Request with:", { detectedBias, detectedNoise });
       const patternNoiseData = await fetchPatternNoise(
         user.uid, 
         judgementId, 
@@ -99,7 +88,6 @@ const Chat = ({ judgementId, setFinishButtonDisable }) => {
         const { similarDecisions, patternNoiseSources } = patternNoiseData;
         if (similarDecisions && similarDecisions.length > 0) {
           console.log("Pattern Noise detected: Similar past decisions found.", similarDecisions);
-          console.log("Pattern Noise Sources:", patternNoiseSources);
           if (patternNoiseSources && patternNoiseSources.length > 0) {
             const patternNoiseSource = patternNoiseSources[0].source;
             detectNoise("Pattern Noise", patternNoiseSource);
@@ -109,6 +97,18 @@ const Chat = ({ judgementId, setFinishButtonDisable }) => {
         } else {
           console.log("No Pattern Noise detected.");
           setSimilarDecisions([]);
+        }
+      }
+
+      const levelNoiseData = await fetchLevelNoise(messageContent);
+      if (levelNoiseData) {
+        const { confidence_scores } = levelNoiseData;
+        if (confidence_scores["harsh"] > confidence_scores["neutral"]) {
+          detectedNoise.push("Level Noise");
+
+          const source = await fetchSource(messageContent, detectedBias, detectedNoise);
+          const noiseSource = source.noiseSummary !== "No noise source available." ? source.noiseSummary : "No specific source";
+          detectNoise("Level Noise", noiseSource);
         }
       }
 
@@ -132,6 +132,7 @@ const Chat = ({ judgementId, setFinishButtonDisable }) => {
         const recencySource = `It seems you may have read [${newsAPI.most_similar_article.title}], which could be affecting your judgment.`;
 
         detectBias("Recency Bias", recencySource);
+        detectedBias.push("Recency Bias"); 
       } else {
         console.log("No Recency Bias detected");
       }

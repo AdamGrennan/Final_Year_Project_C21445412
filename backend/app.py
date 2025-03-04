@@ -1,25 +1,25 @@
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "src")))
 from flask import Flask
 from flask_cors import CORS
 from sentence_transformers import SentenceTransformer
-from bert.load_model import load_bias_model
-from api.level_noise.level_noise import level_noise_endpoint
-from api.bert_endpoint import bert_endpoint
-from api.gpt.gpt import gpt_endpoint
-from api.gpt.source import source_endpoint
-from api.gpt.advice import advice_endpoint
-from api.pattern_noise.pattern_noise import pattern_noise_endpoint
-from api.news_api.news_api import news_api_endpoint
-import firebase_admin
-from firebase_admin import credentials
-from firebase_admin import firestore
+from src.bert.load_model import load_bias_model
+from src.api.level_noise.level_noise import level_noise_endpoint
+from src.api.bert_endpoint import bert_endpoint
+from src.api.gpt.chat import chat_endpoint
+from src.api.gpt.source import source_endpoint
+from src.api.gpt.advice import advice_endpoint
+from src.api.gpt.chat_summary import chat_summary_endpoint
+from src.api.gpt.summary import summary_endpoint
+from src.api.pattern_noise.pattern_noise import pattern_noise_endpoint
+from src.api.news_api.news_api import news_api_endpoint
+from config.firebase_config import initialize_firebase
 from transformers import pipeline
 from openai import OpenAI
 
-if not firebase_admin._apps:
-    cred = credentials.Certificate('../config/finalyearproject-35ec5-firebase-adminsdk-hxyoq-4258f91ae8.json')
-    firebase_admin.initialize_app(cred)
-
-db = firestore.client()
+db = initialize_firebase()
 
 #GPT API key
 client = OpenAI(api_key="sk--6J0lHtxcBaT3MAGsCdv45c8e-ApLvzWOsQGbSFMU0T3BlbkFJU_iEG2lxrrnZJOdpd3OahPhtj5ecFBavR_DH-kBVMA")
@@ -51,9 +51,9 @@ def level_noise():
 def news_api():
     return news_api_endpoint(sbert_model)
 
-@app.route('/gpt', methods=['POST'])
-def gpt():
-    return gpt_endpoint(model, tokenizer, bias_labels, client)
+@app.route('/chat', methods=['POST'])
+def chat():
+    return chat_endpoint(model, tokenizer, bias_labels, client)
 
 @app.route('/source', methods=['POST'])
 def source():
@@ -62,6 +62,14 @@ def source():
 @app.route('/advice', methods=['POST'])
 def advice():
     return advice_endpoint(client)
+
+@app.route('/chat_summary', methods=['POST'])
+def chat_summary():
+    return chat_summary_endpoint(client)
+
+@app.route('/summary', methods=['POST'])
+def summary():
+    return summary_endpoint(client)
 
 if __name__ == '__main__':
     app.run(debug=True)

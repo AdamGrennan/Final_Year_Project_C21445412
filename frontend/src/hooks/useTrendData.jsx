@@ -1,62 +1,30 @@
 import { useEffect, useState } from "react";
-import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
-import { useParams, useSearchParams } from "next/navigation";
+import { doc, onSnapshot } from "firebase/firestore";
+import { useParams } from "next/navigation";
 import { db } from "@/config/firebase";
-import { useDecision } from '@/context/DecisionContext';
 
 const useTrendData = () => {
-  const [trends, setTrends] = useState([]);
-  
-  const searchParams = useSearchParams();
-  const isRevisited = searchParams.get("revisited") === "true";
+  const [fetchedTrends, setFetchedTrends] = useState([]);
   const { judgementId } = useParams();
 
   useEffect(() => {
-    const fetchTrendData = async () => {
-      if (!judgementId) return;
+    if (!judgementId) return;
 
-      try {
-        const trendRef = doc(db, "trends", judgementId);
-        const trendSnap = await getDoc(trendRef);
-
-        if (trendSnap.exists()) {
-          const trendData = trendSnap.data();
-          setTrends(trendData.trends || []);
-          console.log("Fetched Trends:", trendData.trends);
-        } else {
-          console.warn("No trend data found for this decision.");
-        }
-      } catch (error) {
-        console.error("Error fetching trends:", error);
+    const trendRef = doc(db, "trends", judgementId);
+    const unsubscribe = onSnapshot(trendRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const trendData = snapshot.data();
+        setFetchedTrends(trendData.trends || []);
+        console.log("Trends Updated:", trendData.trends);
+      } else {
+        console.warn("Trends not available yet, waiting...");
       }
-    };
+    });
 
-    if (isRevisited) {
-      fetchTrendData();
-    }
-  }, [isRevisited, judgementId]);
+    return () => unsubscribe(); 
+  }, [judgementId]);
 
-  const saveTrends = async (detectedTrends) => {
-    if (!judgementId || !detectedTrends.length) return;
-
-    try {
-      const trendRef = doc(db, "trends", judgementId);
-
-      await setDoc(trendRef, {
-        judgementId,
-        trends: detectedTrends,
-        createdAt: serverTimestamp(),
-      });
-
-      setTrends(detectedTrends);
-
-      console.log("Trends successfully saved to Firestore!");
-    } catch (error) {
-      console.error("Error saving trends to Firestore:", error);
-    }
-  };
-
-  return { trends, saveTrends };
+  return { fetchedTrends };
 };
 
 export default useTrendData;

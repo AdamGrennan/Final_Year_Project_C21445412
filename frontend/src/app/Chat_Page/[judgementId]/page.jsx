@@ -6,9 +6,8 @@ import * as React from "react";
 import Chat from "@/components/chat_components/Chat";
 import { Button } from "@/components/ui/button";
 import { db } from "@/config/firebase";
-import { writeBatch } from 'firebase/firestore';
-import { doc, serverTimestamp } from "firebase/firestore";
-import { fetchAdvice } from '@/services/ApiService';
+import { doc, serverTimestamp, writeBatch, getDoc } from "firebase/firestore";
+import { fetchAdvice, fetchSummary, fetchChatSummary } from '@/services/ApiService';
 import { fetchChats } from '@/services/FirebaseService';
 import { useUser } from '@/context/UserContext';
 import { useJudgment } from '@/context/JudgementContext';
@@ -55,13 +54,8 @@ export default function Page() {
       sources: Array.isArray(noiseSources?.[noise]) ? noiseSources[noise] : []
     })) : [];
 
-    if (!judgmentData?.title) {
-      console.error("Error: judgmentData.title is undefined.");
-      setIsLoading(false);
-      return;
-    }
-
     const judgeRef = doc(db, "judgement", judgementId);
+    const dashboardRef = doc(db, "dashboard", user.uid);
 
     try {
       batch.update(judgeRef, {
@@ -71,17 +65,65 @@ export default function Page() {
         updatedAt: serverTimestamp(),
       });
 
+      const snapshot = await getDoc(dashboardRef);
+      let existingStats = { biasOccurrences: {}, 
+      noiseOccurrences: {}, 
+      biasSources: {}, 
+      noiseSources: {}, 
+      totalDecisions: 0 };
+
+      if (snapshot.exists()) {
+        existingStats = snapshot.data();
+      }
+
+      const updatedBiasCounts = { ...existingStats.biasOccurrences };
+      const updatedNoiseCounts = { ...existingStats.noiseOccurrences };
+      const updatedBiasSources = { ...existingStats.biasSources };
+      const updatedNoiseSources = { ...existingStats.noiseSources };
+  
+      detectedBias.forEach(bias => {
+        updatedBiasCounts[bias] = (updatedBiasCounts[bias] || 0) + 1;
+        if (biasSources[bias]) {
+          biasSources[bias].forEach(source => {
+            updatedBiasSources[source] = (updatedBiasSources[source] || 0) + 1;
+          });
+        }
+      });
+  
+      detectedNoise.forEach(noise => {
+        updatedNoiseCounts[noise] = (updatedNoiseCounts[noise] || 0) + 1;
+        if (noiseSources[noise]) {
+          noiseSources[noise].forEach(source => {
+            updatedNoiseSources[source] = (updatedNoiseSources[source] || 0) + 1;
+          });
+        }
+      });
+ 
+      batch.set(dashboardRef, {
+        userId: user.uid,
+        totalDecisions: existingStats.totalDecisions + 1,
+        biasOccurrences: updatedBiasCounts,
+        noiseOccurrences: updatedNoiseCounts,
+        biasSources: updatedBiasSources,  
+        noiseSources: updatedNoiseSources, 
+        lastUpdated: serverTimestamp(),
+      }, { merge: true });
+
       const messages = await fetchChats(user, judgementId) || [];
 
       const response = await fetchAdvice(judgmentData.title, messages, detectedBias, detectedNoise);
+
+      const chatSummary = await fetchChatSummary(messages, detectedBias, detectedNoise, biasSources, noiseSources);
       
       if (!response || !response.advice) {
         console.error("Error: fetchAdvice returned an invalid response:", response);
+      }else if(!chatSummary){
+        console.error("Error: fetchChatSummary returned an invalid response:", chatSummary);
       } else {
-        console.log("Setting advice in state:", response.advice);
         setAdvice(response.advice); 
-        batch.update(judgeRef, { advice: response.advice });
+        batch.update(judgeRef, { advice: response.advice, chatSummary: chatSummary.chat_summary });
       }
+
       await batch.commit();
       router.push(`/Final_Report/${judgementId}`);
 
