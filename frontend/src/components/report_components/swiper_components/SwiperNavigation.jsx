@@ -10,7 +10,7 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/scrollbar';
 
-const SwiperNavigation = ({ swiperRef, isLastSlide }) => {
+const SwiperNavigation = ({ swiperRef, isLastSlide, isFirstSlide }) => {
     const router = useRouter();
 
     const openHome = () => {
@@ -19,21 +19,24 @@ const SwiperNavigation = ({ swiperRef, isLastSlide }) => {
         }, 700);
     };
 
-    return(
+    return (
         <div className="w-full flex justify-between items-center absolute top-20 px-4 z-10">
-        <PrevButton swiperRef={swiperRef} />
-        {!isLastSlide ? (
-            <NextButton swiperRef={swiperRef} />
-        ) : (
-            <Button
-                onClick={openHome}
-                className="bg-PRIMARY text-white font-urbanist rounded-3xl transform transition-transform duration-300 active:scale-[1.1] hover:bg-opacity-80"
-            >
-                Finish
-                <IoIosArrowForward className="h-5 text-white" />
-            </Button>
-        )}
-    </div>
+              <div className="w-8">
+                {!isFirstSlide && <PrevButton swiperRef={swiperRef} />}
+            </div>
+             
+            {!isLastSlide ? (
+                <NextButton swiperRef={swiperRef} />
+            ) : (
+                <Button
+                    onClick={openHome}
+                    className="bg-PRIMARY text-white font-urbanist rounded-3xl transform transition-transform duration-300 active:scale-[1.1] hover:bg-opacity-80"
+                >
+                    Finish
+                    <IoIosArrowForward className="h-5 text-white" />
+                </Button>
+            )}
+        </div>
     );
 };
 

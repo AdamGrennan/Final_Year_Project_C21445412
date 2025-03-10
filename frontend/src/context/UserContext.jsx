@@ -30,12 +30,19 @@ export const UserProvider = ({ children }) => {
 
         return () => unsubscribe();
     }, []);
+
+    const updateUser = (updatedUser) => {
+        setUser((prevUser) => ({ ...prevUser, ...updatedUser}));
+    };
+
     return (
-        <UserContext.Provider value={{ user, setUser, loading }}>
+        <UserContext.Provider value={{ user, setUser, loading, updateUser }}>
             {children}
         </UserContext.Provider>
     );
 };
+
+
 
 export const useUser = () => {
     return useContext(UserContext);

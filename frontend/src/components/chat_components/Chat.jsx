@@ -47,7 +47,6 @@ const Chat = ({ judgementId, setFinishButtonDisable }) => {
 
   const onSend = async (option) => {
     setButtonDisable(true);
-    setFinishButtonDisable(true);
     const messageContent = option || input.trim();
     if (!messageContent) return;
 
@@ -55,6 +54,10 @@ const Chat = ({ judgementId, setFinishButtonDisable }) => {
     setMessages((prev) => [...prev, newMessage]);
     setInput("");
 
+    if (!messages.some(msg => msg.sender === "user")) {
+      setFinishButtonDisable(false);
+  }
+  
     try {
       let detectedBias = [];
       let detectedNoise = [];
@@ -112,18 +115,24 @@ const Chat = ({ judgementId, setFinishButtonDisable }) => {
         }
       }
 
-      const gptData = await fetchGPTResponse(messageContent, messages);
-      if (gptData.bias_feedback) {
-        const gptResponse = {
-          text: gptData.bias_feedback,
-          sender: "GPT",
-        };
+      const gptResponse = { text: "", sender: "GPT" };
+      setMessages((prev) => [...prev, gptResponse]);
 
-        setMessages((prev) => [...prev, gptResponse]);
-        await saveChats(user, judgementId, [gptResponse], detectedBias, detectedNoise);
-      } else if (gptData.error) {
-        console.error(gptData.error || "ERROR, No response from GPT");
-      }
+      await fetchGPTResponse(messageContent, messages, (newText) => {
+        setMessages((prev) => {
+          const updatedMessages = [...prev];
+          const lastMessageIndex = updatedMessages.length - 1;
+          if (lastMessageIndex >= 0) {
+            updatedMessages[lastMessageIndex] = {
+              ...updatedMessages[lastMessageIndex],
+              text: newText, 
+            };
+          }
+          return updatedMessages;
+        });
+      });
+  
+      await saveChats(user, judgementId, [gptResponse], detectedBias, detectedNoise);
 
       const newsAPI = await fetchNewsAPI(messageContent);
       if (newsAPI?.most_similar_article) {

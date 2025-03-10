@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { db } from "@/config/firebase";
 import { collection, query, where, orderBy, getDocs, limit, doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { newOccurrence, percentageChange, decisionStreaks } from "../components/report_components/trend-components/TrendStats";
+import { newOccurrence, percentageChange, decisionStreaks } from "../utils/TrendStats";
 
 const useTrendAnalysis = (user, jid, bias, noise) => {
   const [trends, setTrends] = useState([]);

@@ -9,13 +9,15 @@ import { Button } from "@/components/ui/button";
 import { MdModeEdit } from "react-icons/md";
 import EditModal from "@/components/profile-components/EditModal";
 import DeleteModal from "@/components/profile-components/DeleteModal";
+import { updatePassword } from "firebase/auth";
 
 export default function ProfilePage() {
-  const { user } = useUser();
+  const { user, updateUser } = useUser();
   const [fieldToEdit, setFieldToEdit] = useState("");
   const [value, setValue] = useState("");
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [refresh, setRefresh] = useState(false);
 
   const handleEditClick = (field) => {
     setFieldToEdit(field);
@@ -27,7 +29,8 @@ export default function ProfilePage() {
     try {
       if (fieldToEdit === "name") {
         await updateDoc(doc(db, "users", user.uid), { name: value });
-        alert("Name updated successfully.");
+        updateUser((prevUser) => ({...prevUser, name:value}));
+        setRefresh(!refresh);
       } else if (fieldToEdit === "password") {
         await updatePassword(auth.currentUser, value);
         alert("Password updated successfully.");

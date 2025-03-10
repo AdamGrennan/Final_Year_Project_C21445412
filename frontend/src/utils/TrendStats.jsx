@@ -14,15 +14,12 @@ export const newOccurrence = (allDecisions, bias, noise) => {
 };
 
 export const percentageChange = (allDecisions, key) => {
-  if (allDecisions.length < 3) return []; 
-
-  const weightRecent = 0.7;
-  const weightPast = 0.3; 
+  if (allDecisions.length < 3) return [];
 
   const countOccurrences = (decisions) =>
     decisions.reduce((acc, decision) => {
       (decision[key] || []).forEach(item => {
-        const name = item.bias || item.noise; 
+        const name = item.bias || item.noise;
         if (name) acc[name] = (acc[name] || 0) + 1;
       });
       return acc;
@@ -39,25 +36,18 @@ export const percentageChange = (allDecisions, key) => {
     const prevCount = pastCounts[biasOrNoise] || 0;
     const currentCount = recentCounts[biasOrNoise] || 0;
 
-    let weightedPast = prevCount * weightPast;
-    let weightedRecent = currentCount * weightRecent;
     let change = 0;
 
-    if (prevCount === 0 && currentCount === 0) {
-      return null;
-    }
+    if (prevCount === 0 && currentCount === 0) return null;
 
     if (prevCount > 0 && currentCount === 0) {
-      change = -100; 
+      change = -100;
     } 
     else if (prevCount === 0 && currentCount > 0) {
-      change = (Math.log(1 + currentCount) * 20); 
+      change = ((currentCount - prevCount) / (prevCount + 1)) * 100; 
     } 
-    else if (prevCount > 0 && currentCount > prevCount) {
-      change = ((weightedRecent - weightedPast) / (weightedPast + 1)) * 100;
-    } 
-    else if (prevCount > 0 && currentCount < prevCount) {
-      change = ((weightedRecent - weightedPast) / weightedPast) * 100;
+    else {
+      change = ((currentCount - prevCount) / prevCount) * 100;
     }
 
     return {
@@ -66,6 +56,7 @@ export const percentageChange = (allDecisions, key) => {
     };
   }).filter(Boolean); 
 };
+
 
 
 export const decisionStreaks = (allDecisions, allBiases, allNoises) => {

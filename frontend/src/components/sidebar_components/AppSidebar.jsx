@@ -101,7 +101,7 @@ export function AppSidebar({ ...props }) {
                       </SidebarMenuButton>
                     ) : item.title === "Dashboard" ? (
                       <SidebarMenuButton asChild isActive={item.isActive} className="font-urbanist text-white hover:bg-MERGE hover:no-underline">
-                        <a href="#">
+                          <a href="#" onClick={(e) => { e.preventDefault(); router.push("/Dashboard"); }}>
                           <MdDashboard className="text-white mr-2" />
                           {item.title}
                         </a>

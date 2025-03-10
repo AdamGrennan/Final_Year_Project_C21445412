@@ -9,6 +9,7 @@ import { Pagination, } from 'swiper/modules';
 import InteractCard from "@/components/report_components/InteractCard";
 import SwiperNavigation from "@/components/report_components/swiper_components/SwiperNavigation";
 import useDecisionData from "@/hooks/useDecisionData";
+import { uploadDashboardStats } from "@/utils/uploadDashboardStats";
 import { useParams } from "next/navigation";
 import { query, collection, where, orderBy, limit, getDocs, doc, getDoc } from "firebase/firestore";
 import { db } from "@/config/firebase";
@@ -23,19 +24,16 @@ import BiasCard from "@/components/report_components/BiasCard";
 
 export default function Page() {
   useDecisionData();
-
-  const { detectedBias,
-    detectedNoise, setDetectedNoise, setDetectedBias,
-    biasSources, noiseSources,
-    setBiasSources, setNoiseSources, advice } = useDecision();
-
+  const { detectedBias, detectedNoise, biasSources, noiseSources, advice } = useDecision();
   const { judgementId } = useParams();
   const { user } = useUser();
   const swiperRef = useRef(null);
   const [isLastSlide, setIsLastSlide] = useState(false);
+  const [isFirstSlide, setIsFirstSlide] = useState(true);
   const [chatSummaries, setChatSummaries] = useState([]);
+  uploadDashboardStats(user);
 
-useEffect(() => {
+  useEffect(() => {
     const getSummaries = async () => {
       try {
         const judgeRef = doc(db, "judgement", judgementId);
@@ -52,7 +50,7 @@ useEffect(() => {
 
         const judgmentsQuery = query(
           collection(db, "judgement"),
-          where("userId", "==", user.uid), 
+          where("userId", "==", user.uid),
           where("isCompleted", "==", true),
           orderBy("updatedAt", "desc"),
           limit(6)
@@ -82,13 +80,16 @@ useEffect(() => {
     if (judgementId) {
       getSummaries();
     }
-}, [judgementId]);
+  }, [judgementId]);
 
   return (
     <div className="container">
       <Swiper
         onSwiper={(swiper) => (swiperRef.current = swiper)}
-        onSlideChange={(swiper) => setIsLastSlide(swiper.isEnd)}
+        onSlideChange={(swiper) => {
+          setIsLastSlide(swiper.isEnd);
+          setIsFirstSlide(swiper.activeIndex === 0);
+        }}
         modules={[Pagination]}
         spaceBetween={50}
         slidesPerView={1}
@@ -146,11 +147,11 @@ useEffect(() => {
             </h2>
           </div>
           <div className="flex flex-col md:flex-row items-start justify-between w-full space-y-6 md:space-y-0 md:space-x-6 mt-8">
-            <div className="w-full md:w-2/3 h-[375px] bg-white rounded-lg shadow-md p-6 space-y-4">
+            <div className="w-full md:w-2/3 h-[375px] bg-white rounded-lg shadow-md p-6 space-y-4 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-SECONDARY scrollbar-track-GRAAY">
               <h3 className="text-center font-urbanist text-black text-xl font-semibold border-b border-PRIMARY pb-2">
                 Feedback
               </h3>
-              <SummarySideBar chatSummaries={chatSummaries}/>
+              <SummarySideBar chatSummaries={chatSummaries} />
             </div>
             <div className="w-full md:w-1/3 h-[375px] bg-white rounded-lg shadow-md p-6 space-y-4">
               <h3 className="text-center font-urbanist text-black text-xl font-semibold border-b border-PRIMARY pb-2">
@@ -161,7 +162,7 @@ useEffect(() => {
           </div>
         </SwiperSlide>
       </Swiper>
-      <SwiperNavigation swiperRef={swiperRef} isLastSlide={isLastSlide} />
+      <SwiperNavigation swiperRef={swiperRef} isLastSlide={isLastSlide} isFirstSlide={isFirstSlide} />
     </div>
 
   );

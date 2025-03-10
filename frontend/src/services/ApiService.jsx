@@ -1,5 +1,5 @@
 
-export const fetchGPTResponse = async (input, messages, currentStage) => {
+export const fetchGPTResponse = async (input, messages, setDisplayedText) => {
   const response = await fetch('http://127.0.0.1:5000/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -7,16 +7,32 @@ export const fetchGPTResponse = async (input, messages, currentStage) => {
       input: input.trim(),
       context: messages.map((msg) => ({
         sender: msg.sender || "user",
-        content: msg.text || "",
+        text: msg.text || "",
+        detectedBias: msg.detectedBias || [],
+        detectedNoise: msg.detectedNoise || [],
       })),
-      currentStage,
     }),
   });
+
   if (!response.ok) {
     throw new Error(`GPT error: ${response.status} - ${await response.text()}`);
   }
-  return response.json();
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+
+  let accumulatedText = ""; 
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+
+    const chunk = decoder.decode(value, { stream: true });
+    accumulatedText += chunk; 
+    setDisplayedText(accumulatedText); 
+  }
 };
+
+
 
 export const fetchBERTResponse = async (input) => {
   const response = await fetch('http://127.0.0.1:5000/bert', {

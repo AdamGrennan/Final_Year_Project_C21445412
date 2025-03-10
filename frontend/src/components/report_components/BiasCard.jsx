@@ -104,9 +104,9 @@ const BiasCard = ({ bias, noise, biasSources, noiseSources, advice }) => {
               </CarouselItem>
             ))}
           </CarouselContent>
-          <div className="absolute bottom-[95%] -translate-y-1/2 w-full flex justify-between px-12">
-            <CarouselPrevious className="bg-gray-300 hover:bg-gray-400 text-black py-2 px-4 rounded-full transition relative mr-8" />
-            <CarouselNext className="bg-gray-300 hover:bg-gray-400 text-black py-2 px-4 rounded-full transition relative ml-8" />
+          <div className="absolute bottom-[97%] -translate-y-1/2 w-full flex justify-between px-12">
+            <CarouselPrevious className="bg-white hover:bg-white text-black py-2 px-4 rounded-full transition relative mr-8" />
+            <CarouselNext className="bg-white hover:bg-white text-black py-2 px-4 rounded-full transition relative ml-8" />
           </div>
         </Carousel>
       ) : (

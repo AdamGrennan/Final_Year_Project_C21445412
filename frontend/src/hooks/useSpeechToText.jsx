@@ -2,8 +2,8 @@ import { useState, useRef, useEffect } from "react";
 
 const useSpeechToText = (onSpeechComplete, options = {}) => {
   const [listening, setListening] = useState(false);
-  const [transcript, setTranscript] = useState("");
   const recognitionRef = useRef(null);
+  const manualStop = useRef(false);
 
   useEffect(() => {
     if (!("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
@@ -11,8 +11,11 @@ const useSpeechToText = (onSpeechComplete, options = {}) => {
       return;
     }
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    recognitionRef.current = new SpeechRecognition();
+    if(!recognitionRef.current){
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognitionRef.current = new SpeechRecognition();
+    }
+ 
 
     const recognition = recognitionRef.current;
     recognition.continuous = options.continuous || false;
@@ -26,12 +29,10 @@ const useSpeechToText = (onSpeechComplete, options = {}) => {
       recognition.grammars = speechRecognitionList;
     }
 
+    let finalTranscript = "";
+
     recognition.onresult = (event) => {
-      let text = "";
-      for (let i = 0; i < event.results.length; i++) {
-        text += event.results[i][0].transcript;
-      }
-      setTranscript(text);
+        finalTranscript = event.results[event.results.length - 1][0].transcript;
     };
 
     recognition.onerror = (event) => {
@@ -40,27 +41,37 @@ const useSpeechToText = (onSpeechComplete, options = {}) => {
 
     recognition.onend = () => {
         setListening(false);
-        if (transcript.trim()) {
-          onSpeechComplete(transcript);
-          setTranscript(""); 
+
+        if(manualStop.current){
+            manualStop.current = false;
+            return;
+        }
+
+        if (finalTranscript .trim()) {
+          onSpeechComplete(finalTranscript);
         }
       };
 
     return () => {
       recognition.stop();
     };
-  }, [transcript, onSpeechComplete]);
+  }, [onSpeechComplete]);
 
   const startListening = () => {
     if (recognitionRef.current && !listening) {
-      setTranscript(""); 
-      recognitionRef.current.start();
-      setListening(true);
+      try {
+        manualStop.current = false;
+        recognitionRef.current.start();
+        setListening(true);
+      } catch (error) {
+        console.error("SpeechRecognition start failed:", error);
+      }
     }
-  };
+  }; 
 
   const stopListening = () => {
     if (recognitionRef.current && listening) {
+      manualStop.current = true;
       recognitionRef.current.stop();
       setListening(false);
     }
@@ -68,7 +79,6 @@ const useSpeechToText = (onSpeechComplete, options = {}) => {
 
   return {
     listening,
-    transcript,
     startListening,
     stopListening,
   };

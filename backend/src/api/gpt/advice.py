@@ -18,20 +18,21 @@ def advice_endpoint(client):
 
     for bias in detected_biases:
         prompt = f"""
-        A user made a decision titled **"{decision_title}"**, and the following bias was detected: **{bias}**.
-        Their reasoning: "{context}".
-        Provide **one paragraph** of **specific, practical** advice to help them **reduce {bias}** in similar decisions.
-        Keep it clear, structured, and avoid lists.
+        The user made a decision titled "**{decision_title}**", and the bias **{bias}** was detected in their reasoning.
+        Conversation history: "**{context}**".
+        
+        Provide a **practical, actionable strategy** to counteract **{bias}** in this situation. Focus on **how they can adjust their thought process** next time to make a more balanced decision. 
+        Avoid generic explanations—give a clear **solution** in one paragraph.
         """
 
         try:
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
-                    {"role": "system", "content": "You provide structured, paragraph-style advice to help users reduce biases and noise."},
+                    {"role": "system", "content": "You provide direct, structured, and practical advice to help users mitigate bias."},
                     {"role": "user", "content": prompt}
                 ],
-                max_tokens=100,  
+                max_tokens=150,  
                 temperature=0.5,
                 stop=["\n"] 
             )
@@ -45,20 +46,20 @@ def advice_endpoint(client):
 
     for noise in detected_noise:
         prompt = f"""
-         A user made a decision titled **"{decision_title}"**, and the following type of noise was detected: **{noise}**.
-        Their reasoning: "{context}".
-        Explain in **one paragraph** how {noise} affects their judgment and provide one clear, actionable strategy to reduce its impact in future decisions.
-        Avoid lists; structure it as a flowing explanation.
+        The user made a decision titled **"{decision_title}"**, and **{noise}** was detected as a source of judgment noise.
+        Conversation history: "**{context}**".
+        
+        Suggest a **specific, immediate step** the user can take to reduce the impact of **{noise}** in similar decisions. Keep it **direct, situation-based, and immediately useful**.
         """
 
         try:
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
-                    {"role": "system", "content": "You provide structured, paragraph-style explanations of noise and strategies to mitigate it."},
+                    {"role": "system", "content": "You give actionable strategies to help users reduce judgment noise in their decisions."},
                     {"role": "user", "content": prompt}
                 ],
-                max_tokens=100,  
+                max_tokens=150,  
                 temperature=0.5
             )
 

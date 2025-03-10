@@ -13,7 +13,7 @@ import { useDecision } from '@/context/DecisionContext';
 
 export default function Page() {
   const router = useRouter();
-  const { setDetectedNoise , setDetectedBias, setNoiseSources, setBiasSources, setAdvice } = useDecision();
+  const { setDetectedNoise, setDetectedBias, setNoiseSources, setBiasSources, setAdvice } = useDecision();
   const [isModalOpen, setModalOpen] = useState(false);
   const welcomeMessage = (
     <>
@@ -29,6 +29,10 @@ export default function Page() {
     router.push('/Judgement_Form');
   };
 
+  const dashboard = () => {
+    router.push('/Dashboard');
+  };
+
   useEffect(() => {
     const resetContext = () => {
       setDetectedBias([]);
@@ -37,10 +41,10 @@ export default function Page() {
       setBiasSources([]);
       setAdvice("");
     };
-  
+
     resetContext();
   }, []);
-  
+
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
@@ -71,16 +75,17 @@ export default function Page() {
   return (
     <div className="flex flex-1 flex-col h-full gap-4 p-4">
       <div className="flex gap-4">
-        <div className="flex flex-col w-full md:w-1/2">
-          <Label htmlFor="terms" className="font-urbanist text-PRIMARY text-2xl font-semibold mb-2 ">Decision History</Label>
+        <div className="flex flex-col w-full md:w-1/2 pl-8">
+          <Label htmlFor="terms" className="font-urbanist text-PRIMARY text-2xl font-semibold mb-2">Decision History</Label>
           <JudgementList />
         </div>
+
 
         <div className="flex items-end flex-col w-full md:w-1/2">
           <Label htmlFor="terms" className="font-urbanist text-PRIMARY text-2xl font-semibold mb-2 ">Tools</Label>
           <div className="flex flex-col space-y-[25px]">
             <JudgementButton onClick={newJudgement} />
-            <DashboardButton />
+            <DashboardButton onClick={dashboard} />
           </div>
         </div>
       </div>

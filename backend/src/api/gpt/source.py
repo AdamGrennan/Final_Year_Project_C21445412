@@ -8,13 +8,14 @@ def source_endpoint(client):
 
     if not message:
         return jsonify({"error": "Invalid request data"}), 400
-    
+
     summary = {}
 
     if detected_noise:
         noise_prompt = f"""
-        Provide a **very short source** where the noise is detected. 
-        Keep it under 10 words.
+        Identify **where** noise appears in the following message. 
+        Return a short, natural response that refers to the specific phrase or wording that caused the noise.
+        Do not explain or summarize—just highlight how it was detected.
         Message: "{message}"
         """
 
@@ -22,11 +23,11 @@ def source_endpoint(client):
             noise_response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
-                    {"role": "system", "content": "You generate **very short, precise noise sources**."},
+                    {"role": "system", "content": "Extract and highlight the specific source of noise without explanation."},
                     {"role": "user", "content": noise_prompt}
                 ],
                 max_tokens=15,  
-                temperature=0.4
+                temperature=0.4  
             )
             summary["noise_summary"] = noise_response.choices[0].message.content.strip().strip('"')
         except Exception as e:
@@ -35,8 +36,9 @@ def source_endpoint(client):
 
     if detected_bias:
         bias_prompt = f"""
-        Provide a **very short phrase** where this bias appears. 
-        Keep it under 10 words.
+        Identify **where** bias appears in the following message.
+        Return a short, natural response that refers to the specific phrase or wording that caused the bias.
+        Do not explain or summarize—just highlight how it was detected.
         Message: "{message}"
         """
 
@@ -44,7 +46,7 @@ def source_endpoint(client):
             bias_response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
-                    {"role": "system", "content": "You generate **very short bias sources**."},
+                    {"role": "system", "content": "Extract and highlight the specific source of bias without explanation."},
                     {"role": "user", "content": bias_prompt}
                 ],
                 max_tokens=15,  

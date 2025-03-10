@@ -13,6 +13,7 @@ const MessageSender = ({ input, setInput, onSend, buttonDisable }) => {
     onSend(finalText); 
     setVoicePopup(false); 
   });
+  const isSendDisabled = input.trim() === "";
 
   useEffect(() => {
     if (transcript) {
@@ -26,7 +27,7 @@ const MessageSender = ({ input, setInput, onSend, buttonDisable }) => {
   };
 
   const handleKeyPress = (event) => {
-    if (event.key === 'Enter') {
+    if (event.key === 'Enter' && !isSendDisabled) {
       onSend();
     }
   };
@@ -46,7 +47,7 @@ const MessageSender = ({ input, setInput, onSend, buttonDisable }) => {
       />
       <Button className="bg-PRIMARY text-white w-8 h-8 rounded-full hover:bg-opacity-80 mr-2"
         onClick={() => onSend(input)}
-        disabled={buttonDisable}>
+        disabled={isSendDisabled}>
         <FaArrowUpLong />
       </Button>
 
@@ -65,7 +66,7 @@ const MessageSender = ({ input, setInput, onSend, buttonDisable }) => {
                 setVoicePopup(false);
                 stopListening();
               }}>
-              <IoCloseOutline className="text-2xl" />
+              <IoCloseOutline className="text-2xl text-gray-500 transition-colors duration-200 hover:text-PRIMARY"/>
             </Button>
             <h3 className="text-lg font-semibold">{listening ? "Listening..." : "Start Speaking"}</h3>
             <p className="mt-2 text-gray-500">{transcript || "Press below to start"}</p>

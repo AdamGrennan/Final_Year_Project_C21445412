@@ -135,12 +135,15 @@ export default function Page() {
   return (
     <div className="flex flex-row w-full h-[485px] overflow-hidden">
        {isLoading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-90 z-50">
-          <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-t-transparent border-PRIMARY"></div>
-            <p className="mt-4 text-lg font-urbanist font-semibold text-gray-800">Report Generating{dots}</p>
-          </div>
-        </div>
+       <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-90 z-50">
+       <div className="flex flex-col items-center">
+         <div className="animate-spin rounded-full h-16 w-16 border-4 border-t-transparent border-PRIMARY"></div>
+         <p className="mt-4 text-lg font-urbanist font-semibold text-gray-800">
+           Report Generating{dots}
+         </p>
+       </div>
+     </div>
+     
       )}
       <div className="flex-1">
         <Chat judgementId={judgementId} setFinishButtonDisable={setButtonDisable}/>
@@ -155,7 +158,7 @@ export default function Page() {
         </p>
         <Button
           onClick={finalReport}
-          disabled={buttonDisable}
+          disabled={!buttonDisable}
           className="bg-PRIMARY text-white font-urbanist mt-72 w-full  hover:bg-opacity-80"
         >
           Finish
