@@ -11,7 +11,7 @@ def summary_endpoint(client):
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
-                {"role": "system", "content": f"You analyze decision-making behavior and return only {task_type} as bullet points. Do not include section headers or introductions. Use 'you' instead of 'the user'."},
+                {"role": "system", "content": f"You analyze decision-making behavior and return only {task_type} as bullet points. Do not include section headers or introductions. Use 'you' instead of 'the user', also include one related emoji at the end of each bullet point."},
                 {"role": "user", "content": f"Compare the most recent decision with the last 5:\n\nCurrent Summary: {current_chat_summary}\n\nPrevious Summaries: {previous_chat_summaries}"}
                      ],
                 max_tokens=150,  

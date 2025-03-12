@@ -28,9 +28,10 @@ export default function ProfilePage() {
   const handleSave = async () => {
     try {
       if (fieldToEdit === "name") {
-        await updateDoc(doc(db, "users", user.uid), { name: value });
-        updateUser((prevUser) => ({...prevUser, name:value}));
-        setRefresh(!refresh);
+        const userRef = doc(db, "users", user.uid);
+        await updateDoc(userRef, { name: value });
+        updateUser({ name: value});
+
       } else if (fieldToEdit === "password") {
         await updatePassword(auth.currentUser, value);
         alert("Password updated successfully.");

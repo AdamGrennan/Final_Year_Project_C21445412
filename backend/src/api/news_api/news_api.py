@@ -41,7 +41,7 @@ def news_api_endpoint(sbert_model):
         article_similarity = round(float(similarities[article_match]), 2)
 
         logger.info(f"Most Similar Article: {article_title} (Similarity: {article_similarity})")
-        if article_similarity >= 0.3:
+        if article_similarity >= 0.25:
             return jsonify({
                 "most_similar_article": {
                     "title": article_title,

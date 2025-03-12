@@ -2,13 +2,14 @@ from flask import request, jsonify
 
 def chat_summary_endpoint(client):
     data = request.json
+    title = data.get('title')
+    theme = data.get('theme', "General") 
     messages = data.get('messages', [])
     detected_bias = data.get('detectedBias', []) or []
     detected_noise = data.get('detectedNoise', []) or []
     noise_sources = data.get('noiseSources', []) or []
     bias_sources = data.get('biasSources', []) or []
-    theme = data.get('theme', "General") 
-
+    
     if not messages or not isinstance(messages, list):
         return jsonify({"error": "Invalid request data: Messages must be a non-empty list"}), 400
     
@@ -18,6 +19,7 @@ def chat_summary_endpoint(client):
     The user has been making decisions in the theme of '{theme}'.
     Below is a summary of their decision-making process based on the following conversation.
     
+    - **Title:** {title}
     - **Messages:** {messages}
     - **Detected Biases:** {", ".join(detected_bias) or "None"}
     - **Bias Sources:** {", ".join(bias_sources) or "Unknown"}

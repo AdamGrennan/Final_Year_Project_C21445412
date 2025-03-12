@@ -1,5 +1,6 @@
 
-export const fetchGPTResponse = async (input, messages, setDisplayedText) => {
+export const fetchGPTResponse = async (input, messages, feedback, setDisplayedText) => {
+
   const response = await fetch('http://127.0.0.1:5000/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -10,6 +11,7 @@ export const fetchGPTResponse = async (input, messages, setDisplayedText) => {
         text: msg.text || "",
         detectedBias: msg.detectedBias || [],
         detectedNoise: msg.detectedNoise || [],
+        feedback: feedback || {}
       })),
     }),
   });
@@ -166,13 +168,14 @@ export const fetchAdvice = async (title, messageContent, detectedBias, detectedN
   }
 };
 
-export const fetchChatSummary = async (messageContent, detectedBias, detectedNoise, biasSources, noiseSources) => {
+export const fetchChatSummary = async (title, messageContent, detectedBias, detectedNoise, biasSources, noiseSources) => {
   try {
     const response = await fetch("http://127.0.0.1:5000/chat_summary", {
 
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 
+        title: title,
         messages: messageContent, 
         detectedBias: detectedBias,
         detectedNoise: detectedNoise,

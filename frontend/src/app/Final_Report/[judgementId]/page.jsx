@@ -8,7 +8,7 @@ import { useState, useRef, useEffect } from "react";
 import { Pagination, } from 'swiper/modules';
 import InteractCard from "@/components/report_components/InteractCard";
 import SwiperNavigation from "@/components/report_components/swiper_components/SwiperNavigation";
-import useDecisionData from "@/hooks/useDecisionData";
+import useDecisionData from "@/utils/useDecisionData";
 import { uploadDashboardStats } from "@/utils/uploadDashboardStats";
 import { useParams } from "next/navigation";
 import { query, collection, where, orderBy, limit, getDocs, doc, getDoc } from "firebase/firestore";
@@ -157,7 +157,7 @@ export default function Page() {
               <h3 className="text-center font-urbanist text-black text-xl font-semibold border-b border-PRIMARY pb-2">
                 Your Feedback
               </h3>
-              <InteractCard />
+              <InteractCard user={user} decision={judgementId}/>
             </div>
           </div>
         </SwiperSlide>

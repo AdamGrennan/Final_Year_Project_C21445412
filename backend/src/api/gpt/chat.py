@@ -17,6 +17,7 @@ def chat_endpoint(model, tokenizer, bias_labels, client):
     description = data.get("description", "").strip() or "No Description Available"
     statement = data.get("input", "").strip()
     context = data.get("context", [])
+    feedback = data.get("feedback")
 
     try:
         if not statement and title and description:

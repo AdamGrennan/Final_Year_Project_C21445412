@@ -26,7 +26,7 @@ def source_endpoint(client):
                     {"role": "system", "content": "Extract and highlight the specific source of noise without explanation."},
                     {"role": "user", "content": noise_prompt}
                 ],
-                max_tokens=15,  
+                max_tokens=20,  
                 temperature=0.4  
             )
             summary["noise_summary"] = noise_response.choices[0].message.content.strip().strip('"')
@@ -49,7 +49,7 @@ def source_endpoint(client):
                     {"role": "system", "content": "Extract and highlight the specific source of bias without explanation."},
                     {"role": "user", "content": bias_prompt}
                 ],
-                max_tokens=15,  
+                max_tokens=20,  
                 temperature=0.4  
             )
             summary["bias_summary"] = bias_response.choices[0].message.content.strip().strip('"')

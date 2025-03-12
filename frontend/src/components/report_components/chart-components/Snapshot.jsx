@@ -10,8 +10,7 @@ import {
     CarouselNext,
     CarouselPrevious,
 } from "@/components/ui/carousel"
-import { Card } from "../../ui/card";
-import { CardContent } from "../../ui/card";
+import { Card, CardContent} from "../../ui/card";
 
 const Snapshot = ({ bias, noise }) => {
 

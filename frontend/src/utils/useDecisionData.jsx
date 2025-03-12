@@ -9,7 +9,7 @@ const useDecisionData = () => {
   const { detectedBias,
     detectedNoise, setDetectedNoise, setDetectedBias,
     biasSources, noiseSources, setBiasSources,
-    setNoiseSources, setAdvice } = useDecision();
+    setNoiseSources, setAdvice, setStrengths, setImprovements } = useDecision();
 
   const searchParams = useSearchParams();
   const isRevisited = searchParams.get("revisited") === "true";
@@ -43,12 +43,16 @@ const useDecisionData = () => {
               noiseSources[n.noise] = n.sources || [];
             });
             const adviceData = decisionData.advice || {};
+            const strengthData = decisionData.strengths || {};
+            const improvementData = decisionData.improvements || {};
 
             setBiasSources({ ...biasSources });
             setNoiseSources({ ...noiseSources });
             setAdvice(adviceData);
             setDetectedBias([...detectedBiasesArray]);
             setDetectedNoise([...detectedNoiseArray]);
+            setStrengths([...strengthData]); 
+            setImprovements([...improvementData]); 
 
           } else {
             console.error("No such document!");
@@ -57,7 +61,6 @@ const useDecisionData = () => {
           console.error("Error fetching revisited decision:", error);
         }
       } else {
-
         await finalReport();
       }
     };

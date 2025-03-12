@@ -13,6 +13,7 @@ import { useUser } from '@/context/UserContext';
 import { useJudgment } from '@/context/JudgementContext';
 import { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
+import { uploadDashboardStats } from '@/utils/uploadDashboardStats';
 
 export default function Page() {
   const router = useRouter();
@@ -55,7 +56,6 @@ export default function Page() {
     })) : [];
 
     const judgeRef = doc(db, "judgement", judgementId);
-    const dashboardRef = doc(db, "dashboard", user.uid);
 
     try {
       batch.update(judgeRef, {
@@ -65,55 +65,11 @@ export default function Page() {
         updatedAt: serverTimestamp(),
       });
 
-      const snapshot = await getDoc(dashboardRef);
-      let existingStats = { biasOccurrences: {}, 
-      noiseOccurrences: {}, 
-      biasSources: {}, 
-      noiseSources: {}, 
-      totalDecisions: 0 };
-
-      if (snapshot.exists()) {
-        existingStats = snapshot.data();
-      }
-
-      const updatedBiasCounts = { ...existingStats.biasOccurrences };
-      const updatedNoiseCounts = { ...existingStats.noiseOccurrences };
-      const updatedBiasSources = { ...existingStats.biasSources };
-      const updatedNoiseSources = { ...existingStats.noiseSources };
-  
-      detectedBias.forEach(bias => {
-        updatedBiasCounts[bias] = (updatedBiasCounts[bias] || 0) + 1;
-        if (biasSources[bias]) {
-          biasSources[bias].forEach(source => {
-            updatedBiasSources[source] = (updatedBiasSources[source] || 0) + 1;
-          });
-        }
-      });
-  
-      detectedNoise.forEach(noise => {
-        updatedNoiseCounts[noise] = (updatedNoiseCounts[noise] || 0) + 1;
-        if (noiseSources[noise]) {
-          noiseSources[noise].forEach(source => {
-            updatedNoiseSources[source] = (updatedNoiseSources[source] || 0) + 1;
-          });
-        }
-      });
- 
-      batch.set(dashboardRef, {
-        userId: user.uid,
-        totalDecisions: existingStats.totalDecisions + 1,
-        biasOccurrences: updatedBiasCounts,
-        noiseOccurrences: updatedNoiseCounts,
-        biasSources: updatedBiasSources,  
-        noiseSources: updatedNoiseSources, 
-        lastUpdated: serverTimestamp(),
-      }, { merge: true });
-
       const messages = await fetchChats(user, judgementId) || [];
 
       const response = await fetchAdvice(judgmentData.title, messages, detectedBias, detectedNoise);
 
-      const chatSummary = await fetchChatSummary(messages, detectedBias, detectedNoise, biasSources, noiseSources);
+      const chatSummary = await fetchChatSummary(judgmentData.title, messages, detectedBias, detectedNoise, biasSources, noiseSources);
       
       if (!response || !response.advice) {
         console.error("Error: fetchAdvice returned an invalid response:", response);
@@ -125,6 +81,7 @@ export default function Page() {
       }
 
       await batch.commit();
+      await uploadDashboardStats(user.uid);
       router.push(`/Final_Report/${judgementId}`);
 
     } catch (error) {
@@ -158,7 +115,7 @@ export default function Page() {
         </p>
         <Button
           onClick={finalReport}
-          disabled={!buttonDisable}
+          disabled={buttonDisable}
           className="bg-PRIMARY text-white font-urbanist mt-72 w-full  hover:bg-opacity-80"
         >
           Finish

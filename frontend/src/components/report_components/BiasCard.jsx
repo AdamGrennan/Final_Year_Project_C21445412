@@ -10,14 +10,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LuBicepsFlexed } from "react-icons/lu";
-import { FaAnchor } from "react-icons/fa";
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import { PiScalesFill } from "react-icons/pi";
-import { MdOutlineShowChart } from "react-icons/md";
-import { FaCloudShowersHeavy } from "react-icons/fa";
-import { MdCallSplit } from "react-icons/md";
-import { MdOutlineCheckCircle } from "react-icons/md";
-import { FaHourglassHalf } from "react-icons/fa";
+import { FaCloudShowersHeavy, FaHourglassHalf, FaAnchor } from "react-icons/fa";
+import { MdOutlineCheckCircle, MdOutlineShowChart, MdCallSplit } from "react-icons/md";
 import {
   Carousel,
   CarouselContent,

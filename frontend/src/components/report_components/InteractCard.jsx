@@ -2,8 +2,9 @@
 import React, { useState } from "react";
 import { Button } from "../ui/button";
 import { BiSolidBadgeCheck } from "react-icons/bi";
+import { uploadFeedback } from "@/utils/uploadFeedback";
 
-const InteractCard = () => {
+const InteractCard = ({user, decision}) => {
     const [submit, setSubmit] = useState(false);
     const [feedback, setFeedback] = useState({
         helpful: null, 
@@ -14,15 +15,18 @@ const InteractCard = () => {
         setFeedback(prev => ({ ...prev, [key]: value }));
     };
 
-    const onSubmit = () => {
-        setSubmit(true);
-        console.log("Saved Feedback:", feedback); 
+    const onSubmit = async () => {
+        if(feedback.helpful && feedback.perspectiveChanged){
+            await uploadFeedback(user, decision, feedback);
+            setSubmit(true);
+            console.log("Saved Feedback:", feedback); 
+        }
     };
 
     const isSubmitDisable = !(feedback.helpful && feedback.perspectiveChanged);
 
     return (
-        <div className="bg-white">
+        <div className="bg-white flex flex-col items-center justify-center text-center w-full">
             {!submit ? (
                 <>
                     <p className="mb-1 font-urbanist">Did you find this chat helpful?</p>
@@ -54,7 +58,7 @@ const InteractCard = () => {
                     <Button
                         onClick={onSubmit}
                         disabled={isSubmitDisable}
-                        className="w-1/2 font-urbanist py-4 text-white bg-PRIMARY hover:bg-opacity-80 rounded-md"
+                        className="w-1/2 font-urbanist py-4 mt-8 text-white bg-PRIMARY hover:bg-opacity-80 rounded-md"
                     >
                         Submit
                     </Button>

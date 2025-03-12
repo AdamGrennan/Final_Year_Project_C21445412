@@ -22,7 +22,7 @@ def advice_endpoint(client):
         Conversation history: "**{context}**".
         
         Provide a **practical, actionable strategy** to counteract **{bias}** in this situation. Focus on **how they can adjust their thought process** next time to make a more balanced decision. 
-        Avoid generic explanations—give a clear **solution** in one paragraph.
+        Avoid generic explanations—give a clear **solution** in one paragraph, Address user personally instead of 'the user'.
         """
 
         try:
@@ -49,7 +49,8 @@ def advice_endpoint(client):
         The user made a decision titled **"{decision_title}"**, and **{noise}** was detected as a source of judgment noise.
         Conversation history: "**{context}**".
         
-        Suggest a **specific, immediate step** the user can take to reduce the impact of **{noise}** in similar decisions. Keep it **direct, situation-based, and immediately useful**.
+        Suggest a **specific, immediate step** the user can take to reduce the impact of **{noise}** in similar decisions. 
+        Keep it **direct, situation-based, and immediately useful**, Address user personally instead of 'the user'.
         """
 
         try:
