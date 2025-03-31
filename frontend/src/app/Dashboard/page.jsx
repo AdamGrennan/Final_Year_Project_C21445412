@@ -1,32 +1,67 @@
 "use client"
 import { FrequentTable } from "@/components/dashboard-components/FrequentTable";
 import { DashboardCarousel } from "@/components/dashboard-components/DashboardCarousel";
-import { DecisionStats } from "@/components/dashboard-components/DecisionStats";
+import { PersonaType } from "@/components/dashboard-components/PersonaType";
 import { useUser } from "@/context/UserContext";
+import { getDashboard } from "@/utils/dashboardUtils/getDashboard";
+import { useEffect, useState } from "react";
 
 export default function Page() {
   const { user } = useUser();
+  const [total, setTotal] = useState(0);
+  const [mostFrequentBias, setMostFrequentBias] = useState("");
+  const [mostFrequentNoise, setMostFrequentNoise] = useState("");
+  const [biasCounts, setBiasCounts] = useState([]);
+  const [noiseCounts, setNoiseCounts] = useState([]);
+  const [pieData, setPieData] = useState([]);
+  const [trendInsights, setTrendInsights] = useState([]);
+  const [biasTheme, setBiasTheme] = useState("");
+  const [noiseTheme, setNoiseTheme] = useState("");
 
-  const mockData = [
-    { label: "Overconfidence Bias", percentage: 75 },
-    { label: "Confirmation Bias", percentage: 68 },
-    { label: "Anchoring Bias", percentage: 42 },
-  ];
+  useEffect(() => {
+    if (user) {
+      getDashboard(user).then((data) => {
+        setTotal(data.totalDecisions);
+        setMostFrequentBias(data.mostFrequentBias);
+        setMostFrequentNoise(data.mostFrequentNoise);
+        setBiasCounts(data.biasCounts);
+        setNoiseCounts(data.noiseCounts);
+        setTrendInsights(data.trendInsights);
+        setBiasTheme(data.topThemeWithBias);
+        setNoiseTheme(data.topThemeWithNoise);
+  
+        const combinedPieData = [
+          ...Object.entries(data.biasCounts || {}).map(([name, value]) => ({
+            name,
+            value,
+            type: "Bias",
+          })),
+          ...Object.entries(data.noiseCounts || {}).map(([name, value]) => ({
+            name,
+            value,
+            type: "Noise",
+          })),
+        ];
+
+        setPieData(combinedPieData);
+      });
+    }
+  }, [user]);
+  
 
   return (
     <div className="grid grid-cols-3 gap-6 w-full px-6 pt-4">
-      <div className="col-span-1">
-        <FrequentTable data={mockData} />
+      <div className="col-span-1 flex flex-col">
+        <FrequentTable userId={user.uid}/>
         <div className="mt-10">
-          <DecisionStats user={user}/>
+          <PersonaType total={total} bias={mostFrequentBias} noise={mostFrequentNoise}/>
         </div>
       </div>
 
-      <div className="col-span-1"></div>
-
-      <div className="col-span-1 flex justify-end">
-        <DashboardCarousel />
+      <div className="col-span-2 flex justify-end">
+        <DashboardCarousel userId={user.uid} total={total} pieData={pieData} topThemebiaWithBias={biasTheme} topThemeWithNoise={noiseTheme} trendInsights={trendInsights}/>
       </div>
     </div>
   );
 };
+

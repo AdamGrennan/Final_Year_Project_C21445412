@@ -32,7 +32,7 @@ const MessageList = ({ messages }) => {
                             className={`px-4 py-2 mb-2 break-words rounded-lg shadow-sm font-urbanist
                             ${message.sender === "BERT" || message.sender === "GPT" || message.sender === "System"
                                     ? "bg-white text-black ml-auto max-w-fit inline-block"
-                                    : "bg-PRIMARY text-white mr-auto max-w-[80%] inline-block"
+                                    : "bg-gradient-to-br from-PRIMARY via-MERGE to-SECONDARY from-30% via-50% to-90% text-white mr-auto max-w-[80%] inline-block"
                                 }`}
                             style={{
                                 alignSelf: message.sender === "BERT" || message.sender === "GPT" || message.sender === "System"

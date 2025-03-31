@@ -8,8 +8,21 @@ import {
 } from "@/components/ui/select";
 
 const TemplateSelect = ({ onSelect }) => {
-  const [templates] = useState(["None", "Personal", "Work"]);
-
+  const [ categories ] = useState([
+    "None",
+    "Personal",
+    "Work",
+    "Finance",
+    "Health & Well-being",
+    "Relationships",
+    "Education & Learning",
+    "Career Development",
+    "Purchases & Shopping",
+    "Time Management",
+    "Social & Leisure",
+    "Ethical & Moral Dilemmas"
+  ]);
+  
   return (
     <div className="w-[250px]">
       <Select onValueChange={(value) => onSelect(value)}>
@@ -17,7 +30,7 @@ const TemplateSelect = ({ onSelect }) => {
           <SelectValue placeholder="Enter a theme" />
         </SelectTrigger>
         <SelectContent className="bg-white font-urbanist text-gray-700">
-          {templates.map((template) => (
+          {categories.map((template) => (
             <SelectItem key={template} value={template}>
               {template}
             </SelectItem>

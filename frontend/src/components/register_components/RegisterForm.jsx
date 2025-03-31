@@ -44,11 +44,13 @@ export function RegisterForm() {
       return;
     }
 
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@.#$!%*?&])[A-Za-z\d@.#$!%*?&]{8,15}$/;
+
     if (!password) {
-      setPasswordError("Invalid Password");
+      setPasswordError("Password is required");
       return;
-    } else if (password.length < 6) {
-      setPasswordError("Password must be at least 6 characters long");
+    } else if (!regex.test(password)) {
+      setPasswordError("Password must be 8-15 characters long, include uppercase, lowercase, a number, and a special character.");
       return;
     }
 
@@ -142,3 +144,4 @@ export function RegisterForm() {
     </Card>)
   );
 }
+

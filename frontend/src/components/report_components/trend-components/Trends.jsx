@@ -3,13 +3,10 @@ import React, { useState, useEffect } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MdKeyboardDoubleArrowUp, MdOutlineKeyboardDoubleArrowDown, MdNewReleases } from "react-icons/md";
 import { AiFillFire } from "react-icons/ai";
-import { useSearchParams } from "next/navigation";
 import useFetchTrends from "../../../hooks/useTrendAnalysis";
 import useTrendData from "@/hooks/useTrendData";
 
-const Trends = ({ user, jid, bias, noise }) => {
-  const searchParams = useSearchParams();
-  const isRevisited = searchParams.get("revisited") === "true";
+const Trends = ({ user, jid, bias, noise, isRevisited }) => {
   const { fetchedTrends } = useTrendData();
   const { fetchTrends, trends } = useFetchTrends(user, jid, bias, noise);
   const [displayTrends, setDisplayTrends] = useState([]);

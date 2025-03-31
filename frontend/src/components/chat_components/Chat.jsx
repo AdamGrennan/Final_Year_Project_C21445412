@@ -7,7 +7,7 @@ import { fetchChats, saveChats } from "@/services/FirebaseService";
 import MessageList from "./MessageList";
 import MessageSender from "./MessageSender";
 import { useJudgment } from "@/context/JudgementContext";
-import { getFeedback } from "@/utils/getFeedback";
+import { getFeedback } from "@/utils/decisionUtils/getFeedback";
 import { openingMessage, fetchBERTResponse, fetchGPTResponse, fetchLevelNoise, fetchPatternNoise, fetchSource, fetchNewsAPI } from "@/services/ApiService";
 
 const Chat = ({ judgementId, setFinishButtonDisable }) => {
@@ -16,22 +16,9 @@ const Chat = ({ judgementId, setFinishButtonDisable }) => {
   const { judgmentData } = useJudgment();
   const { detectBias, detectNoise } = useDecision();
   const [messages, setMessages] = useState([]);
-  const [feedback, setFeedback] = useState(null);
   const [input, setInput] = useState("");
   const [buttonDisable, setButtonDisable] = useState(false);
   const hasInitialized = useRef(false);
-
-  useEffect(() => {
-    const fetchFeedback = async() => {
-      	try{
-          const feedbackData = await getFeedback(user.uid);
-          setFeedback(feedbackData);
-        }catch(error){
-          console.error("Error fetching feedback for chat", error)
-        }
-    }
-    fetchFeedback();
-  }, []);
 
   const createChat = async () => {
     if (messages.length > 0) return;
@@ -132,7 +119,7 @@ const Chat = ({ judgementId, setFinishButtonDisable }) => {
       const gptResponse = { text: "", sender: "GPT" };
       setMessages((prev) => [...prev, gptResponse]);
 
-      await fetchGPTResponse(messageContent, messages, feedback, (newText) => {
+      await fetchGPTResponse(messageContent, messages, (newText) => {
         setMessages((prev) => {
           const updatedMessages = [...prev];
           const lastMessageIndex = updatedMessages.length - 1;
@@ -149,17 +136,18 @@ const Chat = ({ judgementId, setFinishButtonDisable }) => {
       await saveChats(user, judgementId, [gptResponse], detectedBias, detectedNoise);
 
       const newsAPI = await fetchNewsAPI(messageContent);
-      if (newsAPI?.most_similar_article) {
+
+      if (newsAPI?.recency_bias_detected) {
         console.log("Possible Recency Bias detected:", newsAPI.most_similar_article.title);
-
+      
         const recencySource = `It seems you may have read [${newsAPI.most_similar_article.title}], which could be affecting your judgment.`;
-
+      
         detectBias("Recency Bias", recencySource);
         detectedBias.push("Recency Bias"); 
       } else {
         console.log("No Recency Bias detected");
       }
-
+      
       await saveChats(user, judgementId, [{ ...newMessage }], detectedBias, detectedNoise);
 
     } catch (error) {

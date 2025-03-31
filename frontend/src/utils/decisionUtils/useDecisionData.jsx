@@ -4,15 +4,12 @@ import { useParams, useSearchParams } from "next/navigation";
 import { db } from "@/config/firebase";
 import { useDecision } from '@/context/DecisionContext';
 
-const useDecisionData = () => {
+const useDecisionData = (isRevisited) => {
 
   const { detectedBias,
     detectedNoise, setDetectedNoise, setDetectedBias,
     biasSources, noiseSources, setBiasSources,
     setNoiseSources, setAdvice, setStrengths, setImprovements } = useDecision();
-
-  const searchParams = useSearchParams();
-  const isRevisited = searchParams.get("revisited") === "true";
   const { judgementId } = useParams();
 
   useEffect(() => {

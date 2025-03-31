@@ -1,5 +1,5 @@
 
-export const fetchGPTResponse = async (input, messages, feedback, setDisplayedText) => {
+export const fetchGPTResponse = async (input, messages, setDisplayedText) => {
 
   const response = await fetch('http://127.0.0.1:5000/chat', {
     method: 'POST',
@@ -11,7 +11,6 @@ export const fetchGPTResponse = async (input, messages, feedback, setDisplayedTe
         text: msg.text || "",
         detectedBias: msg.detectedBias || [],
         detectedNoise: msg.detectedNoise || [],
-        feedback: feedback || {}
       })),
     }),
   });

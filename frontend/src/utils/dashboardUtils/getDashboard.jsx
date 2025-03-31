@@ -19,6 +19,13 @@ export const getDashboard = async (user) => {
 
     return {
       totalDecisions: dashboardData.totalDecisions || 0,
+      mostFrequentBias: dashboardData.mostFrequentBias || "ERROR",
+      mostFrequentNoise: dashboardData.mostFrequentNoise || "ERROR",
+      biasCounts: dashboardData.biasCounts || "ERROR",
+      noiseCounts: dashboardData.noiseCounts || "ERROR",
+      topThemeWithBias: dashboardData.topThemeWithBias || "ERROR",
+      topThemeWithNoise: dashboardData.topThemeWithNoise || "ERROR",
+      trendInsights: dashboardData.trendInsights || "ERROR",
     };
   } catch (error) {
     console.error("Error fetching dashboard:", error);

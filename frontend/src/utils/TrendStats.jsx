@@ -32,32 +32,30 @@ export const percentageChange = (allDecisions, key) => {
   const recentCounts = countOccurrences(recentDecisions);
   const pastCounts = countOccurrences(pastDecisions);
 
-  return Object.keys({ ...recentCounts, ...pastCounts }).map(biasOrNoise => {
-    const prevCount = pastCounts[biasOrNoise] || 0;
-    const currentCount = recentCounts[biasOrNoise] || 0;
+  return Object.keys({ ...recentCounts, ...pastCounts }).map(label => {
+    const prevCount = pastCounts[label] || 0;
+    const currentCount = recentCounts[label] || 0;
 
     let change = 0;
 
-    if (prevCount === 0 && currentCount === 0) return null;
-
-    if (prevCount > 0 && currentCount === 0) {
-      change = -100;
+    if (prevCount === 0 && currentCount > 0) {
+      change = 100; 
     } 
-    else if (prevCount === 0 && currentCount > 0) {
-      change = ((currentCount - prevCount) / (prevCount + 1)) * 100; 
+    else if (prevCount > 0 && currentCount === 0) {
+      change = -100; 
+    } 
+    else if (prevCount > 0 && currentCount > 0) {
+      change = ((currentCount - prevCount) / prevCount) * 100;
     } 
     else {
-      change = ((currentCount - prevCount) / prevCount) * 100;
+      return null; 
     }
-
     return {
-      message: `${biasOrNoise} ${change > 0 ? "increased" : "decreased"} by ${Math.abs(change.toFixed(1))}%`,
+      message: `${label} ${change > 0 ? "increased" : "decreased"} by ${Math.abs(change.toFixed(1))}%`,
       type: change > 0 ? "increase" : "decrease"
     };
-  }).filter(Boolean); 
+  }).filter(Boolean);
 };
-
-
 
 export const decisionStreaks = (allDecisions, allBiases, allNoises) => {
   if (allDecisions.length < 3) return [];

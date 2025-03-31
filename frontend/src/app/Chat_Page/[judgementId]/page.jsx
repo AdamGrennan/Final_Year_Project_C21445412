@@ -13,7 +13,7 @@ import { useUser } from '@/context/UserContext';
 import { useJudgment } from '@/context/JudgementContext';
 import { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
-import { uploadDashboardStats } from '@/utils/uploadDashboardStats';
+import { uploadDashboardStats } from '@/utils/dashboardUtils/uploadDashboardStats';
 
 export default function Page() {
   const router = useRouter();

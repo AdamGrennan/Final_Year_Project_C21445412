@@ -13,7 +13,8 @@ import { LuBicepsFlexed } from "react-icons/lu";
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import { PiScalesFill } from "react-icons/pi";
 import { FaCloudShowersHeavy, FaHourglassHalf, FaAnchor } from "react-icons/fa";
-import { MdOutlineCheckCircle, MdOutlineShowChart, MdCallSplit } from "react-icons/md";
+import {MdOutlineShowChart, MdCallSplit } from "react-icons/md";
+import { BiSolidBadgeCheck } from "react-icons/bi";
 import {
   Carousel,
   CarouselContent,
@@ -107,7 +108,7 @@ const BiasCard = ({ bias, noise, biasSources, noiseSources, advice }) => {
         </Carousel>
       ) : (
         <div className="flex flex-col justify-center items-center text-center translate-y-8">
-          <MdOutlineCheckCircle className="w-32 h-32 text-SECONDARY" />
+          <BiSolidBadgeCheck className="w-32 h-32 text-PRIMARY" />
           <p className="font-urbanist font-light">No Noise or Bias Detected</p>
         </div>
       )}

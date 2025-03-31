@@ -1,6 +1,7 @@
 from flask import request, Response, jsonify
 from bert.predict import predict_bias
 import time
+from service.feedback_service import FeedbackService
 
 def get_created_at(chat):
     return chat.get("createdAt", float("-inf"))  
@@ -17,7 +18,6 @@ def chat_endpoint(model, tokenizer, bias_labels, client):
     description = data.get("description", "").strip() or "No Description Available"
     statement = data.get("input", "").strip()
     context = data.get("context", [])
-    feedback = data.get("feedback")
 
     try:
         if not statement and title and description:
@@ -30,6 +30,10 @@ def chat_endpoint(model, tokenizer, bias_labels, client):
 
         detected_biases = predict_bias(model, tokenizer, statement, bias_labels)
         detected_biases = [bias for bias in detected_biases if bias in bias_labels]
+        
+        feedback_service = FeedbackService()
+        feedback_data = feedback_service.fetch_feedback(data.get("userId"), data.get("judgementId"))
+        chat_instruction = feedback_service.generate_instruction(feedback_data)
 
         messages = [
             {
@@ -40,6 +44,7 @@ def chat_endpoint(model, tokenizer, bias_labels, client):
                     "Ensure responses follow the previous conversation naturally. "
                     "If the user responds with 'yes' or asks for help, assume they are referring to the last topic discussed. "
                     "Never ask the user to repeat themselves; instead, continue based on the last message in context."
+                    f"{chat_instruction}"
                 ),
             }
         ]

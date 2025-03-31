@@ -5,17 +5,16 @@ import { doc, updateDoc } from "firebase/firestore";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
 
-const DeleteModal = ({ onClose }) => {
-    const { router } = useRouter();
+const DeleteModal = ({ userId, onClose }) => {
+    const router  = useRouter();
 
       const deleteAccount = async () => {
         try {
+          await updateDoc(doc(db, "users", userId), { deleted: true });
           await deleteUser(auth.currentUser);
-          await updateDoc(doc(db, "users", user.uid), { deleted: true });
-          setSuccess("Account deleted successfully.");
           router.push("/");
         } catch (error) {
-          console.log(error)
+          console.error(error)
         }
       };
 

@@ -8,9 +8,9 @@ import { useState, useRef, useEffect } from "react";
 import { Pagination, } from 'swiper/modules';
 import InteractCard from "@/components/report_components/InteractCard";
 import SwiperNavigation from "@/components/report_components/swiper_components/SwiperNavigation";
-import useDecisionData from "@/utils/useDecisionData";
-import { uploadDashboardStats } from "@/utils/uploadDashboardStats";
-import { useParams } from "next/navigation";
+import useDecisionData from "@/utils/decisionUtils/useDecisionData";
+import { uploadDashboardStats } from "@/utils/dashboardUtils/uploadDashboardStats";
+import { useParams, useSearchParams } from "next/navigation";
 import { query, collection, where, orderBy, limit, getDocs, doc, getDoc } from "firebase/firestore";
 import { db } from "@/config/firebase";
 
@@ -23,7 +23,6 @@ import 'swiper/css/scrollbar';
 import BiasCard from "@/components/report_components/BiasCard";
 
 export default function Page() {
-  useDecisionData();
   const { detectedBias, detectedNoise, biasSources, noiseSources, advice } = useDecision();
   const { judgementId } = useParams();
   const { user } = useUser();
@@ -31,7 +30,15 @@ export default function Page() {
   const [isLastSlide, setIsLastSlide] = useState(false);
   const [isFirstSlide, setIsFirstSlide] = useState(true);
   const [chatSummaries, setChatSummaries] = useState([]);
-  uploadDashboardStats(user);
+  const searchParams = useSearchParams();
+  const isRevisited = searchParams.get("revisited") === "true";
+  useDecisionData(isRevisited);
+
+  useEffect(() => {
+    if (!isRevisited) {
+      uploadDashboardStats(user.uid);
+    }
+  }, [isRevisited]);
 
   useEffect(() => {
     const getSummaries = async () => {
@@ -105,7 +112,7 @@ export default function Page() {
             </h2>
           </div>
           <div className="h-auto flex flex-col md:flex-row items-start justify-between p-8 space-y-8 md:space-y-0 md:space-x-8 bg-white">
-            <div className="w-full md:w-2/3 h-[375px] max-h-[375px] bg-white rounded-lg shadow-md p-6 space-y-4 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-SECONDARY scrollbar-track-GRAAY">
+            <div className="w-full md:w-3/3 h-[375px] max-h-[375px] bg-white rounded-lg shadow-md p-6 space-y-4 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-SECONDARY scrollbar-track-GRAAY">
               <h3 className="text-center font-urbanist text-black text-base font-semibold border-b border-PRIMARY pb-2">
                 Detected Noise & Bias
               </h3>
@@ -114,12 +121,6 @@ export default function Page() {
                 biasSources={biasSources}
                 noiseSources={noiseSources}
                 advice={advice} />
-            </div>
-            <div className="w-full md:w-1/3 h-[375px] bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-center font-urbanist text-black text-base font-semibold border-b border-PRIMARY pb-2">
-                Insight Graphs
-              </h3>
-              <Snapshot bias={detectedBias} noise={detectedNoise} />
             </div>
           </div>
         </SwiperSlide>
@@ -130,11 +131,18 @@ export default function Page() {
               Trends and Patterns
             </h2>
             <div className="h-auto flex flex-col md:flex-row items-start justify-between p-8 space-y-8 md:space-y-0 md:space-x-8 bg-white">
-              <div className="w-full md:w-3/3 h-[375px] bg-white rounded-lg shadow-md p-6 space-y-4 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-SECONDARY scrollbar-track-GRAAY">
+            <div className="w-full md:w-1/3 h-[375px] bg-white rounded-lg shadow-md p-6">
+              <h3 className="text-center font-urbanist text-black text-base font-semibold border-b border-PRIMARY pb-2">
+                Insight Graphs
+              </h3>
+              <Snapshot bias={detectedBias} noise={detectedNoise} />
+            </div> 
+              
+              <div className="w-full md:w-2/3 h-[375px] bg-white rounded-lg shadow-md p-6 space-y-4 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-SECONDARY scrollbar-track-GRAAY">
                 <h3 className="font-urbanist text-black text-base font-semibold border-b border-PRIMARY pb-2">
                   Key Trends
                 </h3>
-                <Trends user={user} jid={judgementId} bias={detectedBias} noise={detectedNoise} />
+                <Trends user={user} jid={judgementId} bias={detectedBias} noise={detectedNoise} isRevisited={isRevisited}/>
               </div>
             </div>
           </div>
@@ -151,13 +159,13 @@ export default function Page() {
               <h3 className="text-center font-urbanist text-black text-xl font-semibold border-b border-PRIMARY pb-2">
                 Feedback
               </h3>
-              <SummarySideBar chatSummaries={chatSummaries} />
+              <SummarySideBar chatSummaries={chatSummaries} judgementId={judgementId} isRevisited={isRevisited}/>
             </div>
             <div className="w-full md:w-1/3 h-[375px] bg-white rounded-lg shadow-md p-6 space-y-4">
               <h3 className="text-center font-urbanist text-black text-xl font-semibold border-b border-PRIMARY pb-2">
                 Your Feedback
               </h3>
-              <InteractCard user={user} decision={judgementId}/>
+              <InteractCard user={user} decision={judgementId} isRevisited={isRevisited}/>
             </div>
           </div>
         </SwiperSlide>

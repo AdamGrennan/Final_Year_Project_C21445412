@@ -1,44 +1,55 @@
 "use client";
 import React from "react";
-import { getDashboard } from "@/utils/getDashboard";
-import { useState, useEffect } from "react";
+import BiasPieChart from "./PieChart";
 
-export const DecisionStats = ({ user }) => {
-    const [total, setTotal] = useState(0);
-    const [weekly, setWeekly] = useState(0); 
-    const [monthly, setMonthly] = useState(0); 
-
-    useEffect(() => {
-        if (user) {
-          getDashboard(user).then((data) => {
-            setTotal(data.totalDecisions);
-          });
-        }
-      }, [user]);    
-
+export const DecisionStats = ({
+  total,
+  pieData,
+  topThemeWithBias,
+  topThemeWithNoise,
+  trendInsights = [],
+}) => {
   return (
-    <div className="w-[310px] h-[250px] bg-gray-100 rounded-lg shadow-md p-4 flex flex-col justify-between">
-    <h2 className="font-urbanist font-semibold border-b-2 border-PRIMARY pb-1 w-fit">
-        Decision Stats
-      </h2>
-      <div className="font-urbanist flex flex-col space-y-3">
-        <StatItem label="Total Decisions" value={total} />
-        <StatItem label="Decisions This Week" value={weekly} />
-        <StatItem label="Decisions This Month" value={monthly} />
+    <div className="m-0 p-0">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <div className="flex flex-col space-y-6">
+          <div className="w-full max-w-[270px] self-start">
+            <div className="bg-white p-4 space-y-3">
+              <StatItem label="Total Decisions" value={total} />
+              <StatItem label="Most Biased Theme" value={topThemeWithBias || "N/A"} />
+              <StatItem label="Noisiest Theme" value={topThemeWithNoise || "N/A"} />
+
+              {trendInsights.map((trend, index) => (
+                <StatItem
+                  key={index}
+                  label="Trend Insight"
+                  value={trend.message}
+                  type={trend.type}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col w-full">
+          <BiasPieChart pieData={pieData} title="Bias Distribution" />
+        </div>
       </div>
     </div>
   );
 };
 
-const StatItem = ({ label, value }) => (
-  <div className="flex justify-between bg-white p-2 rounded-md shadow">
-    <span className="text-sm font-medium">{label}</span>
-    <span className="text-lg font-semibold text-PRIMARY">{value}</span>
-  </div>
-);
+const StatItem = ({ label, value, type }) => {
+  let textColor = "text-gray-700";
+  if (type === "increase") textColor = "text-green-600";
+  if (type === "decrease") textColor = "text-red-600";
+  if (type === "new") textColor = "text-blue-600";
+  if (type === "streak") textColor = "text-purple-600";
 
-const Example = () => {
-  return <DecisionStats total={54} weekly={10} monthly={32} />;
+  return (
+    <div className="flex flex-col bg-gray-50 px-4 py-2 rounded-lg shadow-sm border border-gray-200">
+      <span className="text-xs font-medium text-gray-600">{label}</span>
+      <span className={`text-sm font-semibold ${textColor}`}>{value}</span>
+    </div>
+  );
 };
-
-export default Example;
