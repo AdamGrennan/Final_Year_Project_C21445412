@@ -26,6 +26,8 @@ export const getDashboard = async (user) => {
       topThemeWithBias: dashboardData.topThemeWithBias || "ERROR",
       topThemeWithNoise: dashboardData.topThemeWithNoise || "ERROR",
       trendInsights: dashboardData.trendInsights || "ERROR",
+      mostBiasedTime: dashboardData.mostBiasedTime || "ERROR",
+      noisiestTime: dashboardData.noisiestTime || "ERROR",
     };
   } catch (error) {
     console.error("Error fetching dashboard:", error);

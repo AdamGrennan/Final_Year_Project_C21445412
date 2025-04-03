@@ -8,7 +8,7 @@ import { useDecision } from "@/context/DecisionContext";
 import { IoExitOutline } from "react-icons/io5";
 import { MdDashboard } from "react-icons/md";
 import { MdBubbleChart } from "react-icons/md";
-import { FaUser } from "react-icons/fa";
+import { FaUser, FaBook } from "react-icons/fa";
 import { RiHomeFill } from "react-icons/ri";
 import {
   Sidebar,
@@ -33,6 +33,7 @@ const data = {
         { title: "Home", url: "#" },
         { title: "New", url: "#" },
         { title: "Dashboard", url: "#" },
+        { title: "Guide", url: "#" },
         { title: "Log Out", url: "#" },
       ],
     },
@@ -113,6 +114,13 @@ export function AppSidebar({ ...props }) {
                           {item.title}
                         </a>
                       </SidebarMenuButton>
+                         ) : item.title === "Guide" ? (
+                          <SidebarMenuButton asChild isActive={item.isActive} className="font-urbanist text-white hover:bg-MERGE hover:no-underline">
+                            <a href="#" onClick={(e) => { e.preventDefault(); router.push("/Guide"); }}>
+                              <FaBook className="text-white mr-2" />
+                              {item.title}
+                            </a>
+                          </SidebarMenuButton>
                     ) : (
                       <SidebarMenuButton asChild isActive={item.isActive} className="text-white">
                         <a href={item.url}>{item.title}</a>

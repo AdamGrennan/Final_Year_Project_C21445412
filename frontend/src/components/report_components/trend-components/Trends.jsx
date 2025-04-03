@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MdKeyboardDoubleArrowUp, MdOutlineKeyboardDoubleArrowDown, MdNewReleases } from "react-icons/md";
 import { AiFillFire } from "react-icons/ai";
-import useFetchTrends from "../../../hooks/useTrendAnalysis";
+import useFetchTrends from "../../../utils/trendUtils/useTrendAnalysis";
 import useTrendData from "@/hooks/useTrendData";
 
 const Trends = ({ user, jid, bias, noise, isRevisited }) => {
@@ -31,14 +31,13 @@ const Trends = ({ user, jid, bias, noise, isRevisited }) => {
   return (
     <div>
       <ScrollArea>
-        {displayTrends.length === 0 ? <p>No Trends Detected </p> :
+        {displayTrends.length === 0 ? <p className="font-urbanist text-gray-500">No Trends Detected </p> :
           displayTrends.map((trend, index) => (
             <div key={index} className="w-full text-left flex flex-col items-center font-urbanist">
-              <div className="flex justify-between items-center font-urbanist">
-                <p>{trend.message}</p>
-                <span className="ml-4">{iconMap[trend.type]}</span>
+              <div className="flex justify-between items-center w-full px-2 py-1 rounded-md bg-gray-50 hover:bg-gray-100 transition">
+                <p className="text-gray-700">{trend.message}</p>
+                <span className="text-xl">{iconMap[trend.type]}</span>
               </div>
-
             </div>
           ))}
       </ScrollArea>

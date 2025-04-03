@@ -2,11 +2,30 @@ import logging
 from flask import request, jsonify
 from newsapi import NewsApiClient
 from sklearn.metrics.pairwise import cosine_similarity
+import spacy
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 newsapi = NewsApiClient(api_key='ff2821922ae545f1b0a770cc8bf2d7c3')
+nlp = spacy.load("en_core_web_sm")
+
+def extract_keywords(text):
+    doc = nlp(text)
+    keywords = set()
+
+    for ent in doc.ents:
+        if ent.label_ in ["PERSON", "ORG", "GPE", "NORP"]:
+            keywords.add(ent.text)
+
+    if not keywords:
+        keywords.update([
+            token.text for token in doc
+            if token.pos_ in ["NOUN", "PROPN"] and not token.is_stop
+        ])
+
+    return list(keywords)
+
 
 def news_api_endpoint(sbert_model):
     try:
@@ -15,9 +34,13 @@ def news_api_endpoint(sbert_model):
 
         if not input_text:
             return jsonify({"error": "No input provided"}), 400
+        
+        keywords = extract_keywords(input_text)
+        query = " OR ".join(keywords)
 
-        query = input_text.lower()
-
+        logger.info(f"Keywords extracted: {keywords}")
+        logger.info(f"Final Query used: {query}")
+        
         articles = newsapi.get_everything(
             q=query,
             sort_by="publishedAt",
@@ -25,7 +48,6 @@ def news_api_endpoint(sbert_model):
             page_size=50
         )
 
-        logger.info(f"Query used: {query}")
         logger.info(f"NewsAPI raw response: {articles}")
 
         if articles.get("status") != "ok":
@@ -69,7 +91,7 @@ def news_api_endpoint(sbert_model):
 
         logger.info(f"Most Similar Article: {article_title} (Similarity: {article_similarity})")
 
-        if article_similarity >= 0.25:
+        if article_similarity >= 0.5:
             return jsonify({
                 "recency_bias_detected": True,
                 "most_similar_article": {

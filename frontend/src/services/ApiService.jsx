@@ -191,9 +191,9 @@ export const fetchChatSummary = async (title, messageContent, detectedBias, dete
   }
 }
 
-export const fetchSummary = async ({ currentChatSummary, previousChatSummaries }) => {
+export const fetchInsights = async ({ currentChatSummary, previousChatSummaries }) => {
   try {
-    const response = await fetch("http://127.0.0.1:5000/summary", {
+    const response = await fetch("http://127.0.0.1:5000/insights", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ currentChatSummary,
@@ -205,7 +205,7 @@ export const fetchSummary = async ({ currentChatSummary, previousChatSummaries }
 
     return data;
   } catch (error) {
-    console.log("ERROR in fetchSummary:", error);
+    console.log("ERROR in fetchInsights:", error);
     return { Strengths: [], "Areas to Improve": [] };
   }
 };

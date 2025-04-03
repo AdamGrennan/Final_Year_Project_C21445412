@@ -107,15 +107,31 @@ const Chat = ({ judgementId, setFinishButtonDisable }) => {
       const levelNoiseData = await fetchLevelNoise(messageContent);
       if (levelNoiseData) {
         const { confidence_scores } = levelNoiseData;
-        if (confidence_scores["harsh"] > confidence_scores["neutral"]) {
-          detectedNoise.push("Level Noise");
-
+      
+        const harshScore = confidence_scores["harsh"] || 0;
+        const lenientScore = confidence_scores["lenient"] || 0;
+        const neutralScore = confidence_scores["neutral"] || 0;
+      
+        const threshold = 0.05; 
+      
+        let levelNoiseType = null;
+      
+        if (harshScore - neutralScore > threshold && harshScore > lenientScore) {
+          levelNoiseType = "Harsh Level Noise";
+        } else if (lenientScore - neutralScore > threshold && lenientScore > harshScore) {
+          levelNoiseType = "Lenient Level Noise";
+        }
+      
+        if (levelNoiseType) {
+          detectedNoise.push(levelNoiseType); 
+      
           const source = await fetchSource(messageContent, detectedBias, detectedNoise);
-          const noiseSource = source.noiseSummary !== "No noise source available." ? source.noiseSummary : "No specific source";
-          detectNoise("Level Noise", noiseSource);
+          const noiseSource =
+            source.noiseSummary !== "No noise source available." ? source.noiseSummary : "No specific source";
+      
+          detectNoise(levelNoiseType, noiseSource); 
         }
       }
-
       const gptResponse = { text: "", sender: "GPT" };
       setMessages((prev) => [...prev, gptResponse]);
 

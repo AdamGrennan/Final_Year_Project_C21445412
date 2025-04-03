@@ -1,6 +1,5 @@
 import { db } from "@/config/firebase";
 import { collection, query, where, getDocs, doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
-import { newOccurrence, percentageChange, decisionStreaks } from "@/utils/TrendStats";
 
 export const uploadDashboardStats = async (userId) => {
   try {
@@ -10,14 +9,16 @@ export const uploadDashboardStats = async (userId) => {
     const q = query(decisionsRef, where("userId", "==", userId));
     const querySnapshot = await getDocs(q);
 
-    const allDecisions = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
     const dashboardRef = doc(db, "dashboard", userId);
     const dashboardSnap = await getDoc(dashboardRef);
     const dashboardData = dashboardSnap.exists() ? dashboardSnap.data() : {};
 
-    const biasThemes = {};
-    const noiseThemes = {};
+    const biasThemes = dashboardData.biasThemes || {};
+    const noiseThemes = dashboardData.noiseThemes || {};
+
+    const biasTimes = { Morning: 0, Afternoon: 0, Evening: 0, Night: 0 };
+    const noiseTimes = { Morning: 0, Afternoon: 0, Evening: 0, Night: 0 };
+
     let totalDecisions = dashboardData.totalDecisions || 0;
     let completedDecisions = dashboardData.completedDecisions || 0;
     const biasCounts = dashboardData.biasCounts || {};
@@ -26,8 +27,32 @@ export const uploadDashboardStats = async (userId) => {
 
     const newDecisionIds = [];
 
+    const getTime = (timestamp) => {
+      const date = timestamp?.toDate?.();
+      if (!date) return null;
+
+      const hour = date.getHours();
+      if (hour >= 6 && hour < 12) return "Morning";
+      if (hour >= 12 && hour < 18) return "Afternoon";
+      if (hour >= 18 && hour < 22) return "Evening";
+      return "Night";
+    };
+
     querySnapshot.forEach((doc) => {
       const decision = doc.data();
+
+      const timeBucket = getTime(decision.createdAt);
+
+      if (timeBucket) {
+        if (Array.isArray(decision.detectedBias) && decision.detectedBias.length > 0) {
+          biasTimes[timeBucket] = (biasTimes[timeBucket] || 0) + 1;
+        }
+
+        if (Array.isArray(decision.detectedNoise) && decision.detectedNoise.length > 0) {
+          noiseTimes[timeBucket] = (noiseTimes[timeBucket] || 0) + 1;
+        }
+      }
+
       const decisionId = doc.id;
 
       if (processedDecisionIds.includes(decisionId)) return;
@@ -65,18 +90,17 @@ export const uploadDashboardStats = async (userId) => {
         if (Array.isArray(decision.detectedBias) && decision.detectedBias.length > 0) {
           biasThemes[theme] = (biasThemes[theme] || 0) + 1;
         }
-        
+
         if (Array.isArray(decision.detectedNoise) && decision.detectedNoise.length > 0) {
           noiseThemes[theme] = (noiseThemes[theme] || 0) + 1;
         }
-        
+
       }
 
     });
     if (newDecisionIds.length === 0) {
       return;
     }
-    
 
     let mostFrequentBias = null;
     let highestBiasCount = 0;
@@ -99,7 +123,6 @@ export const uploadDashboardStats = async (userId) => {
     let topThemeWithBias = null;
     let maxBiasThemeCount = 0;
     for (const theme in biasThemes) {
-      console.log(`BIAS THEME: ${theme} — COUNT: ${biasThemes[theme]}`);
       if (biasThemes[theme] > maxBiasThemeCount) {
         maxBiasThemeCount = biasThemes[theme];
         topThemeWithBias = theme;
@@ -109,26 +132,18 @@ export const uploadDashboardStats = async (userId) => {
     let topThemeWithNoise = null;
     let maxNoiseThemeCount = 0;
     for (const theme in noiseThemes) {
-      console.log(`NOISE THEME: ${theme} — COUNT: ${noiseThemes[theme]}`);
       if (noiseThemes[theme] > maxNoiseThemeCount) {
         maxNoiseThemeCount = noiseThemes[theme];
         topThemeWithNoise = theme;
       }
     }
-    
-    const allBiasLabels = Object.keys(biasCounts);
-    const allNoiseLabels = Object.keys(noiseCounts);
 
-    const latestDecision = allDecisions.find(d => newDecisionIds.includes(d.id));
-    const currentBiases = latestDecision?.detectedBias?.map(b => b.bias) || [];
-    const currentNoises = latestDecision?.detectedNoise?.map(n => n.noise) || [];
+    const getMaxKey = (obj) =>
+      Object.keys(obj).reduce((a, b) => (obj[a] > obj[b] ? a : b), "None");
 
-    const trendMessages = [
-      ...newOccurrence(allDecisions, currentBiases, currentNoises),
-      ...percentageChange(allDecisions, "detectedBias"),
-      ...percentageChange(allDecisions, "detectedNoise"),
-      ...decisionStreaks(allDecisions, allBiasLabels, allNoiseLabels),
-    ].slice(0, 3);
+    const mostBiasedTime = getMaxKey(biasTimes);
+    const noisiestTime = getMaxKey(noiseTimes);
+
 
     const updatedDecisionIds = [...processedDecisionIds, ...newDecisionIds];
 
@@ -140,11 +155,14 @@ export const uploadDashboardStats = async (userId) => {
         completedDecisions,
         biasCounts,
         noiseCounts,
+        biasThemes,
+        noiseThemes,
         mostFrequentBias,
         mostFrequentNoise,
         topThemeWithBias,
         topThemeWithNoise,
-        trendInsights: trendMessages,
+        mostBiasedTime,
+        noisiestTime,
         processedDecisionIds: updatedDecisionIds,
         updatedAt: serverTimestamp(),
       },

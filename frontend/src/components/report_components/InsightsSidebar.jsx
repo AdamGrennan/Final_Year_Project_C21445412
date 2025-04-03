@@ -1,29 +1,32 @@
 "use client";
 import { useEffect, useState } from "react";
-import { fetchSummary } from "@/services/ApiService";
+import { fetchInsights } from "@/services/ApiService";
 import { db } from "@/config/firebase"; 
 import { doc, updateDoc } from "firebase/firestore"; 
 import { useDecision } from '@/context/DecisionContext';
 
 const SummarySidebar = ({ chatSummaries, judgementId, isRevisited }) => {
   const { strengths, improvements, setStrengths, setImprovements } = useDecision(); 
+  const [showInsights, setShowInsights] = useState(false);
 
   useEffect(() => {
     const getSummary = async () => {
-      if (isRevisited) {
-        return;
-      }
-      
+      if (isRevisited) return;
+
       try {
-        if (!chatSummaries || !chatSummaries.currentChatSummary || !chatSummaries.previousChatSummaries) {
+        if (!chatSummaries?.currentChatSummary || !chatSummaries?.previousChatSummaries) {
           console.warn("chatSummaries is missing required fields.");
           return;
         }
 
         const { currentChatSummary, previousChatSummaries } = chatSummaries;
 
-        const response = await fetchSummary({ currentChatSummary, previousChatSummaries });
-        console.log("Fetched Summary:", response);
+        if (previousChatSummaries.length < 2) {
+          setShowInsights(true);
+          return;
+        }
+
+        const response = await fetchInsights({ currentChatSummary, previousChatSummaries });
 
         if (response && judgementId) {
           const judgementRef = doc(db, "judgement", judgementId);
@@ -40,7 +43,7 @@ const SummarySidebar = ({ chatSummaries, judgementId, isRevisited }) => {
       }
     };
 
-    if (chatSummaries && chatSummaries.currentChatSummary && chatSummaries.previousChatSummaries) {
+    if (chatSummaries?.currentChatSummary && chatSummaries?.previousChatSummaries) {
       getSummary();
     }
   }, [chatSummaries, judgementId, isRevisited]);
@@ -48,18 +51,25 @@ const SummarySidebar = ({ chatSummaries, judgementId, isRevisited }) => {
   return (
     <div className="flex flex-col items-center justify-center">
       <div className="w-full">
-        <ul className="list-disc list-inside text-sm space-y-2">
-          <h3 className="font-urbanist text-lg font-semibold text-green-300 mb-2">Strengths</h3>
-          {strengths.length > 0 && strengths.map((key, index) => (
-            <p key={index} className="font-urbanist">{key}</p>
-          ))}
-          <h3 className="font-urbanist text-lg font-semibold text-red-300 mb-2">Areas to Improve</h3>
-          {improvements.length > 0 && improvements.map((key, index) => (
-            <p key={index} className="font-urbanist">{key}</p>
-          ))}
-        </ul>
+        {showInsights ? (
+          <p className="text-sm text-center text-gray-400 italic">
+            Make 3 decisions to unlock personalized insights.
+          </p>
+        ) : (
+          <ul className="list-disc list-inside text-sm space-y-2">
+            <h3 className="font-urbanist text-lg font-semibold text-green-300 mb-2">Strengths</h3>
+            {strengths.map((key, index) => (
+              <p key={index} className="font-urbanist">{key}</p>
+            ))}
+            <h3 className="font-urbanist text-lg font-semibold text-red-300 mb-2">Areas to Improve</h3>
+            {improvements.map((key, index) => (
+              <p key={index} className="font-urbanist">{key}</p>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );
 };
+
 export default SummarySidebar;

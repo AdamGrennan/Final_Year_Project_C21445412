@@ -11,7 +11,7 @@ export default function Page() {
           htmlFor="terms" 
           className="font-urbanist text-PRIMARY text-2xl font-semibold text-center"
         >
-          Ready to Make a Decision?
+         Start a New Decision
         </Label>
         <JudgementForm />
       </div>

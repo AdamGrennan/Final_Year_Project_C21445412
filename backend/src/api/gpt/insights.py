@@ -1,6 +1,6 @@
 from flask import request, jsonify
 
-def summary_endpoint(client):
+def insight_endpoint(client):
     data = request.json
 
     current_chat_summary = data.get('currentChatSummary', "No summary available")
@@ -12,8 +12,14 @@ def summary_endpoint(client):
                 model="gpt-3.5-turbo",
                 messages=[
                 {"role": "system", "content": f"You analyze decision-making behavior and return only {task_type} as bullet points. Do not include section headers or introductions. Use 'you' instead of 'the user', also include one related emoji at the end of each bullet point."},
-                {"role": "user", "content": f"Compare the most recent decision with the last 5:\n\nCurrent Summary: {current_chat_summary}\n\nPrevious Summaries: {previous_chat_summaries}"}
-                     ],
+                {"role": "user", "content": f"""
+                You are analyzing a user’s decision-making patterns over time.
+                Below is the most recent decision followed by the five most recent previous decisions. Each contains the title, theme, detected bias and noise, and a summary. Compare them and identify clear patterns.
+                Be specific and avoid generic advice. You can refer to decision titles.
+                Current Decision:
+                {current_chat_summary}
+                Past Decisions:
+                {"\n\n".join(previous_chat_summaries)}"""}],
                 max_tokens=150,  
                 temperature=0.5  
             )

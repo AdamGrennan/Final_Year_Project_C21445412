@@ -44,6 +44,7 @@ def chat_summary_endpoint(client):
             if response and hasattr(response, 'choices') else "Summary could not be generated due to an error."
     except Exception as e:
         print(f"Chat Summary Error: {e}")
-        chat_summary_response["chat_summary"] = "Summary could not be generated due to an error."
+        chat_summary_response["chat_summary"] = f"Title: {title}\nTheme: {theme}\nBiases: {', '.join(detected_bias) or 'None'}\nNoise: {', '.join(detected_noise) or 'None'}\n\nSummary: {response.choices[0].message.content.strip().strip('\"')}"
+
 
     return jsonify(chat_summary_response)

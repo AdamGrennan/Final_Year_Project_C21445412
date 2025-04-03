@@ -12,7 +12,7 @@ from src.api.gpt.chat import chat_endpoint
 from src.api.gpt.source import source_endpoint
 from src.api.gpt.advice import advice_endpoint
 from src.api.gpt.chat_summary import chat_summary_endpoint
-from src.api.gpt.summary import summary_endpoint
+from src.api.gpt.insights import insight_endpoint
 from src.api.pattern_noise.pattern_noise import pattern_noise_endpoint
 from src.api.news_api.news_api import news_api_endpoint
 from config.firebase_config import initialize_firebase
@@ -67,9 +67,9 @@ def advice():
 def chat_summary():
     return chat_summary_endpoint(client)
 
-@app.route('/summary', methods=['POST'])
-def summary():
-    return summary_endpoint(client)
+@app.route('/insights', methods=['POST'])
+def insights():
+    return insight_endpoint(client)
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -90,7 +90,7 @@ const JudgementList = () => {
           Not Completed
         </Button>
       </div>
-      <ScrollArea className="h-[350px] w-[550px] rounded-md border bg-GRAAY p-4">
+      <ScrollArea className="h-[350px] w-[550px] rounded-md border bg-white p-4">
         <div className="flex flex-col items-center text-gray-500">
           {judgements.length === 0 ? (
             <div className="flex flex-col items-center">

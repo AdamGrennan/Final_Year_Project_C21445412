@@ -17,6 +17,8 @@ export default function Page() {
   const [trendInsights, setTrendInsights] = useState([]);
   const [biasTheme, setBiasTheme] = useState("");
   const [noiseTheme, setNoiseTheme] = useState("");
+  const [mostBiasedTime, setMostBiasedTime] = useState("");
+  const [noisiestTime, setNoisiestTime] = useState("");
 
   useEffect(() => {
     if (user) {
@@ -29,6 +31,8 @@ export default function Page() {
         setTrendInsights(data.trendInsights);
         setBiasTheme(data.topThemeWithBias);
         setNoiseTheme(data.topThemeWithNoise);
+        setMostBiasedTime(data.mostBiasedTime);
+        setNoisiestTime(data.noisiestTime);
   
         const combinedPieData = [
           ...Object.entries(data.biasCounts || {}).map(([name, value]) => ({
@@ -59,7 +63,11 @@ export default function Page() {
       </div>
 
       <div className="col-span-2 flex justify-end">
-        <DashboardCarousel userId={user.uid} total={total} pieData={pieData} topThemebiaWithBias={biasTheme} topThemeWithNoise={noiseTheme} trendInsights={trendInsights}/>
+        <DashboardCarousel userId={user.uid} 
+        total={total} pieData={pieData} 
+        topThemeWithBias={biasTheme} topThemeWithNoise={noiseTheme} 
+        trendInsights={trendInsights} mostBiasedTime={mostBiasedTime}
+        noisiestTime={noisiestTime}/>
       </div>
     </div>
   );

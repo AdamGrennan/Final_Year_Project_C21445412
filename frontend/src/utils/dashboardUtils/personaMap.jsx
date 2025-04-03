@@ -1,8 +1,12 @@
+import { GiBullseye } from "react-icons/gi";
+
+
 export const personaMap = (bias, noise) => {
     if (bias === "Overconfidence Bias" && noise === "Level Noise") {
       return {
         type: "The Overconfident Consistent",
         description: "Highly confident and tends to be consistently lenient or strict in decision-making.",
+        icon: <GiBullseye className="text-red-500 text-2xl"/>
       };
     }
     if (bias === "Overconfidence Bias" && noise === "Occasion Noise") {

@@ -18,19 +18,17 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "../ui/textarea";
 import { useJudgment } from "@/context/JudgementContext";
 
 const formSchema = z.object({
-  title: z
-    .string()
-    .min(4, { message: "Title must be at least 4 characters." })
-    .max(20, { message: "Title must be at most 20 characters." }),
+  title: z.string().min(4, { message: "Title must be at least 4 characters." }).max(20),
   theme: z.string().min(2, { message: "Please select a template." }),
-  description: z
-    .string()
-    .min(4, { message: "Description must be at least 4 characters." })
-    .max(100, { message: "Description must be at most 100 characters." }),
+  details: z.object({
+    situation: z.string().min(4, { message: "Situation is required." }),
+    options: z.string().optional(),
+    influences: z.string().optional(),
+    goal: z.string().optional(),
+  }),
 });
 
 const JudgementForm = () => {
@@ -44,7 +42,12 @@ const JudgementForm = () => {
     defaultValues: {
       title: "",
       theme: "",
-      description: "",
+      details: {
+        situation: "",
+        options: "",
+        influences: "",
+        goal: "",
+      },
     },
   });
 
@@ -67,7 +70,7 @@ const JudgementForm = () => {
   };
 
   return (
-    <div className="mr-auto p-6 bg-GRAAY shadow-md w-[600px] h-[400px]">
+    <div className="mr-auto p-6 bg-white w-[600px] min-h-[500px]">
       <FormProvider {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <section>
@@ -81,7 +84,11 @@ const JudgementForm = () => {
                   <FormItem className="font-urbanist">
                     <FormLabel>Title</FormLabel>
                     <FormControl>
-                      <Input  className="font-urbanist border-none focus:border-SECONDARY focus:ring-SECONDARY focus:outline-none bg-white" placeholder="Enter a title" {...field} />
+                      <Input
+                        className="font-urbanist border border-gray-300 focus:border-SECONDARY focus:ring-SECONDARY bg-white"
+                        placeholder="Enter title"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -103,32 +110,89 @@ const JudgementForm = () => {
             </div>
           </section>
 
-          <section>
+          <section className="space-y-4">
             <FormField
               control={form.control}
-              name="description"
+              name="details.situation"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="font-urbanist">Description</FormLabel>
+                  <FormLabel className="font-urbanist">What's the situation?</FormLabel>
                   <FormControl>
-                    <Textarea
-                     className="font-urbanist border-none focus:border-SECONDARY focus:ring-SECONDARY focus:outline-none h-[150px] bg-white"
-                      placeholder="Provide a detailed description"
+                    <Input
+                      placeholder="e.g. I've been offered a job in another city"
                       {...field}
+                      className="font-urbanist border border-gray-300 bg-white"
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            <details className="mt-2 border-t pt-4 text-sm text-gray-600">
+              <summary className="cursor-pointer font-urbanist font-semibold text-SECONDARY">
+                Add more context (optional)
+              </summary>
+              <div className="mt-4 space-y-4">
+                <FormField
+                  control={form.control}
+                  name="details.options"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-urbanist">Options you're considering</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g. Take job offer, stay put"
+                          {...field}
+                          className="font-urbanist border border-gray-300 bg-white"
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="details.influences"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-urbanist">What's influencing you?</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g. Deadline next week, manager conflict"
+                          {...field}
+                          className="font-urbanist border border-gray-300 bg-white"
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="details.goal"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-urbanist">Ideal outcome</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g. Better work-life balance"
+                          {...field}
+                          className="font-urbanist border border-gray-300 bg-white"
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </details>
           </section>
-          <div className="flex justify-center items-center">
-          <Button
-            type="submit"
-            className="w-1/2 font-urbanist py-4 text-white bg-PRIMARY hover:bg-opacity-80 rounded-md"
-          >
-            Submit
-          </Button>
+
+          <div className="flex justify-center items-center pt-4">
+            <Button
+              type="submit"
+              className="w-1/2 font-urbanist py-4 text-white bg-PRIMARY hover:bg-opacity-80 rounded-md"
+            >
+              Submit
+            </Button>
           </div>
         </form>
       </FormProvider>

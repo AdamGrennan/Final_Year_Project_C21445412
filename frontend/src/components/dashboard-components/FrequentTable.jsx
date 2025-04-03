@@ -10,7 +10,7 @@ export const FrequentTable = ({ userId }) => {
 
   const getBarColor = (percentage) => {
     if (percentage >= 75) return "#ff4d4d";
-    if (percentage >= 50) return "#ffa500"; 
+    if (percentage >= 40) return "#ffa500"; 
     return "#00ff80"; 
   };
 

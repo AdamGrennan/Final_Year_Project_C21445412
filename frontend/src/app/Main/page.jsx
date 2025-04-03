@@ -73,7 +73,7 @@ export default function Page() {
 
 
   return (
-    <div className="flex flex-1 flex-col h-full gap-4 p-4">
+    <div className="flex flex-1 flex-col h-full gap-4 p-4 bg-gray-50">
       <div className="flex gap-4">
         <div className="flex flex-col w-full md:w-1/2 pl-8">
           <Label htmlFor="terms" className="font-urbanist text-PRIMARY text-2xl font-semibold mb-2">Decision History</Label>

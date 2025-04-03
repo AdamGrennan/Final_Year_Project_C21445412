@@ -10,13 +10,14 @@ import {
 import { DecisionStats } from "./DecisionStats";
 import { RecentDecision } from "./RecentDecisions";
 
-export const DashboardCarousel = ({ userId, total, pieData, topThemeWithBias, topThemeWithNoise, trendInsights }) => {
+export const DashboardCarousel = ({ userId, total, pieData, topThemeWithBias, topThemeWithNoise, trendInsights, mostBiasedTime,
+  noisiestTime }) => {
   return (
     <div>
       <h2 className="font-urbanist font-semibold mb-2 border-b-[2px] border-PRIMARY pb-1 w-40">
         Decision Statistics
       </h2>
-      <div className="w-[650px] h-[410px] bg-white shadow-lg rounded-lg p-4 relative">
+      <div className="w-[620px] h-[410px] bg-white shadow-lg rounded-lg p-4 relative">
         <Carousel className="w-full h-full">
           <CarouselContent className="flex">
             <CarouselItem className="flex-shrink-0 w-full flex justify-center">
@@ -26,6 +27,8 @@ export const DashboardCarousel = ({ userId, total, pieData, topThemeWithBias, to
                 topThemeWithBias={topThemeWithBias}
                 topThemeWithNoise={topThemeWithNoise}
                 trendInsights={trendInsights}
+                mostBiasedTime={mostBiasedTime}
+                noisiestTime={noisiestTime}
               />
             </CarouselItem>
             <CarouselItem className="flex-shrink-0 w-full flex justify-center">

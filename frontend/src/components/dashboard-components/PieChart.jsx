@@ -5,7 +5,8 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const COLORS = ["#FFB703", "#FB8500", "#023047", "#8ECAE6", "#219EBC", "#219EBC"];
+const COLORS = ["#FFB703", "#FB8500", "#023047", "#8ECAE6", "#219EBC", "#FF6B6B"];
+
 
 const BiasPieChart = ({ pieData }) => {
   if (!pieData || pieData.length === 0) return <p>No bias data available.</p>;
@@ -34,12 +35,24 @@ const BiasPieChart = ({ pieData }) => {
           },
         },
       },
+      tooltip: {
+        callbacks: {
+          label: function (context) {
+            const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
+            const value = context.parsed;
+            const percentage = ((value / total) * 100).toFixed(1);
+            return `${context.label}: ${value} (${percentage}%)`;
+          },
+        },
+      },
     },
   };
+  
 
   return (
     <div className="bg-white p-4 w-[300px] self-start">
       <div className="w-full h-[300px]">
+      <h3 className="text-md font-semibold mb-2 text-center">Bias & Noise Distribution</h3>
         <Pie data={chartData} options={options} />
       </div>
     </div>

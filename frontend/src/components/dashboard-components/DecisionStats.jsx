@@ -7,17 +7,21 @@ export const DecisionStats = ({
   pieData,
   topThemeWithBias,
   topThemeWithNoise,
+  mostBiasedTime,
+  noisiestTime,
   trendInsights = [],
 }) => {
   return (
     <div className="m-0 p-0">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         <div className="flex flex-col space-y-6">
-          <div className="w-full max-w-[270px] self-start">
+          <div className="w-full max-w-[500px]">
             <div className="bg-white p-4 space-y-3">
               <StatItem label="Total Decisions" value={total} />
               <StatItem label="Most Biased Theme" value={topThemeWithBias || "N/A"} />
               <StatItem label="Noisiest Theme" value={topThemeWithNoise || "N/A"} />
+              <StatItem label="Most Biased Time" value={mostBiasedTime || "N/A"} />
+              <StatItem label="Noisiest Time" value={noisiestTime || "N/A"} />
 
               {trendInsights.map((trend, index) => (
                 <StatItem
@@ -31,7 +35,7 @@ export const DecisionStats = ({
           </div>
         </div>
 
-        <div className="flex flex-col w-full">
+        <div className="flex flex-col mt-6">
           <BiasPieChart pieData={pieData} title="Bias Distribution" />
         </div>
       </div>

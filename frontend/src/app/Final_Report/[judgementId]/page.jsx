@@ -1,6 +1,6 @@
 "use client";
 import Snapshot from "@/components/report_components/chart-components/Snapshot";
-import SummarySideBar from "@/components/report_components/SummarySidebar";
+import SummarySideBar from "@/components/report_components/InsightsSidebar";
 import Trends from "@/components/report_components/trend-components/Trends";
 import { useDecision } from '@/context/DecisionContext';
 import { useUser } from '@/context/UserContext';
@@ -90,7 +90,7 @@ export default function Page() {
   }, [judgementId]);
 
   return (
-    <div className="container">
+    <div className="container bg-gray-50">
       <Swiper
         onSwiper={(swiper) => (swiperRef.current = swiper)}
         onSlideChange={(swiper) => {
@@ -106,12 +106,12 @@ export default function Page() {
         className="mySwiper"
       >
         <SwiperSlide>
-          <div className="w-full text-center">
+          <div className="w-full text-center bg-gray-50">
             <h2 className="font-urbanist text-2xl font-semibold text-PRIMARY">
               Decision Analysis
             </h2>
           </div>
-          <div className="h-auto flex flex-col md:flex-row items-start justify-between p-8 space-y-8 md:space-y-0 md:space-x-8 bg-white">
+          <div className="bg-gray-50 h-auto flex flex-col md:flex-row items-start justify-between p-8 space-y-8 md:space-y-0 md:space-x-8">
             <div className="w-full md:w-3/3 h-[375px] max-h-[375px] bg-white rounded-lg shadow-md p-6 space-y-4 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-SECONDARY scrollbar-track-GRAAY">
               <h3 className="text-center font-urbanist text-black text-base font-semibold border-b border-PRIMARY pb-2">
                 Detected Noise & Bias
@@ -126,11 +126,11 @@ export default function Page() {
         </SwiperSlide>
 
         <SwiperSlide>
-          <div className="w-full text-center">
+          <div className="w-full text-center bg-gray-50">
             <h2 className="font-urbanist text-2xl font-semibold text-PRIMARY">
               Trends and Patterns
             </h2>
-            <div className="h-auto flex flex-col md:flex-row items-start justify-between p-8 space-y-8 md:space-y-0 md:space-x-8 bg-white">
+            <div className="bg-gray-50 h-auto flex flex-col md:flex-row items-start justify-between p-8 space-y-8 md:space-y-0 md:space-x-8">
             <div className="w-full md:w-1/3 h-[375px] bg-white rounded-lg shadow-md p-6">
               <h3 className="text-center font-urbanist text-black text-base font-semibold border-b border-PRIMARY pb-2">
                 Insight Graphs
@@ -138,7 +138,7 @@ export default function Page() {
               <Snapshot bias={detectedBias} noise={detectedNoise} />
             </div> 
               
-              <div className="w-full md:w-2/3 h-[375px] bg-white rounded-lg shadow-md p-6 space-y-4 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-SECONDARY scrollbar-track-GRAAY">
+              <div className="w-full md:w-2/3 h-[375px]  bg-white rounded-lg shadow-md p-6 space-y-4 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-SECONDARY scrollbar-track-GRAAY">
                 <h3 className="font-urbanist text-black text-base font-semibold border-b border-PRIMARY pb-2">
                   Key Trends
                 </h3>
@@ -149,15 +149,15 @@ export default function Page() {
         </SwiperSlide>
 
         <SwiperSlide>
-          <div className="w-full text-center">
+          <div className="w-full text-center bg-gray-50">
             <h2 className="font-urbanist text-2xl font-semibold text-PRIMARY">
               Summary Of Your Decision
             </h2>
           </div>
-          <div className="flex flex-col md:flex-row items-start justify-between w-full space-y-6 md:space-y-0 md:space-x-6 mt-8">
+          <div className="bg-gray-50 flex flex-col md:flex-row items-start justify-between w-full space-y-6 md:space-y-0 md:space-x-6 mt-8">
             <div className="w-full md:w-2/3 h-[375px] bg-white rounded-lg shadow-md p-6 space-y-4 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-SECONDARY scrollbar-track-GRAAY">
-              <h3 className="text-center font-urbanist text-black text-xl font-semibold border-b border-PRIMARY pb-2">
-                Feedback
+              <h3 className="bg-white text-center font-urbanist text-black text-xl font-semibold border-b border-PRIMARY pb-2">
+                Decision Insights
               </h3>
               <SummarySideBar chatSummaries={chatSummaries} judgementId={judgementId} isRevisited={isRevisited}/>
             </div>

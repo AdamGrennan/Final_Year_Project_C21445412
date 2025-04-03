@@ -15,6 +15,7 @@ import { PiScalesFill } from "react-icons/pi";
 import { FaCloudShowersHeavy, FaHourglassHalf, FaAnchor } from "react-icons/fa";
 import {MdOutlineShowChart, MdCallSplit } from "react-icons/md";
 import { BiSolidBadgeCheck } from "react-icons/bi";
+import { GiDeathStar } from "react-icons/gi";
 import {
   Carousel,
   CarouselContent,
@@ -26,14 +27,13 @@ import {
 const BiasCard = ({ bias, noise, biasSources, noiseSources, advice }) => {
 
   const combinedItems = [...new Set([...bias, ...noise])];
-  console.log("Combined Unique Items:", combinedItems);
 
   const iconMap = {
     "Overconfidence Bias": <LuBicepsFlexed />,
     "Anchoring Bias": <FaAnchor />,
     "Confirmation Bias": <FaMagnifyingGlass />,
     "Framing Bias": <MdCallSplit />,
-    "Recency Bias": <FaHourglassHalf />,
+    "Recency  Bias": <FaHourglassHalf />,
     "Level Noise": <PiScalesFill />,
     "Pattern Noise": <MdOutlineShowChart />,
     "Occasion Noise": <FaCloudShowersHeavy />,

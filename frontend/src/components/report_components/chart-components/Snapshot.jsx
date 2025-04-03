@@ -10,7 +10,7 @@ import {
     CarouselNext,
     CarouselPrevious,
 } from "@/components/ui/carousel"
-import { Card, CardContent} from "../../ui/card";
+import { Card, CardContent } from "../../ui/card";
 
 const Snapshot = ({ bias, noise }) => {
 
@@ -39,12 +39,12 @@ const Snapshot = ({ bias, noise }) => {
                     </CarouselItem>
                 </CarouselContent>
                 <div className="absolute bottom-[90%] -translate-y-1/2 w-full flex justify-between px-12">
-                    <CarouselPrevious className="bg-gray-300 hover:bg-gray-400 text-black py-2 px-4 rounded-full transition relative mr-8" />
-                    <CarouselNext className="bg-gray-300 hover:bg-gray-400 text-black py-2 px-4 rounded-full transition relative ml-8" />
+                    <CarouselPrevious className="bg-white hover:bg-white text-black py-2 px-4 rounded-full transition relative mr-8" />
+                    <CarouselNext className="bg-white hover:bg-white text-black py-2 px-4 rounded-full transition relative ml-8" />
                 </div>
             </Carousel>
         </div>
     );
-};
+}; 
 
 export default Snapshot;

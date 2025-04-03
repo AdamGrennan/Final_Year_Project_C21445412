@@ -7,7 +7,7 @@ def level_noise_endpoint(pipe):
     try:
         result = pipe(
             statement,
-            candidate_labels=["neutral", "harsh"],
+            candidate_labels=["lenient", "neutral", "harsh"]
         )
 
         scores = {}

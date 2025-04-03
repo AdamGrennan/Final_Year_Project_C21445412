@@ -36,15 +36,6 @@ export const RecentDecision = ({ userId }) => {
             {recentDecisions.map((decision, index) => (
               <div key={index} className="border rounded p-3 bg-gray-50">
                 <p className="text-gray-700 font-bold">{decision.title}</p>
-  
-                <div className="mt-1">
-                  <p className="font-semibold">
-                    Detected Bias: {decision.detectedBias?.[0]?.bias || "N/A"}
-                  </p>
-                  <p className="font-semibold">
-                    Detected Noise: {decision.detectedNoise?.length > 0 ? "Yes" : "N/A"}
-                  </p>
-                </div>
               </div>
             ))}
           </div>
