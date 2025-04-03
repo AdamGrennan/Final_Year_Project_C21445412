@@ -9,7 +9,6 @@ export const DecisionStats = ({
   topThemeWithNoise,
   mostBiasedTime,
   noisiestTime,
-  trendInsights = [],
 }) => {
   return (
     <div className="m-0 p-0">
@@ -22,15 +21,6 @@ export const DecisionStats = ({
               <StatItem label="Noisiest Theme" value={topThemeWithNoise || "N/A"} />
               <StatItem label="Most Biased Time" value={mostBiasedTime || "N/A"} />
               <StatItem label="Noisiest Time" value={noisiestTime || "N/A"} />
-
-              {trendInsights.map((trend, index) => (
-                <StatItem
-                  key={index}
-                  label="Trend Insight"
-                  value={trend.message}
-                  type={trend.type}
-                />
-              ))}
             </div>
           </div>
         </div>

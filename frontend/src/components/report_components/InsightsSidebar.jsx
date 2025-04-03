@@ -5,7 +5,7 @@ import { db } from "@/config/firebase";
 import { doc, updateDoc } from "firebase/firestore"; 
 import { useDecision } from '@/context/DecisionContext';
 
-const SummarySidebar = ({ chatSummaries, judgementId, isRevisited }) => {
+const InsightsSidebar = ({ chatSummaries, judgementId, isRevisited }) => {
   const { strengths, improvements, setStrengths, setImprovements } = useDecision(); 
   const [showInsights, setShowInsights] = useState(false);
 
@@ -55,6 +55,10 @@ const SummarySidebar = ({ chatSummaries, judgementId, isRevisited }) => {
           <p className="text-sm text-center text-gray-400 italic">
             Make 3 decisions to unlock personalized insights.
           </p>
+        ) : isRevisited && strengths.length === 0 && improvements.length === 0 ? (
+          <p className="text-sm text-center text-gray-400 italic">
+            This decision was revisited, but no strengths or improvements were detected.
+          </p>
         ) : (
           <ul className="list-disc list-inside text-sm space-y-2">
             <h3 className="font-urbanist text-lg font-semibold text-green-300 mb-2">Strengths</h3>
@@ -70,6 +74,7 @@ const SummarySidebar = ({ chatSummaries, judgementId, isRevisited }) => {
       </div>
     </div>
   );
+  
 };
 
-export default SummarySidebar;
+export default InsightsSidebar;

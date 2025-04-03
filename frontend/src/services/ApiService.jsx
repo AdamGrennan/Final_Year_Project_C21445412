@@ -94,7 +94,12 @@ export const openingMessage = async (judgmentData, name) => {
       body: JSON.stringify({
         title: judgmentData?.title || "No Title Provided",
         name: name || "No Name Provided",
-        description: judgmentData?.description || "No Description Provided",
+        details: {
+          situation: judgmentData?.details?.situation || "",
+          options: judgmentData?.details?.options || "",
+          influences: judgmentData?.details?.influences || "",
+          goal: judgmentData?.details?.goal || "",
+        },
         theme: judgmentData?.theme || "No Template",
         input: "",
         context: [],
@@ -217,6 +222,24 @@ export const fetchNewsAPI = async (messageContent) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ input: messageContent}),
+    });
+
+    const data = await response.json();
+    console.log("NEWS API:", data);
+    return data;
+  } catch (error) {
+    return "Error generating news articles.";
+  }
+};
+
+
+export const fetchDashboardInsights = async (messageContent) => {
+  try {
+    const response = await fetch("http://127.0.0.1:5000/dashboard_insights", {
+
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ }),
     });
 
     const data = await response.json();

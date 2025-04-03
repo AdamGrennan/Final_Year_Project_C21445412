@@ -40,8 +40,8 @@ const useDecisionData = (isRevisited) => {
               noiseSources[n.noise] = n.sources || [];
             });
             const adviceData = decisionData.advice || {};
-            const strengthData = decisionData.strengths || {};
-            const improvementData = decisionData.improvements || {};
+            const strengthData = decisionData.strengths || [];
+            const improvementData = decisionData.improvements || [];
 
             setBiasSources({ ...biasSources });
             setNoiseSources({ ...noiseSources });

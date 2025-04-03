@@ -41,15 +41,15 @@ export const uploadDashboardStats = async (userId) => {
     querySnapshot.forEach((doc) => {
       const decision = doc.data();
 
-      const timeBucket = getTime(decision.createdAt);
+      const time = getTime(decision.createdAt);
 
-      if (timeBucket) {
+      if (time) {
         if (Array.isArray(decision.detectedBias) && decision.detectedBias.length > 0) {
-          biasTimes[timeBucket] = (biasTimes[timeBucket] || 0) + 1;
+          biasTimes[time] = (biasTimes[time] || 0) + 1;
         }
 
         if (Array.isArray(decision.detectedNoise) && decision.detectedNoise.length > 0) {
-          noiseTimes[timeBucket] = (noiseTimes[timeBucket] || 0) + 1;
+          noiseTimes[time] = (noiseTimes[time] || 0) + 1;
         }
       }
 
@@ -144,7 +144,6 @@ export const uploadDashboardStats = async (userId) => {
     const mostBiasedTime = getMaxKey(biasTimes);
     const noisiestTime = getMaxKey(noiseTimes);
 
-
     const updatedDecisionIds = [...processedDecisionIds, ...newDecisionIds];
 
     await setDoc(
@@ -168,8 +167,6 @@ export const uploadDashboardStats = async (userId) => {
       },
       { merge: true }
     );
-
-    console.log("Dashboard stats updated successfully!");
   } catch (error) {
     console.error("Error updating dashboard stats:", error);
   }

@@ -25,7 +25,20 @@ const Chat = ({ judgementId, setFinishButtonDisable }) => {
 
     if (user?.uid) {
       try {
-        const openMessage = await openingMessage(judgmentData, user.name);
+        const openMessage = await openingMessage(
+          {
+            title: judgmentData?.title,
+            theme: judgmentData?.theme,
+            details: {
+              situation: judgmentData?.details?.situation || "",
+              options: judgmentData?.details?.options || "",
+              influences: judgmentData?.details?.influences || "",
+              goal: judgmentData?.details?.goal || "",
+            },
+          },
+          user.name
+        );
+        
 
         if (openMessage.bias_feedback) {
           const openingMessage = {
