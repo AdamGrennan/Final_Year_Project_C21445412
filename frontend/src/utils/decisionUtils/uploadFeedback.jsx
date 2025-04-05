@@ -7,6 +7,7 @@ export const uploadFeedback = async (user, decisionId, feedback) => {
       userId: user.uid,
       decisionId,
       ...feedback,
+      usedInNextChat: false,
       createdAt: serverTimestamp(),
     };
 

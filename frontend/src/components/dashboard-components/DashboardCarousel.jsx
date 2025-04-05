@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/carousel";
 import { DecisionStats } from "./DecisionStats";
 import { RecentDecision } from "./RecentDecisions";
-import { useState } from "react";
 
 export const DashboardCarousel = ({ userId, total, pieData, topThemeWithBias, topThemeWithNoise, trendInsights, mostBiasedTime,
   noisiestTime }) => {

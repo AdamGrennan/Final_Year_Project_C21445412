@@ -1,5 +1,14 @@
 import { db } from "@/config/firebase";
-import { collection, query, where, getDocs, doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  doc,
+  setDoc,
+  getDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 
 export const uploadDashboardStats = async (userId) => {
   try {
@@ -21,8 +30,8 @@ export const uploadDashboardStats = async (userId) => {
 
     let totalDecisions = dashboardData.totalDecisions || 0;
     let completedDecisions = dashboardData.completedDecisions || 0;
-    const biasCounts = dashboardData.biasCounts || {};
-    const noiseCounts = dashboardData.noiseCounts || {};
+    const biasCounts = dashboardData.biasDecisionCounts || {};
+    const noiseCounts = dashboardData.noiseDecisionCounts || {};
     const processedDecisionIds = dashboardData.processedDecisionIds || [];
 
     const newDecisionIds = [];
@@ -40,19 +49,6 @@ export const uploadDashboardStats = async (userId) => {
 
     querySnapshot.forEach((doc) => {
       const decision = doc.data();
-
-      const time = getTime(decision.createdAt);
-
-      if (time) {
-        if (Array.isArray(decision.detectedBias) && decision.detectedBias.length > 0) {
-          biasTimes[time] = (biasTimes[time] || 0) + 1;
-        }
-
-        if (Array.isArray(decision.detectedNoise) && decision.detectedNoise.length > 0) {
-          noiseTimes[time] = (noiseTimes[time] || 0) + 1;
-        }
-      }
-
       const decisionId = doc.id;
 
       if (processedDecisionIds.includes(decisionId)) return;
@@ -62,13 +58,13 @@ export const uploadDashboardStats = async (userId) => {
 
       if (decision.isCompleted) completedDecisions++;
 
+      const uniqueBiases = new Set();
+      const uniqueNoises = new Set();
+
       if (Array.isArray(decision.detectedBias)) {
         decision.detectedBias.forEach((item) => {
           if (typeof item === "object" && typeof item.bias === "string") {
-            const biasLabel = item.bias.trim();
-            if (biasLabel) {
-              biasCounts[biasLabel] = (biasCounts[biasLabel] || 0) + 1;
-            }
+            uniqueBiases.add(item.bias.trim());
           }
         });
       }
@@ -76,71 +72,53 @@ export const uploadDashboardStats = async (userId) => {
       if (Array.isArray(decision.detectedNoise)) {
         decision.detectedNoise.forEach((item) => {
           if (typeof item === "object" && typeof item.noise === "string") {
-            const noiseLabel = item.noise.trim();
-            if (noiseLabel) {
-              noiseCounts[noiseLabel] = (noiseCounts[noiseLabel] || 0) + 1;
-            }
+            uniqueNoises.add(item.noise.trim());
           }
         });
       }
 
+      uniqueBiases.forEach((biasLabel) => {
+        biasCounts[biasLabel] = (biasCounts[biasLabel] || 0) + 1;
+      });
+
+      uniqueNoises.forEach((noiseLabel) => {
+        noiseCounts[noiseLabel] = (noiseCounts[noiseLabel] || 0) + 1;
+      });
+
+      const time = getTime(decision.createdAt);
+      if (time) {
+        if (uniqueBiases.size > 0) biasTimes[time]++;
+        if (uniqueNoises.size > 0) noiseTimes[time]++;
+      }
+
       const theme = decision.theme || "Unknown";
-
       if (theme) {
-        if (Array.isArray(decision.detectedBias) && decision.detectedBias.length > 0) {
-          biasThemes[theme] = (biasThemes[theme] || 0) + 1;
-        }
-
-        if (Array.isArray(decision.detectedNoise) && decision.detectedNoise.length > 0) {
-          noiseThemes[theme] = (noiseThemes[theme] || 0) + 1;
-        }
-
+        if (uniqueBiases.size > 0) biasThemes[theme] = (biasThemes[theme] || 0) + 1;
+        if (uniqueNoises.size > 0) noiseThemes[theme] = (noiseThemes[theme] || 0) + 1;
       }
-
     });
-    if (newDecisionIds.length === 0) {
-      return;
-    }
 
-    let mostFrequentBias = null;
-    let highestBiasCount = 0;
-    for (const bias of Object.keys(biasCounts)) {
-      if (biasCounts[bias] > highestBiasCount) {
-        highestBiasCount = biasCounts[bias];
-        mostFrequentBias = bias;
-      }
-    }
+    if (newDecisionIds.length === 0) return;
 
-    let mostFrequentNoise = null;
-    let highestNoiseCount = 0;
-    for (const noise of Object.keys(noiseCounts)) {
-      if (noiseCounts[noise] > highestNoiseCount) {
-        highestNoiseCount = noiseCounts[noise];
-        mostFrequentNoise = noise;
+    const getMostFrequent = (obj) => {
+      let maxKey = null;
+      let maxCount = 0;
+      for (const key in obj) {
+        if (obj[key] > maxCount) {
+          maxCount = obj[key];
+          maxKey = key;
+        }
       }
-    }
-
-    let topThemeWithBias = null;
-    let maxBiasThemeCount = 0;
-    for (const theme in biasThemes) {
-      if (biasThemes[theme] > maxBiasThemeCount) {
-        maxBiasThemeCount = biasThemes[theme];
-        topThemeWithBias = theme;
-      }
-    }
-
-    let topThemeWithNoise = null;
-    let maxNoiseThemeCount = 0;
-    for (const theme in noiseThemes) {
-      if (noiseThemes[theme] > maxNoiseThemeCount) {
-        maxNoiseThemeCount = noiseThemes[theme];
-        topThemeWithNoise = theme;
-      }
-    }
+      return maxKey;
+    };
 
     const getMaxKey = (obj) =>
       Object.keys(obj).reduce((a, b) => (obj[a] > obj[b] ? a : b), "None");
 
+    const mostFrequentBias = getMostFrequent(biasCounts);
+    const mostFrequentNoise = getMostFrequent(noiseCounts);
+    const topThemeWithBias = getMostFrequent(biasThemes);
+    const topThemeWithNoise = getMostFrequent(noiseThemes);
     const mostBiasedTime = getMaxKey(biasTimes);
     const noisiestTime = getMaxKey(noiseTimes);
 
@@ -152,8 +130,8 @@ export const uploadDashboardStats = async (userId) => {
         userId: userId,
         totalDecisions,
         completedDecisions,
-        biasCounts,
-        noiseCounts,
+        biasDecisionCounts: biasCounts,
+        noiseDecisionCounts: noiseCounts,
         biasThemes,
         noiseThemes,
         mostFrequentBias,

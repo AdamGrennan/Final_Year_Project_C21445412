@@ -9,7 +9,7 @@ const COLORS = ["#FFB703", "#FB8500", "#023047", "#8ECAE6", "#219EBC", "#FF6B6B"
 
 
 const BiasPieChart = ({ pieData }) => {
-  if (!pieData || pieData.length === 0) return <p>No bias data available.</p>;
+  if (!pieData || pieData.length === 0) return <p className="text-sm text-center text-gray-400 italic">No data available.</p>;
 
   const chartData = {
     labels: pieData.map((item) => item.name),

@@ -233,19 +233,22 @@ export const fetchNewsAPI = async (messageContent) => {
 };
 
 
-export const fetchDashboardInsights = async (messageContent) => {
+export const fetchDashboardInsights = async ( decisions, trends) => {
   try {
     const response = await fetch("http://127.0.0.1:5000/dashboard_insights", {
 
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ }),
+      body: JSON.stringify({
+        decisions,
+        trends
+       }),
     });
 
     const data = await response.json();
-    console.log("NEWS API:", data);
+    console.log("DASHBOARD INSIGHTS:", data);
     return data;
   } catch (error) {
-    return "Error generating news articles.";
+    return "Error fetching dashboard insights.";
   }
 };

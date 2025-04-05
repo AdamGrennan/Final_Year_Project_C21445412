@@ -1,16 +1,23 @@
 export const newOccurrence = (allDecisions, bias, noise) => {
-  let detectedTrends = [];
   if (allDecisions.length === 0) {
-    return [...bias, ...noise].map(item => ({ message: `${item} was detected for the first time!`, type: "new" }));
+    return [...bias, ...noise].map(item => ({
+      message: `${item} was detected for the first time!`,
+      type: "new"
+    }));
   }
 
-  const pastBias = new Set(allDecisions.slice(1).flatMap(d => d.detectedBias?.map(b => b.bias) || []));
-  const pastNoise = new Set(allDecisions.slice(1).flatMap(d => d.detectedNoise?.map(n => n.noise) || []));
+  const previousDecisions = allDecisions.slice(1);
 
-  bias.forEach(b => { if (!pastBias.has(b)) detectedTrends.push({ message: `${b} was detected for the first time!`, type: "new" }); });
-  noise.forEach(n => { if (!pastNoise.has(n)) detectedTrends.push({ message: `${n} was detected for the first time!`, type: "new" }); });
+  const pastBias = new Set(previousDecisions.flatMap(d => d.detectedBias?.map(b => b.bias) || []));
+  const pastNoise = new Set(previousDecisions.flatMap(d => d.detectedNoise?.map(n => n.noise) || []));
 
-  return detectedTrends;
+  const newBiases = bias.filter(b => !pastBias.has(b));
+  const newNoises = noise.filter(n => !pastNoise.has(n));
+
+  return [...newBiases, ...newNoises].map(item => ({
+    message: `${item} was detected for the first time!`,
+    type: "new"
+  }));
 };
 
 export const frequencyChange = (allDecisions, key) => {
@@ -60,10 +67,13 @@ export const absentStreaks = (allDecisions, allBiases, allNoises) => {
   const getStreak = (label, type) => {
     let streak = 0;
     for (let i = allDecisions.length - 1; i >= 0; i--) {
-      const items = allDecisions[i][type]?.map(x => x[type === "detectedBias" ? "bias" : "noise"]) || [];
-      if (items.includes(label)) break;
+      const items = allDecisions[i][type] || [];
+      const names = items.map(item => item.bias || item.noise);
+  
+      if (names.includes(label)) break;
       streak++;
     }
+  
     return streak;
   };
 
@@ -114,14 +124,15 @@ export const detectionStreaks = (allDecisions) => {
 export const topFrequentTrends = (allDecisions, type) => {
   const counts = {};
 
-  allDecisions.forEach(d => {
-    const items = d[type]?.map(x => x[type === "detectedBias" ? "bias" : "noise"]) || [];
-    items.forEach(item => {
-      counts[item] = (counts[item] || 0) + 1;
+  for (const decision of allDecisions) {
+    const items = decision[type] || [];
+    items.forEach(({ bias, noise }) => {
+      const label = bias || noise;
+      counts[label] = (counts[label] || 0) + 1;
     });
-  });
+  }
 
-  const maxCount = Math.max(...Object.values(counts), 0);
+  const maxCount = Math.max(0, ...Object.values(counts));
 
   return Object.entries(counts)
     .filter(([, count]) => count === maxCount && maxCount > 1)
@@ -130,5 +141,6 @@ export const topFrequentTrends = (allDecisions, type) => {
       type: "most-frequent"
     }));
 };
+
 
 

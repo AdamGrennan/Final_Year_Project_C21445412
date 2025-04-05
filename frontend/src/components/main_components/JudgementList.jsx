@@ -5,7 +5,6 @@ import { doc, collection, query, where, getDocs, deleteDoc } from "firebase/fire
 import { db } from "@/config/firebase";
 import { useEffect, useState } from "react";
 import { useUser } from "@/context/UserContext";
-import { useDecision } from '@/context/DecisionContext';
 import { Button } from '../ui/button';
 import { IoTrashBin } from "react-icons/io5";
 
@@ -14,7 +13,6 @@ const JudgementList = () => {
   const [judgements, setJudgements] = useState([]);
   const { user } = useUser();
   const [filter, setFilter] = useState(true);
-  const { detectedBias, detectedNoise } = useDecision();
 
   const openDecision = (judgementId, isCompleted) => {
     if (isCompleted) {

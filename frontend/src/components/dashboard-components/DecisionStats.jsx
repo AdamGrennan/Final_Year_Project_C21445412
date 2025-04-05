@@ -33,12 +33,8 @@ export const DecisionStats = ({
   );
 };
 
-const StatItem = ({ label, value, type }) => {
+const StatItem = ({ label, value }) => {
   let textColor = "text-gray-700";
-  if (type === "increase") textColor = "text-green-600";
-  if (type === "decrease") textColor = "text-red-600";
-  if (type === "new") textColor = "text-blue-600";
-  if (type === "streak") textColor = "text-purple-600";
 
   return (
     <div className="flex flex-col bg-gray-50 px-4 py-2 rounded-lg shadow-sm border border-gray-200">

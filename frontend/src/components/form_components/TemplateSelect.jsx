@@ -16,11 +16,8 @@ const TemplateSelect = ({ onSelect }) => {
     "Health & Well-being",
     "Relationships",
     "Education & Learning",
-    "Career Development",
     "Purchases & Shopping",
-    "Time Management",
-    "Social & Leisure",
-    "Ethical & Moral Dilemmas"
+    "Social",
   ]);
   
   return (

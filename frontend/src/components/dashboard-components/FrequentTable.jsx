@@ -21,12 +21,12 @@ export const FrequentTable = ({ userId }) => {
       try {
         const userDoc = await getDoc(doc(db, "dashboard", userId));
         if (userDoc.exists()) {
-          const { biasCounts, noiseCounts, totalDecisions } = userDoc.data();
+          const { biasDecisionCounts, noiseDecisionCounts, totalDecisions } = userDoc.data();
 
           if (totalDecisions > 0) {
             const allCounts = {
-              ...biasCounts, 
-              ...noiseCounts, 
+              ...biasDecisionCounts, 
+              ...noiseDecisionCounts, 
             };
 
             const sortedData = Object.entries(allCounts)
@@ -78,7 +78,7 @@ export const FrequentTable = ({ userId }) => {
             </div>
           ))
         ) : (
-          <p className="text-gray-500 text-center">No data available</p>
+          <p className="text-sm text-center text-gray-400 italic">No data available</p>
         )}
       </div>
     </div>

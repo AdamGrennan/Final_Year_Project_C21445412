@@ -14,7 +14,6 @@ export const DecisionProvider = ({ children }) => {
 
     const formatBias = (bias) => {
         if (typeof bias !== "string") {
-          console.warn("Invalid bias value passed to formatBias:", bias);
           return bias; 
         }
       

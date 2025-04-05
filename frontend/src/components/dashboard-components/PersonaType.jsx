@@ -19,7 +19,7 @@ export const PersonaType = ({ total, bias, noise }) => {
       <div className="p-6 bg-white rounded-lg shadow-md text-center w-full mx-auto h-[200px]">
         {total < 5 ? (
           <>
-            <h2 className="text-2xl font-bold font-urbanist mb-2">Not Enough Decision Data Yet</h2>
+            <h2 className="text-2xl font-semibold font-urbanist mb-2">Not Enough Decision Data Yet</h2>
             <p className="text-gray-600 font-urbanist">
               Make at least 5 decisions to unlock a personalized profile based on your judgment patterns.
             </p>

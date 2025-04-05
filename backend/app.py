@@ -15,6 +15,7 @@ from src.api.gpt.chat_summary import chat_summary_endpoint
 from src.api.gpt.insights import insight_endpoint
 from src.api.pattern_noise.pattern_noise import pattern_noise_endpoint
 from src.api.news_api.news_api import news_api_endpoint
+from src.api.gpt.dashboard_insights import dashboard_insights_endpoint
 from config.firebase_config import initialize_firebase
 from transformers import pipeline
 from openai import OpenAI
@@ -69,7 +70,11 @@ def chat_summary():
 
 @app.route('/insights', methods=['POST'])
 def insights():
-    return insight_endpoint(client)
+    return insight_endpoint(client)#
+
+@app.route('/dashboard_insights', methods=['POST'])
+def dashboard_insights():
+    return dashboard_insights_endpoint(client)
 
 if __name__ == '__main__':
     app.run(debug=True)

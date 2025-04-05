@@ -2,14 +2,11 @@
 
 import React, { useState } from "react";
 import { useUser } from "@/context/UserContext";
-import { auth, db } from "@/config/firebase";
-import { doc, updateDoc } from "firebase/firestore";
 import { Label } from "@radix-ui/react-dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { MdModeEdit } from "react-icons/md";
 import EditModal from "@/components/profile-components/EditModal";
 import DeleteModal from "@/components/profile-components/DeleteModal";
-import { updatePassword } from "firebase/auth";
 
 export default function ProfilePage() {
   const { user, updateUser } = useUser();
@@ -17,7 +14,6 @@ export default function ProfilePage() {
   const [value, setValue] = useState("");
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [refresh, setRefresh] = useState(false);
 
   const handleEditClick = (field) => {
     setFieldToEdit(field);
@@ -26,7 +22,6 @@ export default function ProfilePage() {
   };
 
   const handleDelete = () => {
-    console.log("PROFILE USER", user.uid)
     setShowDeleteModal(true);
   }
 

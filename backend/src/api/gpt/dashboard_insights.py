@@ -4,7 +4,7 @@ def dashboard_insights_endpoint(client):
     try:
         data = request.json
         decisions = data.get("decisions", [])
-        trend_summary = data.get("trendSummary", "")  
+        trends = data.get("trends", "")
 
         if not decisions:
             return jsonify({"error": "No decisions provided."}), 400
@@ -16,23 +16,26 @@ def dashboard_insights_endpoint(client):
             "Your job is to analyze patterns and provide a reflection. Focus on recurring themes, decision tendencies, blind spots, and improvements.\n"
         )
 
-        if trend_summary:
-            prompt += f"\nHere's a summary of recent trends across all decisions:\n{trend_summary}\n\n"
+        if trends:
+            prompt += f"\nHere's a summary of recent trends across all decisions:\n{trends}\n\n"
 
         prompt += "Here are the 5 decisions:\n"
 
-        for i, d in enumerate(decisions, 1):
+        for i, decision in enumerate(decisions, start=1):
+            details = decision.get("details", {})
+            biases = ', '.join(decision.get("detectedBias", [])) or 'None'
+            noise = ', '.join(decision.get("detectedNoise", [])) or 'None'
+
             prompt += (
                 f"\nDecision {i}:\n"
-                f"• Title: {d.get('title', '—')}\n"
-                f"• Theme: {d.get('theme', '—')}\n"
-                f"• Situation: {d.get('details', {}).get('situation', '')}\n"
-                f"• Options: {d.get('details', {}).get('options', '')}\n"
-                f"• Influences: {d.get('details', {}).get('influences', '')}\n"
-                f"• Goal: {d.get('details', {}).get('goal', '')}\n"
-                f"• Biases: {', '.join(d.get('detectedBias', [])) or 'None'}\n"
-                f"• Noise: {', '.join(d.get('detectedNoise', [])) or 'None'}\n"
-                f"• GPT Insight: {d.get('advice', '') or 'None'}\n"
+                f"Title: {decision.get('title', '—')}\n"
+                f"Theme: {decision.get('theme', '—')}\n"
+                f"Situation: {details.get('situation', '')}\n"
+                f"Options: {details.get('options', '')}\n"
+                f"Influences: {details.get('influences', '')}\n"
+                f"Goal: {details.get('goal', '')}\n"
+                f"Biases: {biases}\n"
+                f"Noise: {noise}\n"
             )
 
         prompt += (
@@ -50,9 +53,8 @@ def dashboard_insights_endpoint(client):
         )
 
         summary = response.choices[0].message.content.strip()
-
         return jsonify({"summary": summary})
 
     except Exception as e:
-        print("Error in /recent-insight:", str(e))
+        print("Error in dashboard-insight:", str(e))
         return jsonify({"error": str(e)}), 500

@@ -36,9 +36,14 @@ def chat_endpoint(model, tokenizer, bias_labels, client):
         detected_biases = [bias for bias in detected_biases if bias in bias_labels]
         
         feedback_service = FeedbackService()
-       # feedback_data = feedback_service.fetch_feedback(data.get("userId"), data.get("judgementId"))
-        #previous_chats = feedback_service.fetch_chats_for_decision(data.get("userId"), data.get("judgementId"))
-        #chat_instruction = feedback_service.generate_instruction(feedback_data, previous_chats)
+        feedback_data = feedback_service.fetch_feedback(data.get("userId"))
+        previous_chats = feedback_service.fetch_chats_for_decision(data.get("userId"), data.get("judgementId"))
+        chat_instruction = feedback_service.generate_instruction(feedback_data, previous_chats)
+        print(f"[Chat] Creating feedback-based instruction: {chat_instruction}")
+        
+        if feedback_data:
+         doc_id = feedback_data[0]["id"]
+         feedback_service.mark_feedback(doc_id)
 
         messages = [
             {
@@ -54,7 +59,8 @@ def chat_endpoint(model, tokenizer, bias_labels, client):
                     "Ensure responses follow the previous conversation naturally. "
                     "If the user responds with 'yes' or asks for help, assume they are referring to the last topic discussed. "
                     "Never ask the user to repeat themselves; instead, continue based on the last message in context."
-                    #f"{chat_instruction}"
+                    "Ensure responses follow the previous conversation naturally. "
+                    f"{chat_instruction}"
                 ),
             }
         ]
