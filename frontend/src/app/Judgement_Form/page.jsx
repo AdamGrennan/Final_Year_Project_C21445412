@@ -5,7 +5,7 @@ import JudgementForm from "@/components/form_components/JudgementForm";
 
 export default function Page() {
   return (
-    <div className="flex justify-center items-center h-[500px] w-full">
+    <div className="flex justify-center items-start min-h-screen w-full">
       <div className="flex flex-col gap-4 p-6 bg-white shadow-lg rounded-lg">
         <Label 
           htmlFor="terms" 

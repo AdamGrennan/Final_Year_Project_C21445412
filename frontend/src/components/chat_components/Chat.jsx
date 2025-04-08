@@ -10,12 +10,14 @@ import { useJudgment } from "@/context/JudgementContext";
 import { getFeedback } from "@/utils/decisionUtils/getFeedback";
 import { openingMessage, fetchBERTResponse, fetchGPTResponse, fetchLevelNoise, fetchPatternNoise, fetchSource, fetchNewsAPI } from "@/services/ApiService";
 
-const Chat = ({ judgementId, setFinishButtonDisable }) => {
+const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking  }) => {
   const [similiarDecisions, setSimilarDecisions] = useState([]);
   const { user } = useUser();
   const { judgmentData } = useJudgment();
   const { detectBias, detectNoise } = useDecision();
   const [messages, setMessages] = useState([]);
+  const [messageCount, setMessageCount] = useState(0);
+  const [isChatBusy, setIsChatBusy] = useState(false);
   const [input, setInput] = useState("");
   const [buttonDisable, setButtonDisable] = useState(false);
   const hasInitialized = useRef(false);
@@ -56,8 +58,8 @@ const Chat = ({ judgementId, setFinishButtonDisable }) => {
   };
 
   useEffect(() => {
-    setFinishButtonDisable(buttonDisable);
-  }, [buttonDisable, setFinishButtonDisable]);
+    setFinishButtonDisable(isChatBusy || messageCount < 2);
+  }, [isChatBusy, messageCount]);
 
   const onSend = async (option) => {
     setButtonDisable(true);
@@ -145,6 +147,8 @@ const Chat = ({ judgementId, setFinishButtonDisable }) => {
           detectNoise(levelNoiseType, noiseSource); 
         }
       }
+      setIsThinking(true);
+      setIsChatBusy(true);
       const gptResponse = { text: "", sender: "GPT" };
       setMessages((prev) => [...prev, gptResponse]);
 
@@ -161,7 +165,9 @@ const Chat = ({ judgementId, setFinishButtonDisable }) => {
           return updatedMessages;
         });
       });
-  
+      setIsThinking(false);
+      setIsChatBusy(false);
+
       await saveChats(user, judgementId, [gptResponse], detectedBias, detectedNoise);
 
       const newsAPI = await fetchNewsAPI(messageContent);
@@ -182,6 +188,10 @@ const Chat = ({ judgementId, setFinishButtonDisable }) => {
     } catch (error) {
       console.error("ERROR, Can't connect to BERT OR GPT", error.message || error);
     }
+
+    if (newMessage.sender === "user") {
+      setMessageCount((prev) => prev + 1);
+    }    
 
     setButtonDisable(false);
     setFinishButtonDisable(false);

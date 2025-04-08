@@ -1,7 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { BsArrowRepeat } from "react-icons/bs";
 import { MdKeyboardDoubleArrowUp, MdOutlineKeyboardDoubleArrowDown, MdNewReleases } from "react-icons/md";
+import { FaCrown } from "react-icons/fa";
 import { AiFillFire } from "react-icons/ai";
 import useFetchTrends from "../../../utils/trendUtils/useTrendAnalysis";
 import useTrendData from "@/hooks/useTrendData";
@@ -25,7 +27,9 @@ const Trends = ({ user, jid, bias, noise, isRevisited }) => {
     new: <MdNewReleases className="text-SECONDARY" />,
     increase: <MdKeyboardDoubleArrowUp style={{ color: "red" }} />,
     decrease: <MdOutlineKeyboardDoubleArrowDown style={{ color: "green" }} />,
-    streak: <AiFillFire className="text-PRIMARY" />
+    streak: <AiFillFire className="text-PRIMARY" />,
+    "detection-streak": <BsArrowRepeat/>,
+    "most-frequent": <FaCrown className="text-SECONDARY" />
   };
 
   return (

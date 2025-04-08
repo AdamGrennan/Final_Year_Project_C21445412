@@ -70,7 +70,7 @@ const JudgementForm = () => {
   };
 
   return (
-    <div className="mr-auto p-6 bg-white w-[600px] min-h-[500px]">
+    <div className="mr-auto p-6 bg-white w-[600px]">
       <FormProvider {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <section>
@@ -121,7 +121,7 @@ const JudgementForm = () => {
                     <Input
                       placeholder="e.g. I've been offered a job in another city"
                       {...field}
-                      className="font-urbanist border border-gray-300 bg-white"
+                      className="font-urbanist border border-gray-300 bg-white focus:border-SECONDARY focus:ring-SECONDARY "
                     />
                   </FormControl>
                   <FormMessage />
@@ -144,7 +144,7 @@ const JudgementForm = () => {
                         <Input
                           placeholder="e.g. Take job offer, stay put"
                           {...field}
-                          className="font-urbanist border border-gray-300 bg-white"
+                          className="font-urbanist border border-gray-300 bg-white focus:border-SECONDARY focus:ring-SECONDARY "
                         />
                       </FormControl>
                     </FormItem>
@@ -160,7 +160,7 @@ const JudgementForm = () => {
                         <Input
                           placeholder="e.g. Deadline next week, manager conflict"
                           {...field}
-                          className="font-urbanist border border-gray-300 bg-white"
+                          className="font-urbanist border border-gray-300 bg-white focus:border-SECONDARY focus:ring-SECONDARY "
                         />
                       </FormControl>
                     </FormItem>
@@ -176,7 +176,7 @@ const JudgementForm = () => {
                         <Input
                           placeholder="e.g. Better work-life balance"
                           {...field}
-                          className="font-urbanist border border-gray-300 bg-white"
+                          className="font-urbanist border border-gray-300 bg-white focus:border-SECONDARY focus:ring-SECONDARY "
                         />
                       </FormControl>
                     </FormItem>

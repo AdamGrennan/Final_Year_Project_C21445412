@@ -21,8 +21,8 @@ const DeleteModal = ({ userId, onClose }) => {
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
       <div className="p-8 border w-96 shadow-lg rounded-md bg-white">
-        <h3 className="text-2xl font-urbanist font-semibold text-gray-900">Are you sure you want to delete account?</h3>
-        <div className="flex justify-end gap-4 mt-4">
+        <h3 className="text-2xl text-center font-urbanist font-semibold text-gray-900">Are you sure you want to delete account?</h3>
+        <div className="flex justify-center items-center gap-4 mt-4">
           <Button
             onClick={onClose}
             className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
@@ -31,7 +31,7 @@ const DeleteModal = ({ userId, onClose }) => {
           </Button>
           <Button
             onClick={deleteAccount}
-            className="px-4 py-2 text-white rounded-md bg-PRIMARY"
+            className="px-4 py-2 text-white rounded-md bg-PRIMARY hover:bg-opacity-80"
           >
             Delete
           </Button>

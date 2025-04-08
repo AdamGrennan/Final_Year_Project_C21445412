@@ -6,6 +6,7 @@ import { useUser } from "@/context/UserContext";
 import { getDashboard } from "@/utils/dashboardUtils/getDashboard";
 import { useEffect, useState } from "react";
 
+
 export default function Page() {
   const { user } = useUser();
   const [total, setTotal] = useState(0);
@@ -19,6 +20,7 @@ export default function Page() {
   const [noiseTheme, setNoiseTheme] = useState("");
   const [mostBiasedTime, setMostBiasedTime] = useState("");
   const [noisiestTime, setNoisiestTime] = useState("");
+  const [insights, setInsights] = useState("");
 
   useEffect(() => {
     if (user) {
@@ -33,6 +35,7 @@ export default function Page() {
         setNoiseTheme(data.topThemeWithNoise);
         setMostBiasedTime(data.mostBiasedTime);
         setNoisiestTime(data.noisiestTime);
+        setInsights(data.insights);
   
         const combinedPieData = [
           ...Object.entries(data.biasCounts || {}).map(([name, value]) => ({
@@ -52,7 +55,6 @@ export default function Page() {
     }
   }, [user]);
   
-
   return (
     <div className="grid grid-cols-3 gap-6 w-full px-6 pt-4">
       <div className="col-span-1 flex flex-col">
@@ -67,7 +69,7 @@ export default function Page() {
         total={total} pieData={pieData} 
         topThemeWithBias={biasTheme} topThemeWithNoise={noiseTheme} 
         trendInsights={trendInsights} mostBiasedTime={mostBiasedTime}
-        noisiestTime={noisiestTime}/>
+        noisiestTime={noisiestTime} insights={insights}/>
       </div>
     </div>
   );

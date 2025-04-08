@@ -28,6 +28,7 @@ export const getDashboard = async (user) => {
       trendInsights: dashboardData.trendInsights || "ERROR",
       mostBiasedTime: dashboardData.mostBiasedTime || "ERROR",
       noisiestTime: dashboardData.noisiestTime || "ERROR",
+      insights: dashboardData.insights || "ERROR",
     };
   } catch (error) {
     console.error("Error fetching dashboard:", error);

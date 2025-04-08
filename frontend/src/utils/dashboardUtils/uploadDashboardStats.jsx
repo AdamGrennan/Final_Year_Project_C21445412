@@ -8,7 +8,10 @@ import {
   setDoc,
   getDoc,
   serverTimestamp,
+  orderBy,
+  limit
 } from "firebase/firestore";
+import { fetchDashboardInsights } from "@/services/ApiService";
 
 export const uploadDashboardStats = async (userId) => {
   try {
@@ -35,6 +38,7 @@ export const uploadDashboardStats = async (userId) => {
     const processedDecisionIds = dashboardData.processedDecisionIds || [];
 
     const newDecisionIds = [];
+    let insights = "";
 
     const getTime = (timestamp) => {
       const date = timestamp?.toDate?.();
@@ -122,6 +126,23 @@ export const uploadDashboardStats = async (userId) => {
     const mostBiasedTime = getMaxKey(biasTimes);
     const noisiestTime = getMaxKey(noiseTimes);
 
+    const completedQuery = query(
+      collection(db, "judgement"),
+      where("userId", "==", userId),
+      where("isCompleted", "==", true),
+      orderBy("createdAt", "desc"),
+      limit(5)
+    );
+    const completedSnapshot = await getDocs(completedQuery);
+    const recentDecisions = completedSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    if (recentDecisions.length > 0) {
+      const dashboardData = await fetchDashboardInsights(recentDecisions);
+      if (dashboardData?.insights) {
+        insights = dashboardData.insights;
+      }
+    }
+
     const updatedDecisionIds = [...processedDecisionIds, ...newDecisionIds];
 
     await setDoc(
@@ -141,6 +162,7 @@ export const uploadDashboardStats = async (userId) => {
         mostBiasedTime,
         noisiestTime,
         processedDecisionIds: updatedDecisionIds,
+        insights,
         updatedAt: serverTimestamp(),
       },
       { merge: true }

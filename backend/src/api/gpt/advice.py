@@ -27,7 +27,7 @@ def advice_endpoint(client):
 
         try:
             response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4",
                 messages=[
                     {"role": "system", "content": "You provide direct, structured, and practical advice to help users mitigate bias."},
                     {"role": "user", "content": prompt}
@@ -55,7 +55,7 @@ def advice_endpoint(client):
 
         try:
             response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4",
                 messages=[
                     {"role": "system", "content": "You give actionable strategies to help users reduce judgment noise in their decisions."},
                     {"role": "user", "content": prompt}

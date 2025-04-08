@@ -52,11 +52,11 @@ const InsightsSidebar = ({ chatSummaries, judgementId, isRevisited }) => {
     <div className="flex flex-col items-center justify-center">
       <div className="w-full">
         {showInsights ? (
-          <p className="text-sm text-center text-gray-400 italic">
+          <p className="font-urbanist text-center text-gray-500 italic">
             Make 3 decisions to unlock personalized insights.
           </p>
         ) : isRevisited && strengths.length === 0 && improvements.length === 0 ? (
-          <p className="text-sm text-center text-gray-400 italic">
+          <p className="font-urbanist text-center text-gray-500 italic">
             This decision was revisited, but no strengths or improvements were detected.
           </p>
         ) : (

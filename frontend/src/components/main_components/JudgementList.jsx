@@ -97,7 +97,7 @@ const JudgementList = () => {
                 alt="No Judgements"
                 className="w-[250px] object-contain mt-8"
               />
-              <p className="text-sm font-urbanist font-medium text-PRIMARY">
+              <p className="text-sm font-urbanist font-medium text-PRIMARY italic">
                 No past decisions
               </p>
             </div>
@@ -106,7 +106,7 @@ const JudgementList = () => {
               {judgements.map((judgement) => (
                 <div
                   key={judgement.id}
-                  className="flex items-center justify-between bg-white p-4 rounded-lg shadow-md hover:bg-gray-200 transition-all duration-300"
+                  className="border border-gray-300 flex items-center justify-between bg-white p-4 rounded-lg hover:bg-gray-200 transition-all duration-300"
                 >
                   <div
                     onClick={() => openDecision(judgement.id, judgement.isCompleted)}

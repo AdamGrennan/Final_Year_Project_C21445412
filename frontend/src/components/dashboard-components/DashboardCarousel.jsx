@@ -10,8 +10,9 @@ import {
 import { DecisionStats } from "./DecisionStats";
 import { RecentDecision } from "./RecentDecisions";
 
-export const DashboardCarousel = ({ userId, total, pieData, topThemeWithBias, topThemeWithNoise, trendInsights, mostBiasedTime,
-  noisiestTime }) => {
+export const DashboardCarousel = ({ userId, total, pieData,
+   topThemeWithBias, topThemeWithNoise, trendInsights, mostBiasedTime,
+  noisiestTime, insights}) => {
 
   return (
     <div>
@@ -33,7 +34,7 @@ export const DashboardCarousel = ({ userId, total, pieData, topThemeWithBias, to
               />
             </CarouselItem>
             <CarouselItem className="flex-shrink-0 w-full flex justify-center">
-              <RecentDecision userId={userId} />
+              <RecentDecision userId={userId} insights={insights}/>
             </CarouselItem>
           </CarouselContent>
           <div className="absolute top-2 left-10">

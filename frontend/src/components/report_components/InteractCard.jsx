@@ -27,7 +27,7 @@ const InteractCard = ({user, decision, isRevisited}) => {
     return (
         <div className="bg-white flex flex-col items-center justify-center text-center w-full">
             {isRevisited ? (
-                <p className="font-urbanist text-gray-500">Feedback is not available for revisited decisions.</p>
+                <p className="font-urbanist text-gray-500 italic">Feedback is not available for revisited decisions.</p>
             ) : (
                 !submit ? (
                     <>

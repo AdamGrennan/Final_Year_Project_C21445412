@@ -1,19 +1,23 @@
 "use client";
 
 import React, { useState } from "react";
-import { useUser } from "@/context/UserContext";
 import { Label } from "@radix-ui/react-dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { MdModeEdit } from "react-icons/md";
 import EditModal from "@/components/profile-components/EditModal";
 import DeleteModal from "@/components/profile-components/DeleteModal";
+import { updatePassword } from "firebase/auth";
+import { updateDoc, doc} from "firebase/firestore";
+import { useUser } from "@/context/UserContext";
+
 
 export default function ProfilePage() {
-  const { user, updateUser } = useUser();
+  const { user } = useUser();
   const [fieldToEdit, setFieldToEdit] = useState("");
   const [value, setValue] = useState("");
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const { updateUser } = useUser();
 
   const handleEditClick = (field) => {
     setFieldToEdit(field);
@@ -21,13 +25,31 @@ export default function ProfilePage() {
     setShowEditModal(true);
   };
 
+  const handleSave = async () => {
+    try {
+      if (fieldToEdit === "name") {
+        const userRef = doc(db, "users", user.uid);
+        await updateDoc(userRef, { name: value });
+        updateUser({ name: value});
+
+      } else if (fieldToEdit === "password") {
+        await updatePassword(auth.currentUser, value);
+        alert("Password updated successfully.");
+      }
+      setShowEditModal(false);
+    } catch (error) {
+    console.error("PROFILE", error);
+    }
+  };
+
+
   const handleDelete = () => {
     setShowDeleteModal(true);
   }
 
   return (
-    <div className="flex justify-start p-4">
-      <div className="w-1/2 mx-auto p-4 bg-white rounded-lg shadow-md p-6">
+    <div className="flex justify-start p-12">
+      <div className="w-2/3 mx-auto p-4 bg-white rounded-lg shadow-md p-6">
         <Label className="font-urbanist text-PRIMARY text-2xl font-bold mb-2">Profile</Label>
 
         <div className="mb-4">
@@ -41,8 +63,8 @@ export default function ProfilePage() {
 
         <div className="mb-4">
           <Label className="font-urbanist font-semibold">Name:</Label>
-          <div className="flex items-center">
-            <div className="font-urbanist text-gray-800 border border-gray-300 rounded-md px-3 py-2 bg-white shadow-sm w-full">
+          <div className="flex items-center space-x-2">
+            <div className="font-urbanist text-gray-800 border border-gray-300 rounded-md px-3 py-2 bg-white shadow-sm w-full ">
               {user?.name || "No Name"}
             </div>
             <Button onClick={() => handleEditClick("name")} className="p-2 text-white rounded-md bg-white">
@@ -53,7 +75,7 @@ export default function ProfilePage() {
 
         <div className="mb-4">
           <Label className="font-urbanist font-semibold">Password:</Label>
-          <div className="flex items-center">
+          <div className="flex items-center space-x-2">
             <div className="font-urbanist text-gray-800 border border-gray-300 rounded-md px-3 py-2 bg-white shadow-sm w-full">
               ••••••••
             </div>

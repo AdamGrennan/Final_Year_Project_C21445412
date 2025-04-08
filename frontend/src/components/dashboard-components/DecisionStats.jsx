@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import BiasPieChart from "./PieChart";
+import { FaChartSimple } from "react-icons/fa6";
 
 export const DecisionStats = ({
   total,
@@ -12,6 +13,10 @@ export const DecisionStats = ({
 }) => {
   return (
     <div className="m-0 p-0">
+      <div className="flex items-center">
+      <FaChartSimple className="text-cyan-500 text-2xl mr-2"/>
+        <h2 className="text-lg font-urbanist font-semibold text-gray-800">Decision Statistics</h2>
+      </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         <div className="flex flex-col space-y-6">
           <div className="w-full max-w-[500px]">
