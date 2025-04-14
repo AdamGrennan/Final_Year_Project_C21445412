@@ -1,21 +1,21 @@
 import sys
 import os
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "src")))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from flask import Flask
 from flask_cors import CORS
 from sentence_transformers import SentenceTransformer
-from src.bert.load_model import load_bias_model
-from src.api.level_noise.level_noise import level_noise_endpoint
-from src.api.bert_endpoint import bert_endpoint
-from src.api.gpt.chat import chat_endpoint
-from src.api.gpt.source import source_endpoint
-from src.api.gpt.advice import advice_endpoint
-from src.api.gpt.chat_summary import chat_summary_endpoint
-from src.api.gpt.insights import insight_endpoint
-from src.api.pattern_noise.pattern_noise import pattern_noise_endpoint
-from src.api.news_api.news_api import news_api_endpoint
-from src.api.gpt.dashboard_insights import dashboard_insights_endpoint
+from modules.bert.load_model import load_bias_model
+from noise.level_noise import level_noise_endpoint
+from api.bert import bert_endpoint
+from modules.gpt.chat import chat_endpoint
+from modules.gpt.source import source_endpoint
+from modules.gpt.advice import advice_endpoint
+from modules.gpt.chat_summary import chat_summary_endpoint
+from modules.gpt.insights import insight_endpoint
+from noise.pattern_noise import pattern_noise_endpoint
+from news.news_api import news_api_endpoint
+from modules.gpt.dashboard_insights import dashboard_insights_endpoint
 from config.firebase_config import initialize_firebase
 from transformers import pipeline
 from openai import OpenAI
@@ -75,6 +75,3 @@ def insights():
 @app.route('/dashboard_insights', methods=['POST'])
 def dashboard_insights():
     return dashboard_insights_endpoint(client)
-
-if __name__ == '__main__':
-    app.run(debug=True)

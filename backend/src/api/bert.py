@@ -1,5 +1,5 @@
 from flask import request, jsonify
-from bert.predict import predict_bias
+from modules.bert.predict import predict_bias
 import traceback 
 import numpy as np
 

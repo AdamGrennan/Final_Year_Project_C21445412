@@ -1,7 +1,7 @@
 from flask import request, Response, jsonify
-from bert.predict import predict_bias
+from modules.bert.predict import predict_bias
 import time
-from service.feedback_service import FeedbackService
+from services.feedback_service import FeedbackService
 
 def get_created_at(chat):
     return chat.get("createdAt", float("-inf"))  

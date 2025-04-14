@@ -6,8 +6,8 @@ import torch
 import numpy as np
 from sklearn.metrics import f1_score, precision_score, recall_score
 from sklearn.model_selection import train_test_split
-from bert.dataset import BiasDataset
-from bert.data_load import load_data
+from modules.bert.dataset import BiasDataset
+from modules.bert.data_load import load_data
 
 # Train Model
 def train_model(csv_file, model_name='bert-base-uncased', batch_size=32, epochs=4, early_stop_patience=2):
