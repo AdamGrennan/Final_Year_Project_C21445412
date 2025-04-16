@@ -1,4 +1,8 @@
 from flask import request, jsonify
+import statistics
+from services.level_noise_service import LevelNoiseService
+
+service = LevelNoiseService()
 
 def level_noise_endpoint(pipe):
     data = request.json
@@ -9,23 +13,22 @@ def level_noise_endpoint(pipe):
             statement,
             candidate_labels=["lenient", "neutral", "harsh"]
         )
-
-        scores = {}
-        for label, score in zip(result["labels"], result["scores"]):
-         scores[label] = score
-
-        detected_label = result["labels"][0] 
-        confidence = result["scores"][0]  
+        labels = result["labels"]
+        scores = result["scores"]
         
-        insights = {
-            "confidence_scores": scores,
-            "detected_label": detected_label,
-            "confidence": confidence,
-            "statement": statement, 
-        }
+        top_label = labels[0]
+        top_score = scores[0]
+        neutral_score = scores[labels.index("neutral")]
+        
+        if neutral_score >= top_score - 0.1:
+            detected_label = "neutral"
+        else:
+            detected_label = top_label
+
 
         return jsonify(insights), 200
     
     except Exception as e:
         print(f"Unhandled Exception in /level_noise: {e}")
         return jsonify({"error": str(e)}), 500
+
