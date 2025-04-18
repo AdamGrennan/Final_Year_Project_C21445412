@@ -5,22 +5,26 @@ def insight_endpoint(client):
 
     current_chat_summary = data.get('currentChatSummary', "No summary available")
     previous_chat_summaries = data.get('previousChatSummaries', [])  
+    trends = data.get('trends', [])
+
+    trend_summary = "\n".join([t.get("message", "") for t in trends]) if trends else "No trends detected."
 
     def call_gpt(task_type):
         try:
             response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4",
                 messages=[
-                {"role": "system", "content": f"You analyze decision-making behavior and return only {task_type} as bullet points. Do not include section headers or introductions. Use 'you' instead of 'the user', also include one related emoji at the end of each bullet point."},
+                {"role": "system", "content": f"You analyze decision-making behavior and return each {task_type} as a short, personalized paragraph. Avoid using bullet points or markdown. Use second-person voice and write it as if you're reflecting with the user."},
                 {"role": "user", "content": f"""
                 You are analyzing a user’s decision-making patterns over time.
                 Below is the most recent decision followed by the five most recent previous decisions. Each contains the title, theme, detected bias and noise, and a summary. Compare them and identify clear patterns.
-                Be specific and avoid generic advice. You can refer to decision titles.
+                Additionally, here are some trends detected across their decisions:{trend_summary}
+                Be specific, reflective, and mention if patterns have been repeated across multiple decisions. Do not just give tips—explain how the user tends to think and how that affects decisions.
                 Current Decision:
                 {current_chat_summary}
                 Past Decisions:
                 {"\n\n".join(previous_chat_summaries)}"""}],
-                max_tokens=150,  
+                max_tokens=300,  
                 temperature=0.5  
             )
 

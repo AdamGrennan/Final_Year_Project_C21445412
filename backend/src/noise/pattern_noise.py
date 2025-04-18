@@ -1,15 +1,13 @@
 from flask import request, jsonify
 from sklearn.metrics.pairwise import cosine_similarity
 import requests
+from utils.pattern_noise_util import fetch_chats, is_pattern_noise
 
-MAX_DECISIONS = 2  
-
-def pattern_noise_endpoint(sbert_model, db, threshold=0.7):
+def pattern_noise_endpoint(sbert_model, db, threshold=0.5):
     data = request.json
-    print("\nReceived Request Data:", data) 
 
     user_id = data.get("user_id")
-    judgment_id = data.get("judgmentId")
+    judgment_id = data.get("judgementId") 
     message = data.get("message") 
     detected_bias = data.get("detectedBias", [])
     detected_noise = data.get("detectedNoise", [])
@@ -61,18 +59,21 @@ def pattern_noise_endpoint(sbert_model, db, threshold=0.7):
                 })
                 
                 source_summary = response.json().get("summary", "Pattern Noise detected in chat discussions.")
+                
+                judgment_id = similar_chat.get("judgementId")
+                if not judgment_id:
+                 print("Skipping similar chat with missing judgmentId.")
+                 continue 
 
                 pattern_noise_sources.append({
-                    "judgmentId": similar_chat["judgmentId"],
-                    "source": source_summary
-                })
+                 "judgmentId": judgment_id,
+                 "source": source_summary
+                    })
 
                 similar_decisions.append({
-                    "judgmentId": similar_chat["judgmentId"],
-                    "similarity": score,
-                    "text": similar_chat["text"]
-                })
-
+                 "judgmentId": judgment_id,
+                 "similarity": score,
+                "text": similar_chat["text"]})
     insights = {
         "similarDecisions": similar_decisions,
         "patternNoiseSources": pattern_noise_sources,
@@ -82,69 +83,3 @@ def pattern_noise_endpoint(sbert_model, db, threshold=0.7):
     return jsonify(insights)
 
 
-def fetch_decisions(user_id, db):
-    judge_ref = db.collection("judgement").where("userId", "==", user_id)
-    docs = judge_ref.stream()
-
-    decisions = []
-    for doc in docs:
-        data = doc.to_dict()
-        if data:
-            decisions.append({
-                "judgmentId": doc.id,
-                "theme": data.get("theme", ""),
-                "createdAt": data.get("createdAt", ""),
-                "detectedBias": data.get("detectedBias", []),
-                "detectedNoise": data.get("detectedNoise", []),
-            })
-
-    return decisions
-
-def fetch_chats(user_id, db):
-    print(f"Fetching ALL chats for user: {user_id}")
-
-    chat_ref = db.collection("chat").where("userId", "==", user_id).where("sender", "==", "user")
-    docs = chat_ref.stream()
-
-    messages = []
-    for doc in docs:
-        data = doc.to_dict()
-        if data:
-            messages.append({
-                "text": data.get("text", ""),
-                "judgmentId": data.get("judgmentId", ""),
-                "detected_bias": data.get("detectedBias", []),
-                "detected_noise": data.get("detectedNoise", []),
-            })
-
-    print(f"Retrieved {len(messages)} total chat messages for user {user_id}")
-    return messages
-
-def is_pattern_noise(current_messages, past_messages, sbert_model):
-    print("Running is_pattern_noise()")
-
-    current_texts = " | ".join([msg["text"] for msg in current_messages[-3:]])
-    past_texts = " | ".join([msg["text"] for msg in past_messages[-3:]])
-
-    if not current_texts or not past_texts:
-        print("Not enough chat messages for comparison")
-        return False
-
-    current_vector = sbert_model.encode([current_texts])[0]
-    past_vector = sbert_model.encode([past_texts])[0]
-
-    similarity = cosine_similarity([current_vector], [past_vector])[0][0]
-    print(f"Pattern Noise Similarity Score: {similarity}")
-
-    if similarity > 0.6:
-        past_has_bias = any(msg["detected_bias"] for msg in past_messages)
-        past_has_noise = any(msg["detected_noise"] for msg in past_messages)
-
-        current_has_bias = any(msg["detected_bias"] for msg in current_messages)
-        current_has_noise = any(msg["detected_noise"] for msg in current_messages)
-
-        if not past_has_bias and not past_has_noise and (current_has_bias or current_has_noise):
-            print(f"Pattern Noise Detected!")
-            return True
-
-    return False

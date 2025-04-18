@@ -71,24 +71,23 @@ const JudgementList = () => {
 
   return (
     <div className="w-[500px] flex flex-col items-center">
-      <div className="flex items-center justify-center gap-4 mb-4">
-        <Button
-          onClick={() => setFilter(true)}
-          className={`px-6 py-2 text-sm font-urbanist transition duration-300 rounded-lg ${filter === true ? "bg-PRIMARY text-white shadow-md scale-105" : "bg-gray-200 text-black hover:bg-gray-300"
-            }`}
-        >
-          Completed
-        </Button>
-
-        <Button
-          onClick={() => setFilter(false)}
-          className={`px-6 py-2 text-sm font-urbanist transition duration-300 rounded-lg ${filter === false ? "bg-PRIMARY text-white shadow-md scale-105" : "bg-gray-200 text-black hover:bg-gray-300"
-            }`}
-        >
-          Not Completed
-        </Button>
-      </div>
-      <ScrollArea className="h-[350px] w-[550px] rounded-md border bg-white p-4">
+      <ScrollArea className="h-[380px] w-[550px] rounded-md border bg-white p-4">
+        <div className="sticky top-0 z-10 bg-white px-4 py-3 flex items-center justify-center">
+          <div className="flex bg-gray-100 rounded-full p-1 shadow-inner">
+            <Button
+              onClick={() => setFilter(true)}
+              className={`w-28 h-8 text-xs font-medium rounded-full transition-all duration-300
+        ${filter ? "bg-PRIMARY text-white shadow-md scale-105" : "text-gray-700 hover:bg-gray-100"}`}>
+              Completed
+            </Button>
+            <Button
+              onClick={() => setFilter(false)}
+              className={`w-28 h-8 text-xs font-medium rounded-full transition-all duration-300
+        ${!filter ? "bg-PRIMARY text-white shadow-md scale-105" : "text-gray-700 hover:bg-gray-100"}`}>
+              Not Completed
+            </Button>
+          </div>
+        </div>
         <div className="flex flex-col items-center text-gray-500">
           {judgements.length === 0 ? (
             <div className="flex flex-col items-center">
@@ -140,7 +139,7 @@ const JudgementList = () => {
             </div>
           )}
         </div>
-        <ScrollBar className="bg-SECONDARY" />
+        <ScrollBar className="bg-gray-100" />
       </ScrollArea>
     </div>
 

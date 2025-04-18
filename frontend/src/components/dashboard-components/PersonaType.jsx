@@ -23,7 +23,7 @@ useEffect(() => {
 */
   return (
     <div>
-      <h2 className="font-urbanist font-semibold mb-2 border-b-[2px] border-PRIMARY pb-1 w-42">
+      <h2 className="font-urbanist font-semibold mb-2 border-b-[2px] border-PRIMARY pb-1 w-40">
         Decision-Making Style
       </h2>
       <div className="p-6 bg-white rounded-lg shadow-md text-center w-full mx-auto h-[200px]">

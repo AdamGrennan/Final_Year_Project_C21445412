@@ -39,8 +39,8 @@ const Trends = ({ user, jid, bias, noise, isRevisited }) => {
           displayTrends.map((trend, index) => (
             <div key={index} className="w-full text-left flex flex-col items-center font-urbanist">
               <div className="flex justify-between items-center w-full px-2 py-1 rounded-md bg-gray-50 hover:bg-gray-100 transition">
-                <p className="text-gray-700">{trend.message}</p>
-                <span className="text-xl">{iconMap[trend.type]}</span>
+                <p className="text-gray-700 text-base">{trend.message}</p>
+                <span className="text-base">{iconMap[trend.type]}</span>
               </div>
             </div>
           ))}

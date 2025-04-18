@@ -1,20 +1,21 @@
 
-export const fetchGPTResponse = async (input, messages, setDisplayedText) => {
-
+export const fetchGPTResponse = async (input,messages,setDisplayedText,patternContext,userId,judgementId) => {
   const response = await fetch('http://127.0.0.1:5000/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      input: input.trim(),
+      input: (input || "").trim(),
+      userId: userId || "",              
+      judgementId: judgementId || "",    
       context: messages.map((msg) => ({
         sender: msg.sender || "user",
         text: msg.text || "",
         detectedBias: msg.detectedBias || [],
         detectedNoise: msg.detectedNoise || [],
       })),
+      patternContext,
     }),
   });
-
   if (!response.ok) {
     throw new Error(`GPT error: ${response.status} - ${await response.text()}`);
   }
@@ -33,8 +34,6 @@ export const fetchGPTResponse = async (input, messages, setDisplayedText) => {
   }
 };
 
-
-
 export const fetchBERTResponse = async (input) => {
   const response = await fetch('http://127.0.0.1:5000/bert', {
     method: 'POST',
@@ -49,11 +48,13 @@ export const fetchBERTResponse = async (input) => {
   return response.json();
 };
 
-export const fetchLevelNoise = async (input) => {
+export const fetchLevelNoise = async (input, userId) => {
   const response = await fetch('http://127.0.0.1:5000/level_noise', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ input: input.trim() }),
+    body: JSON.stringify({ 
+      input: input.trim(),
+      user_id: userId, }),
   });
 
   if (!response.ok) {
@@ -71,7 +72,7 @@ export const fetchPatternNoise = async (userId, judgmentId, theme, message, dete
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       user_id: userId,
-      judgmentId: judgmentId,
+      judgementId: judgmentId,
       theme: theme,
       message: message,
       detectedBias: detectedBias,
@@ -196,13 +197,14 @@ export const fetchChatSummary = async (title, messageContent, detectedBias, dete
   }
 }
 
-export const fetchInsights = async ({ currentChatSummary, previousChatSummaries }) => {
+export const fetchInsights = async ({ currentChatSummary, previousChatSummaries, trends }) => {
   try {
     const response = await fetch("http://127.0.0.1:5000/insights", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ currentChatSummary,
-         previousChatSummaries }),
+         previousChatSummaries,
+        trends }),
     });
 
     const data = await response.json();

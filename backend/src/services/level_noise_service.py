@@ -1,8 +1,9 @@
+from config.firebase_config import initialize_firebase
 from firebase_admin import firestore
 
 class LevelNoiseService:
     def __init__(self):
-        self.db = firestore.client()
+        self.db = initialize_firebase() 
         
     def save_level_score(self, user_id, average_score):
         noise_ref = self.db.collection('level_noise_average')
@@ -18,4 +19,4 @@ class LevelNoiseService:
              .where("userId", "==", user_id) \
              .order_by("timestamp", direction=firestore.Query.DESCENDING) \
              .limit(limit).stream()
-        return [doc.to_dict()["score"] for doc in docs]
+        return [doc.to_dict()["average_score"] for doc in docs]

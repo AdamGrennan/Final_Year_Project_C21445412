@@ -3,15 +3,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useUser } from "@/context/UserContext";
 import { useDecision } from '@/context/DecisionContext';
-import { fetchChats, saveChats } from "@/services/FirebaseService";
+import { fetchChats, saveChats, fetchDecisionDetails } from "@/services/FirebaseService";
 import MessageList from "./MessageList";
 import MessageSender from "./MessageSender";
 import { useJudgment } from "@/context/JudgementContext";
-import { getFeedback } from "@/utils/decisionUtils/getFeedback";
 import { openingMessage, fetchBERTResponse, fetchGPTResponse, fetchLevelNoise, fetchPatternNoise, fetchSource, fetchNewsAPI } from "@/services/ApiService";
 
-const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking  }) => {
-  const [similiarDecisions, setSimilarDecisions] = useState([]);
+const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking }) => {
+  const [pastDecisions, setPastDecisions] = useState([]);
   const { user } = useUser();
   const { judgmentData } = useJudgment();
   const { detectBias, detectNoise } = useDecision();
@@ -40,7 +39,7 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking  }) => {
           },
           user.name
         );
-        
+
 
         if (openMessage.bias_feedback) {
           const openingMessage = {
@@ -72,8 +71,8 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking  }) => {
 
     if (!messages.some(msg => msg.sender === "user")) {
       setFinishButtonDisable(false);
-  }
-  
+    }
+
     try {
       let detectedBias = [];
       let detectedNoise = [];
@@ -86,6 +85,8 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking  }) => {
         console.log("Detected Bias", detectedBias)
       }
 
+      await saveChats(user, judgementId, [newMessage], detectedBias, detectedNoise);
+
       const source = await fetchSource(messageContent, detectedBias, detectedNoise);
       if (source.biasSummary !== "No bias source available.") {
         detectedBias.forEach((bias) => detectBias(bias, source.biasSummary));
@@ -95,63 +96,90 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking  }) => {
       }
 
       const patternNoiseData = await fetchPatternNoise(
-        user.uid, 
-        judgementId, 
+        user.uid,
+        judgementId,
         judgmentData.theme,
         messageContent,
         detectedBias,
         detectedNoise
       );
 
+      let patternContext = null;
+
       if (patternNoiseData) {
         const { similarDecisions, patternNoiseSources } = patternNoiseData;
+
         if (similarDecisions && similarDecisions.length > 0) {
-          console.log("Pattern Noise detected: Similar past decisions found.", similarDecisions);
           if (patternNoiseSources && patternNoiseSources.length > 0) {
             const patternNoiseSource = patternNoiseSources[0].source;
             detectNoise("Pattern Noise", patternNoiseSource);
             detectedNoise.push("Pattern Noise");
           }
-          setSimilarDecisions(similarDecisions);
+
+          const firstSimilar = similarDecisions[0];
+          console.log("Pattern Noise Similar Decision Judgment ID:", firstSimilar.judgmentId);
+          const judgmentDetails = await fetchDecisionDetails(firstSimilar.judgmentId);
+
+          patternContext = {
+            title: judgmentDetails?.title || "",
+            summary: judgmentDetails?.chatSummary || "",
+          };
+
+          setPastDecisions(similarDecisions);
         } else {
           console.log("No Pattern Noise detected.");
-          setSimilarDecisions([]);
+          setPastDecisions([]);
         }
       }
 
-      const levelNoiseData = await fetchLevelNoise(messageContent);
-      if (levelNoiseData) {
+      const levelNoiseCounts = {
+        harsh: 0,
+        lenient: 0,
+        neutral: 0,
+      };
+
+      for (const message of messages) {
+        const levelNoiseData = await fetchLevelNoise(message.text, user.uid);
         const { confidence_scores } = levelNoiseData;
-      
+
         const harshScore = confidence_scores["harsh"] || 0;
         const lenientScore = confidence_scores["lenient"] || 0;
         const neutralScore = confidence_scores["neutral"] || 0;
-      
-        const threshold = 0.05; 
-      
-        let levelNoiseType = null;
-      
+
+        const threshold = 0.25;
+
         if (harshScore - neutralScore > threshold && harshScore > lenientScore) {
-          levelNoiseType = "Harsh Level Noise";
+          levelNoiseCounts.harsh++;
         } else if (lenientScore - neutralScore > threshold && lenientScore > harshScore) {
-          levelNoiseType = "Lenient Level Noise";
-        }
-      
-        if (levelNoiseType) {
-          detectedNoise.push(levelNoiseType); 
-      
-          const source = await fetchSource(messageContent, detectedBias, detectedNoise);
-          const noiseSource =
-            source.noiseSummary !== "No noise source available." ? source.noiseSummary : "No specific source";
-      
-          detectNoise(levelNoiseType, noiseSource); 
+          levelNoiseCounts.lenient++;
+        } else {
+          levelNoiseCounts.neutral++;
         }
       }
+      let levelNoiseType = null;
+
+      if (levelNoiseCounts.harsh > levelNoiseCounts.lenient && levelNoiseCounts.harsh > levelNoiseCounts.neutral) {
+        levelNoiseType = "Harsh Level Noise";
+      } else if (levelNoiseCounts.lenient > levelNoiseCounts.harsh && levelNoiseCounts.lenient > levelNoiseCounts.neutral) {
+        levelNoiseType = "Lenient Level Noise";
+      }
+
+      if (levelNoiseType !== "No level noise detected") {
+        detectedNoise.push(levelNoiseType);
+
+        const source = await fetchSource(messageContent, detectedBias, detectedNoise);
+        const noiseSource =
+          source.noiseSummary !== "No noise source available." ? source.noiseSummary : "No specific source";
+
+        detectNoise(levelNoiseType, noiseSource);
+      }
+
       setIsThinking(true);
       setIsChatBusy(true);
       const gptResponse = { text: "", sender: "GPT" };
       setMessages((prev) => [...prev, gptResponse]);
 
+      console.log("Sending to GPT:", messageContent);
       await fetchGPTResponse(messageContent, messages, (newText) => {
         setMessages((prev) => {
           const updatedMessages = [...prev];
@@ -159,12 +187,16 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking  }) => {
           if (lastMessageIndex >= 0) {
             updatedMessages[lastMessageIndex] = {
               ...updatedMessages[lastMessageIndex],
-              text: newText, 
+              text: newText,
             };
           }
           return updatedMessages;
         });
-      });
+      }, patternContext,
+        user?.uid,
+        judgementId,
+        detectedBias,
+        detectedNoise);
       setIsThinking(false);
       setIsChatBusy(false);
 
@@ -174,15 +206,15 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking  }) => {
 
       if (newsAPI?.recency_bias_detected) {
         console.log("Possible Recency Bias detected:", newsAPI.most_similar_article.title);
-      
+
         const recencySource = `It seems you may have read [${newsAPI.most_similar_article.title}], which could be affecting your judgment.`;
-      
+
         detectBias("Recency Bias", recencySource);
-        detectedBias.push("Recency Bias"); 
+        detectedBias.push("Recency Bias");
       } else {
         console.log("No Recency Bias detected");
       }
-      
+
       await saveChats(user, judgementId, [{ ...newMessage }], detectedBias, detectedNoise);
 
     } catch (error) {
@@ -191,7 +223,7 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking  }) => {
 
     if (newMessage.sender === "user") {
       setMessageCount((prev) => prev + 1);
-    }    
+    }
 
     setButtonDisable(false);
     setFinishButtonDisable(false);

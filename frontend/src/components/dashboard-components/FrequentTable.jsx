@@ -50,8 +50,8 @@ export const FrequentTable = ({ userId }) => {
 
   return (
     <div>
-      <h2 className="font-urbanist font-semibold mb-2 border-b-[2px] border-PRIMARY pb-1 w-42">
-        Most Frequent Noise & Bias
+      <h2 className="font-urbanist font-semibold mb-2 border-b-[2px] border-PRIMARY pb-1 w-40">
+        Top Noise & Bias
       </h2>
       <div className="flex justify-start gap-3">
         {data.length > 0 ? (

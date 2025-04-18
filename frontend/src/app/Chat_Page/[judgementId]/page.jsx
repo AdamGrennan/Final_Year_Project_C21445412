@@ -15,6 +15,7 @@ import { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { uploadDashboardStats } from '@/utils/dashboardUtils/uploadDashboardStats';
 import { EmojiPanel } from '@/components/chat_components/Emojis';
+import { WebPanel } from '@/components/chat_components/WebPanel';
 
 export default function Page() {
   const router = useRouter();
@@ -111,25 +112,31 @@ export default function Page() {
           setIsThinking={setIsThinking}
         />
       </div>
-      <div className="w-48 bg-white h-full flex flex-col items-center justify-center p-4 border-l border-gray-200">
-        <Label className="font-semibold text-base">
+      <div className="w-48 bg-white h-full flex flex-col p-4 border-l border-gray-200">
+
+        <Label className="font-semibold text-base text-center mb-4">
           {judgmentData.title}
         </Label>
-        <div className="flex-grow"></div>
-        <EmojiPanel isThinking={isThinking} />
+        <div className="mb-4">
+          <EmojiPanel isThinking={isThinking} />
+        </div>
+        <div className="flex-grow flex items-center justify-center">
+          <WebPanel />
+        </div>
         {buttonDisable && (
-          <p className="mt-2 text-sm text-gray-500 text-center text-italic">
+          <p className="mb-2 text-sm text-gray-500 text-center italic">
             Send at least 2 messages to unlock your final report.
           </p>
         )}
         <Button
           onClick={finalReport}
           disabled={buttonDisable}
-          className="bg-PRIMARY text-white font-urbanist w-full  hover:bg-opacity-80"
+          className="bg-PRIMARY text-white font-urbanist w-full hover:bg-opacity-80"
         >
           Finish
         </Button>
       </div>
+
     </div>
   );
 };

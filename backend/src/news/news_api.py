@@ -37,6 +37,16 @@ def news_api_endpoint(sbert_model):
         
         keywords = extract_keywords(input_text)
         query = " OR ".join(keywords)
+        
+        query = " OR ".join(keywords)
+
+        if not query.strip():
+         logger.warning("No keywords found for query.")
+         return jsonify({
+        "recency_bias_detected": False,
+        "message": "No keywords could be extracted from the input text."
+    }), 200
+
 
         logger.info(f"Keywords extracted: {keywords}")
         logger.info(f"Final Query used: {query}")

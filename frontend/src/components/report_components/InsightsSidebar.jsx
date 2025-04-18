@@ -1,12 +1,14 @@
 "use client";
 import { useEffect, useState } from "react";
 import { fetchInsights } from "@/services/ApiService";
-import { db } from "@/config/firebase"; 
-import { doc, updateDoc } from "firebase/firestore"; 
+import { db } from "@/config/firebase";
+import { doc, updateDoc } from "firebase/firestore";
 import { useDecision } from '@/context/DecisionContext';
+import { TiTick } from "react-icons/ti";
+import { IoIosWarning } from "react-icons/io";
 
 const InsightsSidebar = ({ chatSummaries, judgementId, isRevisited }) => {
-  const { strengths, improvements, setStrengths, setImprovements } = useDecision(); 
+  const { strengths, improvements, setStrengths, setImprovements } = useDecision();
   const [showInsights, setShowInsights] = useState(false);
 
   useEffect(() => {
@@ -26,7 +28,10 @@ const InsightsSidebar = ({ chatSummaries, judgementId, isRevisited }) => {
           return;
         }
 
-        const response = await fetchInsights({ currentChatSummary, previousChatSummaries });
+        const trendRef = doc(db, "trends", judgementId);
+        const trendSnapShot = await getDoc(trendRef);
+        const trends = trendSnapShot.exists() ? trendSnap.data().trends : [];
+        const response = await fetchInsights({ currentChatSummary, previousChatSummaries, trends });
 
         if (response && judgementId) {
           const judgementRef = doc(db, "judgement", judgementId);
@@ -61,20 +66,38 @@ const InsightsSidebar = ({ chatSummaries, judgementId, isRevisited }) => {
           </p>
         ) : (
           <ul className="list-disc list-inside text-sm space-y-2">
-            <h3 className="font-urbanist text-lg font-semibold text-green-300 mb-2">Strengths</h3>
-            {strengths.map((key, index) => (
-              <p key={index} className="font-urbanist">{key}</p>
-            ))}
-            <h3 className="font-urbanist text-lg font-semibold text-red-300 mb-2">Areas to Improve</h3>
-            {improvements.map((key, index) => (
-              <p key={index} className="font-urbanist">{key}</p>
-            ))}
+            <div className="space-y-4">
+              <div className="bg-green-50 border border-green-300 rounded-md p-4 shadow-sm">
+                <h3 className="font-urbanist text-green-600 font-semibold text-base flex items-center gap-2">
+                  <span><TiTick /></span>
+                  Strengths
+                </h3>
+                <div className="space-y-2 mt-2">
+                  {strengths.map((item, i) => (
+                    <p key={i} className="text-green-700 text-sm leading-snug">{item}</p>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-amber-50 border border-amber-300 rounded-md p-4 shadow-sm">
+                <h3 className="font-urbanist text-amber-500 font-semibold text-base flex items-center gap-2">
+                  <span><IoIosWarning /></span>
+                  Areas to Improve
+                </h3>
+                <div className="space-y-2 mt-2">
+                  {improvements.map((item, i) => (
+                    <p key={i} className="text-green-700 text-sm leading-snug">{item}</p>
+                  ))}
+                </div>
+              </div>
+            </div>
+
           </ul>
         )}
       </div>
     </div>
   );
-  
+
 };
 
 export default InsightsSidebar;

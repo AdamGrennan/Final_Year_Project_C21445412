@@ -2,6 +2,7 @@ from flask import request, Response, jsonify
 from modules.bert.predict import predict_bias
 import time
 from services.feedback_service import FeedbackService
+from modules.gpt.prompts import get_opening_message, get_system_prompt
 
 def get_created_at(chat):
     return chat.get("createdAt", float("-inf"))  
@@ -22,14 +23,16 @@ def chat_endpoint(model, tokenizer, bias_labels, client):
     goal = details.get("goal", "").strip()
     statement = data.get("input", "").strip()
     context = data.get("context", [])
+    detectedNoise = data.get("detectedNoise", [])
+    detectedBias = data.get("detectedBias", [])
+    pattern_context = data.get("patternContext")
+    
+    print("CHAT TEST", detectedNoise)
+    print("CHAT TEST", detectedBias)
 
     try:
         if not statement and title:
-            opening_message = (
-                f"Hey {name}! I'm Sonus, your decision-support assistant. "
-                f"I'm here to help you reflect on potential noise and bias in your decision-making process. "
-                f"How can I assist you with your decision about {title}?"
-            )
+            opening_message = get_opening_message(name, title)
             return jsonify({"bias_feedback": opening_message}), 200
 
         detected_biases = predict_bias(model, tokenizer, statement, bias_labels)
@@ -48,60 +51,52 @@ def chat_endpoint(model, tokenizer, bias_labels, client):
         messages = [
             {
                 "role": "system",
-                "content": (
-                    "You are SONUS, an intelligent assistant helping users reflect on noise and bias in decision-making. "
-                    f"The user {name} is considering: '{title}'"
-                    f"The user {name} is considering a decision titled '{title}'. "
-                    f"The situation is: '{situation}'. "
-                    f"Options they are considering include: '{options}'. "
-                    f"Factors influencing them: '{influences}'. "
-                    f"Their ideal goal is: '{goal}'. "
-                    "Ensure responses follow the previous conversation naturally. "
-                    "If the user responds with 'yes' or asks for help, assume they are referring to the last topic discussed. "
-                    "Never ask the user to repeat themselves; instead, continue based on the last message in context."
-                    "Ensure responses follow the previous conversation naturally. "
-                    f"{chat_instruction}"
-                ),
+                "content": 
+                    get_system_prompt(name, title, situation, options, influences, goal, chat_instruction),
             }
         ]
+        
+        if pattern_context:
+         previous_title = pattern_context.get("title", "")
+         previous_summary = pattern_context.get("summary", "")
+
+         messages.append({
+        "role": "system",
+        "content": (
+            f"The user previously made a similar decision titled '{previous_title}'. "
+            f"Here’s a summary of that decision: '{previous_summary}'. "
+            "Use this to help tailor your response and encourage the user to reflect."
+        )
+            })
+             
+        if detectedBias or detectedNoise:
+            messages.append({
+        "role": "system",
+        "content": (
+            "Note: The user's current message was associated with the following:\n"
+            f"Biases: {', '.join(detectedBias) if detectedBias else 'None'}\n"
+            f"Noise: {', '.join(detectedNoise) if detectedNoise else 'None'}\n"
+            "Use this to inform your response — for example, suggest reflection or reframe their thinking if relevant."
+        )
+    })
 
         last_system_message = None 
 
         if context:
             sorted_context = sorted(context, key=get_created_at)
-            context_summary = ""
 
             for idx, chat in enumerate(sorted_context):
                 sender = chat.get("sender", "Unknown")
                 past_message = chat.get("text", "").strip()
-                past_biases = chat.get("detectedBias", [])
-                past_noises = chat.get("detectedNoise", [])
-
-                past_biases_str = ", ".join(past_biases) if isinstance(past_biases, list) else str(past_biases)
-                past_noises_str = ", ".join(past_noises) if isinstance(past_noises, list) else str(past_noises)
-
-                print(f"Context Message {idx + 1}:")
-                print(f"   - Sender: {sender}")
-                print(f"   - Message: {past_message}")
-                print(f"   - Detected Biases: {past_biases_str}")
-                print(f"   - Detected Noises: {past_noises_str}")
 
                 if not past_message:
-                    print("Skipping empty message\n")
-                    continue 
+                    continue
 
                 role = "assistant" if sender == "GPT" else "user"
                 messages.append({"role": role, "content": past_message})
 
                 if role == "assistant":
                     last_system_message = past_message
-
-            if last_system_message:
-                print(f"Last Assistant Message Successfully Tracked: {last_system_message}")
-            else:
-                print("No Assistant Message Found in Context!")
-
-
 
         if statement:
             if last_system_message:
@@ -118,7 +113,12 @@ def chat_endpoint(model, tokenizer, bias_labels, client):
             messages.append({"role": "user", "content": statement})
 
         context_length = sum(len(msg["content"].split()) for msg in messages)
-        response_tokens = 250 if context_length > 100 else 200 if len(statement.split()) > 15 else 120
+        if context_length > 100:
+         response_tokens = 250
+        elif len(statement.split()) > 15:
+         response_tokens = 200
+        else:
+         response_tokens = 120
 
         response = client.chat.completions.create(
             model="gpt-4",

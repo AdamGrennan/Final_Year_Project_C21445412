@@ -15,7 +15,7 @@ export const EmojiPanel = ({ isThinking }) => {
 
   return (
     <div className="flex flex-col items-center justify-center h-full text-center px-4">
-      <div className="w-32 h-32 mb-2">
+      <div className="w-16 h-16 mb-2">
         {animationData && (
           <Lottie animationData={animationData} loop autoplay />
         )}

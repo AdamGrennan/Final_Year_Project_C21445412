@@ -18,11 +18,11 @@ def advice_endpoint(client):
 
     for bias in detected_biases:
         prompt = f"""
-        The user made a decision titled "**{decision_title}**", and the bias **{bias}** was detected in their reasoning.
-        Conversation history: "**{context}**".
+        The user made a decision titled {decision_title}, and the bias {bias} was detected in their reasoning.
+        Conversation history: {context}.
         
-        Provide a **practical, actionable strategy** to counteract **{bias}** in this situation. Focus on **how they can adjust their thought process** next time to make a more balanced decision. 
-        Avoid generic explanations—give a clear **solution** in one paragraph, Address user personally instead of 'the user'.
+        Provide a practical, actionable strategy to counteract {bias} in this situation. Focus on how they can adjust their thought process next time to make a more balanced decision. 
+        Avoid generic explanations—give a clear solution in one paragraph, Address user personally instead of 'the user'.
         """
 
         try:
@@ -46,11 +46,12 @@ def advice_endpoint(client):
 
     for noise in detected_noise:
         prompt = f"""
-        The user made a decision titled **"{decision_title}"**, and **{noise}** was detected as a source of judgment noise.
-        Conversation history: "**{context}**".
+        The user made a decision titled {decision_title}, and {noise} was detected as a source of judgment noise.
+        Conversation history: {context}.
         
-        Suggest a **specific, immediate step** the user can take to reduce the impact of **{noise}** in similar decisions. 
-        Keep it **direct, situation-based, and immediately useful**, Address user personally instead of 'the user'.
+        Provide a clear, thoughtful paragraph directly to Adam explaining how they can reduce the influence of 
+        {noise} in his decision titled {decision_title}. Base it on the conversation history: {context}. 
+        Use a friendly but insightful tone, offering practical mental steps or mindset changes they can use in similar future situations. Avoid numbered steps or bullet points—make it feel like helpful personal advice in one paragraph.
         """
 
         try:

@@ -35,10 +35,11 @@ export default function Page() {
   useDecisionData(isRevisited);
 
   useEffect(() => {
-    if (!isRevisited) {
+    if (!isRevisited && user?.uid) {
       uploadDashboardStats(user.uid);
     }
-  }, [isRevisited]);
+  }, [isRevisited, user]);
+  
 
   useEffect(() => {
     const getSummaries = async () => {
@@ -131,14 +132,14 @@ export default function Page() {
               Trends and Patterns
             </h2>
             <div className="bg-gray-50 h-auto flex flex-col md:flex-row items-start justify-between p-8 space-y-8 md:space-y-0 md:space-x-8">
-            <div className="w-full md:w-1/3 h-[375px] bg-white rounded-lg shadow-md p-6">
+            <div className="w-full md:w-1.5/3 h-[375px] bg-white rounded-lg shadow-md p-6 space-y-4 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-SECONDARY scrollbar-track-GRAAY">
               <h3 className="text-center font-urbanist text-black text-base font-semibold border-b border-PRIMARY pb-2">
-                Insight Graphs
+               Recent Decision Insights
               </h3>
-              <Snapshot bias={detectedBias} noise={detectedNoise} />
+              <SummarySideBar chatSummaries={chatSummaries} judgementId={judgementId} isRevisited={isRevisited}/>
             </div> 
               
-              <div className="w-full md:w-2/3 h-[375px]  bg-white rounded-lg shadow-md p-6 space-y-4 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-SECONDARY scrollbar-track-GRAAY">
+              <div className="w-full md:w-1.5/3 h-[375px]  bg-white rounded-lg shadow-md p-6 space-y-4 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-SECONDARY scrollbar-track-GRAAY">
                 <h3 className="font-urbanist text-black text-base font-semibold border-b border-PRIMARY pb-2">
                   Key Trends
                 </h3>
@@ -159,7 +160,7 @@ export default function Page() {
               <h3 className="bg-white text-center font-urbanist text-black text-xl font-semibold border-b border-PRIMARY pb-2">
                 Decision Insights
               </h3>
-              <SummarySideBar chatSummaries={chatSummaries} judgementId={judgementId} isRevisited={isRevisited}/>
+              <Snapshot bias={detectedBias} noise={detectedNoise} />
             </div>
             <div className="w-full md:w-1/3 h-[375px] bg-white rounded-lg shadow-md p-6 space-y-4">
               <h3 className="text-center font-urbanist text-black text-xl font-semibold border-b border-PRIMARY pb-2">
