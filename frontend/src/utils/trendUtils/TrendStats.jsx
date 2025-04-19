@@ -20,47 +20,6 @@ export const newOccurrence = (allDecisions, bias, noise) => {
   }));
 };
 
-export const frequencyChange = (allDecisions, key) => {
-  if (allDecisions.length < 4) return [];
-
-  const countOccurrences = (decisions) =>
-    decisions.reduce((acc, decision) => {
-      (decision[key] || []).forEach(item => {
-        const name = item.bias || item.noise;
-        if (name) acc[name] = (acc[name] || 0) + 1;
-      });
-      return acc;
-    }, {});
-
-  const mid = Math.floor(allDecisions.length / 2);
-  const past = allDecisions.slice(0, mid);
-  const recent = allDecisions.slice(mid);
-
-  const pastCounts = countOccurrences(past);
-  const recentCounts = countOccurrences(recent);
-
-  const messages = [];
-
-  const allLabels = new Set([...Object.keys(pastCounts), ...Object.keys(recentCounts)]);
-
-  allLabels.forEach(label => {
-    const recentFreq = (recentCounts[label] || 0) / recent.length;
-    const pastFreq = (pastCounts[label] || 0) / past.length;
-
-    const diff = recentFreq - pastFreq;
-
-    if (Math.abs(diff) < 0.1) return; 
-
-    messages.push({
-      message: `${label} is appearing in ${Math.round(recentFreq * 100)}% of recent decisions (was ${Math.round(pastFreq * 100)}%)`,
-      type: diff > 0 ? "increase" : "decrease"
-    });
-  });
-
-  return messages;
-};
-
-
 export const absentStreaks = (allDecisions, allBiases, allNoises) => {
   const streaks = [];
 

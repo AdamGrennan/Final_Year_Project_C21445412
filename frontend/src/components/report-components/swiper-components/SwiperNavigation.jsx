@@ -1,6 +1,6 @@
 "use client"
-import PrevButton from "@/components/report_components/swiper_components/PreviousButton";
-import NextButton from "@/components/report_components/swiper_components/NextButton";
+import PrevButton from "@/components/report-components/swiper-components/PreviousButton";
+import NextButton from "@/components/report-components/swiper-components/NextButton";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { IoIosArrowForward } from "react-icons/io";
@@ -15,7 +15,7 @@ const SwiperNavigation = ({ swiperRef, isLastSlide, isFirstSlide }) => {
 
     const openHome = () => {
         setTimeout(async () => {
-            router.push('/Main');
+            router.push('/main');
         }, 700);
     };
 

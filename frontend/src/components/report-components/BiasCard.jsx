@@ -33,8 +33,7 @@ const BiasCard = ({ bias, noise, biasSources, noiseSources, advice }) => {
     "Confirmation Bias": <FaMagnifyingGlass />,
     "Framing Bias": <MdCallSplit />,
     "Recency  Bias": <FaHourglassHalf />,
-    "Lenient Level Noise": <PiScalesFill />,
-    "Harsh Level Noise": <PiScalesFill />,
+    "Level Noise": <PiScalesFill />,
     "Pattern Noise": <MdOutlineShowChart />,
     "Occasion Noise": <FaCloudShowersHeavy />,
   };
@@ -50,10 +49,8 @@ const BiasCard = ({ bias, noise, biasSources, noiseSources, advice }) => {
       "Confirmation bias is the tendency to seek out, interpret, and remember information that confirms pre-existing beliefs while ignoring contradictory evidence. This can reinforce misconceptions and hinder objective decision-making.",
     "Framing Bias":
       "Framing bias happens when people react differently to the same information depending on how it is presented. For example, a product described as '90% effective' may seem more appealing than one described as having a '10% failure rate,' even though both statements convey the same fact.",
-    "Lenient Level Noise":
+    "Level Noise":
       "Level noise refers to consistent differences in judgment severity between individuals. Some people may consistently be harsher or more lenient in their decisions compared to others, even when evaluating the same situation.",
-    "Harsh Level Noise":
-    "Level noise refers to consistent differences in judgment severity between individuals. Some people may consistently be harsher or more lenient in their decisions compared to others, even when evaluating the same situation.",
     "Pattern Noise":
       "Pattern noise occurs when the same person makes inconsistent judgments in similar cases. This can be due to subconscious preferences, varying interpretations, or personal biases affecting different decisions unpredictably.",
     "Occasion Noise":

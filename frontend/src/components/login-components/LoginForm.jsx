@@ -63,7 +63,7 @@ export function LoginForm() {
 
           setUser({ name: userData.name, email: userData.email, uid: user.uid });
           console.log("User logged in:", user.uid);
-          router.push('/Main');
+          router.push('/main');
         } else {
           setEmailError("No user details found. Please signup!.");
         }
@@ -126,7 +126,7 @@ export function LoginForm() {
         </div>
         <div className="mt-4 text-center text-sm font-semibold font-urbanist">
           Dont have an account?{" "}
-          <Link href="/Register" className="hover:underline font-semibold font-urbanist text-PRIMARY">
+          <Link href="/register" className="hover:underline font-semibold font-urbanist text-PRIMARY">
             Sign up
           </Link>
         </div>

@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react";
-import BiasDoughnutChart from "@/components/report_components/chart-components/BiasDoughnutChart";
+import BiasDoughnutChart from "@/components/report-components/chart-components/BiasDoughnutChart";
 import NoiseDoughnutChart from "./NoiseDoughnutChart";
 import {
     Carousel,

@@ -2,11 +2,12 @@ import sys
 import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 from flask import Flask
 from flask_cors import CORS
 from sentence_transformers import SentenceTransformer
 from modules.bert.load_model import load_bias_model
-from noise.level_noise import level_noise_endpoint
+from noise.level_noise import level_noise_endpoint, level_noise_scores_endpoint
 from api.bert import bert_endpoint
 from modules.gpt.chat import chat_endpoint
 from modules.gpt.source import source_endpoint
@@ -18,6 +19,7 @@ from news.news_api import news_api_endpoint
 from modules.gpt.dashboard_insights import dashboard_insights_endpoint
 from config.firebase_config import initialize_firebase
 from transformers import pipeline
+from serp.serp import serp_endpoint
 from openai import OpenAI
 
 db = initialize_firebase()
@@ -48,6 +50,10 @@ def pattern_noise():
 def level_noise():
     return level_noise_endpoint(pipe)
 
+@app.route("/level_noise_scores", methods=["POST"])
+def level_noise_scores():
+    return level_noise_scores_endpoint()
+
 @app.route('/news_api', methods=['POST'])
 def news_api():
     return news_api_endpoint(sbert_model)
@@ -70,8 +76,12 @@ def chat_summary():
 
 @app.route('/insights', methods=['POST'])
 def insights():
-    return insight_endpoint(client)#
+    return insight_endpoint(client)
 
 @app.route('/dashboard_insights', methods=['POST'])
 def dashboard_insights():
     return dashboard_insights_endpoint(client)
+
+@app.route("/serp", methods=["POST"])
+def serp():
+     return serp_endpoint()

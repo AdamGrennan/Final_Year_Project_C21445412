@@ -13,6 +13,7 @@ def dashboard_insights_endpoint(client):
             "You're SONUS, an intelligent assistant helping users reflect on judgment patterns.\n"
             "Below are 5 recent decisions the user made. Each decision includes a theme, context (situation, options, influences, goal), "
             "detected biases and noise, and a short system-generated insight.\n\n"
+            "Your job is to identify judgment patterns. Use each decision's **title** instead of numbering them. "
             "Your job is to analyze patterns and provide a reflection. Focus on recurring themes, decision tendencies, blind spots, and improvements.\n"
         )
 

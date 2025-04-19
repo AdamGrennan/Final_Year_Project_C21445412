@@ -81,7 +81,7 @@ export function AppSidebar({ ...props }) {
                   <SidebarMenuItem key={item.title}>
                     {item.title === "Home" ? (
                       <SidebarMenuButton asChild isActive={item.isActive} className="font-urbanist text-white flex items-center gap-2 hover:bg-MERGE hover:no-underline">
-                        <a href="#" onClick={(e) => { e.preventDefault(); router.push("/Main"); }}>
+                        <a href="#" onClick={(e) => { e.preventDefault(); router.push("/main"); }}>
                           <RiHomeFill className="text-white mr-2" />
                           {item.title}
                         </a>
@@ -95,28 +95,28 @@ export function AppSidebar({ ...props }) {
                       </SidebarMenuButton>
                     ) : item.title === "New" ? (
                       <SidebarMenuButton asChild isActive={item.isActive} className="font-urbanist text-white hover:bg-MERGE hover:no-underline">
-                        <a href="#" onClick={(e) => { e.preventDefault(); router.push("/Judgement_Form"); }}>
+                        <a href="#" onClick={(e) => { e.preventDefault(); router.push("/judgement-form"); }}>
                           <MdBubbleChart className="text-white mr-2" />
                           {item.title}
                         </a>
                       </SidebarMenuButton>
                     ) : item.title === "Dashboard" ? (
                       <SidebarMenuButton asChild isActive={item.isActive} className="font-urbanist text-white hover:bg-MERGE hover:no-underline">
-                          <a href="#" onClick={(e) => { e.preventDefault(); router.push("/Dashboard"); }}>
+                          <a href="#" onClick={(e) => { e.preventDefault(); router.push("/dashboard"); }}>
                           <MdDashboard className="text-white mr-2" />
                           {item.title}
                         </a>
                       </SidebarMenuButton>
                     ) : item.title === "Account" ? (
                       <SidebarMenuButton asChild isActive={item.isActive} className="font-urbanist text-white hover:bg-MERGE hover:no-underline">
-                        <a href="#" onClick={(e) => { e.preventDefault(); router.push("/Profile"); }}>
+                        <a href="#" onClick={(e) => { e.preventDefault(); router.push("/profile"); }}>
                           <FaUser className="text-white mr-2" />
                           {item.title}
                         </a>
                       </SidebarMenuButton>
                          ) : item.title === "Guide" ? (
                           <SidebarMenuButton asChild isActive={item.isActive} className="font-urbanist text-white hover:bg-MERGE hover:no-underline">
-                            <a href="#" onClick={(e) => { e.preventDefault(); router.push("/Guide"); }}>
+                            <a href="#" onClick={(e) => { e.preventDefault(); router.push("/guide"); }}>
                               <FaBook className="text-white mr-2" />
                               {item.title}
                             </a>

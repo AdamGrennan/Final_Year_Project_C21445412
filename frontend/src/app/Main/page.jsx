@@ -1,9 +1,9 @@
 "use client";
 import { useRouter } from 'next/navigation';
-import JudgementButton from '@/components/main_components/JudgementButton';
-import DashboardButton from '@/components/main_components/DashboardButton';
+import JudgementButton from '@/components/main-components/JudgementButton';
+import DashboardButton from '@/components/main-components/DashboardButton';
 import { Label } from "@/components/ui/label"
-import JudgementList from '@/components/main_components/JudgementList';
+import JudgementList from '@/components/main-components/JudgementList';
 import { auth, db } from '@/config/firebase';
 import { useState, useEffect } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
@@ -26,11 +26,11 @@ export default function Page() {
   );
 
   const newJudgement = () => {
-    router.push('/Judgement_Form');
+    router.push('/judgement-form');
   };
 
   const dashboard = () => {
-    router.push('/Dashboard');
+    router.push('/dashboard');
   };
 
   useEffect(() => {
@@ -113,4 +113,3 @@ export default function Page() {
     </div>
   );
 }
-

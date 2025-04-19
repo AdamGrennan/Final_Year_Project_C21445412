@@ -1,4 +1,4 @@
-import { LoginForm } from "@/components/login_components/LoginForm";
+import { LoginForm } from "@/components/login-components/LoginForm";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -11,13 +11,13 @@ export default function Page() {
       <div className="bg-gradient-to-br from-PRIMARY via-MERGE to-SECONDARY from-30% via-50% to-70% flex items-center justify-center">
         <Image src="/images/SONUS_LOGO.png" alt="Sonus Logo" width={250} height={250}/>
       </div>
-      <Link href="/Main" className="underline font-semibold font-urbanist text-PRIMARY">
+      <Link href="/main" className="underline font-semibold font-urbanist text-PRIMARY">
         HOME PAGE
       </Link>
-      <Link href={`/Final_Report/${1}`} className="font-semibold font-urbanist text-PRIMARY">  
+      <Link href={`/final-report/${1}`} className="font-semibold font-urbanist text-PRIMARY">  
         FINAL PAGE
       </Link>
-      <Link href={`/Chat_Page/${1}`}  className="underline font-semibold font-urbanist text-PRIMARY">
+      <Link href={`/chat-page/${1}`}  className="underline font-semibold font-urbanist text-PRIMARY">
         CHAT PAGE
       </Link>
     </div>

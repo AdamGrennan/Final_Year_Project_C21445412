@@ -69,7 +69,7 @@ export function RegisterForm() {
         setUser({ name: name, email: email, uid: user.uid });
 
         console.log("User registered:", user.uid);
-        router.push('/Main');
+        router.push('/main');
       })
         .catch((error) => {
           const errorCode = error.code;

@@ -7,9 +7,9 @@ import { fetchChats, saveChats, fetchDecisionDetails } from "@/services/Firebase
 import MessageList from "./MessageList";
 import MessageSender from "./MessageSender";
 import { useJudgment } from "@/context/JudgementContext";
-import { openingMessage, fetchBERTResponse, fetchGPTResponse, fetchLevelNoise, fetchPatternNoise, fetchSource, fetchNewsAPI } from "@/services/ApiService";
+import { openingMessage, fetchBERTResponse, fetchGPTResponse, fetchSerp, fetchPatternNoise, fetchSource, fetchNewsAPI } from "@/services/ApiService";
 
-const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking }) => {
+const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking, setRelatedLinks }) => {
   const [pastDecisions, setPastDecisions] = useState([]);
   const { user } = useUser();
   const { judgmentData } = useJudgment();
@@ -40,7 +40,6 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking }) => {
           user.name
         );
 
-
         if (openMessage.bias_feedback) {
           const openingMessage = {
             text: openMessage.bias_feedback,
@@ -69,6 +68,17 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking }) => {
     setMessages((prev) => [...prev, newMessage]);
     setInput("");
 
+    if (messageContent.length > 15) {
+      const query = `${judgmentData?.title || ""} ${messageContent}`;
+      const serpLinks = await fetchSerp(query);
+
+      setRelatedLinks((prev) => {
+        const combined = [...prev, ...serpLinks];
+        const unique = Array.from(new Map(combined.map(item => [item.url, item])).values());
+        return unique.slice(0, 5);
+      });
+    }
+
     if (!messages.some(msg => msg.sender === "user")) {
       setFinishButtonDisable(false);
     }
@@ -80,10 +90,27 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking }) => {
       //await saveChats(user, judgementId, [newMessage], [], []);
 
       const bertData = await fetchBERTResponse(messageContent);
+      /*
       if (bertData.predictions) {
         detectedBias = bertData.predictions.filter((bias) => bias !== "Neutral" && bias !== "OccasionNoise");
         console.log("Detected Bias", detectedBias)
       }
+        */
+      if (bertData.predictions) {
+        bertData.predictions.forEach((label) => {
+          if (label === "Neutral") return;
+
+          if (label === "OccasionNoise") {
+            detectedNoise.push("Occasion Noise");
+          } else {
+            detectedBias.push(label);
+          }
+        });
+
+        console.log("Detected Bias", detectedBias);
+        console.log("Detected Noise", detectedNoise);
+      }
+
 
       await saveChats(user, judgementId, [newMessage], detectedBias, detectedNoise);
 
@@ -130,48 +157,6 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking }) => {
           console.log("No Pattern Noise detected.");
           setPastDecisions([]);
         }
-      }
-
-      const levelNoiseCounts = {
-        harsh: 0,
-        lenient: 0,
-        neutral: 0,
-      };
-
-      for (const message of messages) {
-        const levelNoiseData = await fetchLevelNoise(message.text, user.uid);
-        const { confidence_scores } = levelNoiseData;
-
-        const harshScore = confidence_scores["harsh"] || 0;
-        const lenientScore = confidence_scores["lenient"] || 0;
-        const neutralScore = confidence_scores["neutral"] || 0;
-
-        const threshold = 0.25;
-
-        if (harshScore - neutralScore > threshold && harshScore > lenientScore) {
-          levelNoiseCounts.harsh++;
-        } else if (lenientScore - neutralScore > threshold && lenientScore > harshScore) {
-          levelNoiseCounts.lenient++;
-        } else {
-          levelNoiseCounts.neutral++;
-        }
-      }
-      let levelNoiseType = null;
-
-      if (levelNoiseCounts.harsh > levelNoiseCounts.lenient && levelNoiseCounts.harsh > levelNoiseCounts.neutral) {
-        levelNoiseType = "Harsh Level Noise";
-      } else if (levelNoiseCounts.lenient > levelNoiseCounts.harsh && levelNoiseCounts.lenient > levelNoiseCounts.neutral) {
-        levelNoiseType = "Lenient Level Noise";
-      }
-
-      if (levelNoiseType !== "No level noise detected") {
-        detectedNoise.push(levelNoiseType);
-
-        const source = await fetchSource(messageContent, detectedBias, detectedNoise);
-        const noiseSource =
-          source.noiseSummary !== "No noise source available." ? source.noiseSummary : "No specific source";
-
-        detectNoise(levelNoiseType, noiseSource);
       }
 
       setIsThinking(true);

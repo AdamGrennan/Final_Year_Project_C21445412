@@ -9,44 +9,44 @@ const personaMap = {
   "Overconfidence Bias|Level Noise": {
     type: "Overconfident Consistent",
     description: "You're confident in your choices and tend to judge consistently, though you may lean too harsh or too lenient.",
-    icon: <GiBullseye className="text-red-500 text-3xl" />
+    icon: <GiBullseye className="text-3xl" />
   },
   "Overconfidence Bias|Occasion Noise": {
     type: "Overconfident Reactor",
     description: "You make confident decisions, but your judgment is influenced by mood, time, or energy levels.",
-    icon: <LuBicepsFlexed className="text-SECONDARY text-3xl"/>
+    icon: <LuBicepsFlexed className="text-3xl"/>
   },
   "Overconfidence Bias|Pattern Noise": {
     type: "Overconfident Wildcard",
     description: "You're confident, but your decisions can be unpredictable and don't always follow the facts.",
-    icon: <GiPerspectiveDiceSixFacesOne className="text-cyan-500 text-3xl"/>
+    icon: <GiPerspectiveDiceSixFacesOne className="text-3xl"/>
   },
 
   "Confirmation Bias|Level Noise": {
     type: "Confirmation Seeker",
     description: "You consistently seek out info that supports your views, even if that leads to repetitive blind spots.",
-    icon: <FaEyeSlash className="text-cyan-500 text-3xl"/>
+    icon: <FaEyeSlash className="text-3xl"/>
   },
 "Confirmation Bias|Occasion Noise": {
   type: "Swayed Thinker",
   description: "You tend to follow your beliefs, but your mood or energy levels can influence how you decide.",
-  icon: <FaRegTired className="text-rose-500 text-3xl"/>
+  icon: <FaRegTired className="text-3xl"/>
 },
   "Confirmation Bias|Pattern Noise": {
     type: "Selective Reactor",
     description: "You favor your existing beliefs, but the way you apply them shifts from decision to decision.",
-    icon: <FaMasksTheater className="text-emerald-500 text-3xl"/>
+    icon: <FaMasksTheater className="text-3xl"/>
   },
 
   "Anchoring Bias|Level Noise": {
     type: "Anchored Thinker",
     description: "You're consistent, but often locked into your first impression on decisions.",
-    icon: <GiAnchor className="text-emerald-500 text-3xl"/>
+    icon: <GiAnchor className="text-3xl"/>
   },
   "Anchoring Bias|Occasion Noise": {
     type: "Flexible Thinker",
     description: "You rely on early info, but how strongly you do so changes based on context.",
-    icon: <GiBigWave className="text-sky-500 text-3xl"/>
+    icon: <GiBigWave className="text-3xl"/>
   },
   "Anchoring Bias|Pattern Noise": {
     type: "Shifting Anchor",

@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import BiasPieChart from "./PieChart";
+import PieChart from "./PieChart";
 import { FaChartSimple } from "react-icons/fa6";
 
 export const DecisionStats = ({
@@ -31,7 +31,7 @@ export const DecisionStats = ({
         </div>
 
         <div className="flex flex-col mt-6">
-          <BiasPieChart pieData={pieData} title="Bias Distribution" />
+          <PieChart pieData={pieData} title="Distribution" />
         </div>
       </div>
     </div>

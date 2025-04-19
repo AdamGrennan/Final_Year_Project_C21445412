@@ -1,22 +1,34 @@
 "use client"
 import { deleteUser } from "firebase/auth";
 import { auth, db } from "@/config/firebase";
-import { doc, updateDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, deleteDoc, updateDoc, doc } from "firebase/firestore";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
 
 const DeleteModal = ({ userId, onClose }) => {
-    const router  = useRouter();
+  const router = useRouter();
 
-      const deleteAccount = async () => {
-        try {
-          await updateDoc(doc(db, "users", userId), { deleted: true });
-          await deleteUser(auth.currentUser);
-          router.push("/");
-        } catch (error) {
-          console.error(error)
-        }
-      };
+  const deleteAccount = async () => {
+    try {
+      const decisionsQuery = query(collection(db, "judgement"), where("userId", "==", userId));
+      const decisionSnapshots = await getDocs(decisionsQuery);
+  
+      const deleteDecisionPromises = decisionSnapshots.docs.map((docSnap) =>
+        deleteDoc(doc(db, "judgement", docSnap.id))
+      );
+
+      const deleteUserDoc = deleteDoc(doc(db, "users", userId));
+  
+      await Promise.all([...deleteDecisionPromises, deleteUserDoc]);
+  
+      await deleteUser(auth.currentUser);
+  
+      router.push("/");
+    } catch (error) {
+      console.error("Error deleting account:", error);
+    }
+  };
+  
 
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">

@@ -58,8 +58,6 @@ def news_api_endpoint(sbert_model):
             page_size=50
         )
 
-        logger.info(f"NewsAPI raw response: {articles}")
-
         if articles.get("status") != "ok":
             error_code = articles.get("code", "unknown_error")
             error_msg = articles.get("message", "No message provided")

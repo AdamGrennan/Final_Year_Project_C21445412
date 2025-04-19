@@ -44,9 +44,13 @@ def chat_endpoint(model, tokenizer, bias_labels, client):
         chat_instruction = feedback_service.generate_instruction(feedback_data, previous_chats)
         print(f"[Chat] Creating feedback-based instruction: {chat_instruction}")
         
+        doc_id = None
         if feedback_data:
-         doc_id = feedback_data[0]["id"]
-         feedback_service.mark_feedback(doc_id)
+         doc = feedback_data[0]
+         doc_id = doc.get("id") 
+        if doc_id:
+            feedback_service.mark_feedback(doc_id)
+
 
         messages = [
             {

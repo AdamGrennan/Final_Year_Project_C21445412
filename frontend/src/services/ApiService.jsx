@@ -48,23 +48,50 @@ export const fetchBERTResponse = async (input) => {
   return response.json();
 };
 
-export const fetchLevelNoise = async (input, userId) => {
+export const fetchLevelNoise = async (input, userId, judgementId, currentAvg = null) => {
+  const body = {
+    input: input.trim(),
+    user_id: userId,
+    judgment_id: judgementId,
+    save: false
+  };
+
+  if (currentAvg !== null) {
+    body.current_avg = currentAvg;
+  }
+
   const response = await fetch('http://127.0.0.1:5000/level_noise', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ 
-      input: input.trim(),
-      user_id: userId, }),
+    body: JSON.stringify(body),
   });
 
   if (!response.ok) {
     throw new Error(`LevelNoise error: ${response.status}`);
   }
 
+  return await response.json();
+};
+
+export const levelNoiseScores = async ({ action, userId, judgmentId, score, type = "average" }) => {
+  const response = await fetch("http://127.0.0.1:5000/level_noise_scores", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      action,
+      user_id: userId,
+      judgment_id: judgmentId,
+      score,
+      type,
+    }),
+  });
+
   const data = await response.json();
-  console.log("Level Noise Response from Backend:", data);
+  if (action === "fetch") {
+    return data.scores || [];
+  }
   return data;
-}
+};
 
 export const fetchPatternNoise = async (userId, judgmentId, theme, message, detectedBias, detectedNoise) => {
   const response = await fetch('http://127.0.0.1:5000/pattern_noise', {
@@ -122,7 +149,6 @@ export const openingMessage = async (judgmentData, name) => {
     return data;
 
   } catch (error) {
-    console.error("Network error sending opening message:", error);
     return { error: "Network error: Failed to reach the server." };
   }
 };
@@ -166,7 +192,6 @@ export const fetchAdvice = async (title, messageContent, detectedBias, detectedN
     });
 
     const data = await response.json();
-    console.log("ADVICE:", data);
     return data;
   } catch (error) {
     return "Error generating advice.";
@@ -189,10 +214,8 @@ export const fetchChatSummary = async (title, messageContent, detectedBias, dete
     });
 
     const data = await response.json();
-    console.log("CHAT SUMMARY:", data);
     return data;
   } catch (error) {
-    console.error("CHAT SUMMARY", error)
     return "Error generating chat summary.";
   }
 }
@@ -208,11 +231,9 @@ export const fetchInsights = async ({ currentChatSummary, previousChatSummaries,
     });
 
     const data = await response.json();
-    console.log("SUMMARY RESPONSE:", data);
 
     return data;
   } catch (error) {
-    console.log("ERROR in fetchInsights:", error);
     return { Strengths: [], "Areas to Improve": [] };
   }
 };
@@ -227,7 +248,6 @@ export const fetchNewsAPI = async (messageContent) => {
     });
 
     const data = await response.json();
-    console.log("NEWS API:", data);
     return data;
   } catch (error) {
     return "Error generating news articles.";
@@ -247,9 +267,24 @@ export const fetchDashboardInsights = async (decisions, trends) => {
     });
 
     const data = await response.json();
-    console.log("DASHBOARD INSIGHTS:", data);
     return data;
   } catch (error) {
     return "Error fetching dashboard insights.";
   }
 };
+
+export const fetchSerp = async (query) => {
+  try{
+  const response = await fetch("http://127.0.0.1:5000/serp", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query }),
+  });
+
+  const data = await response.json();
+  return data.links || [];
+ }catch (error) {
+    return "Error fetching dashboard insights.";
+  }
+};
+

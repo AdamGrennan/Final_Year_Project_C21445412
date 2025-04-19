@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
 import { Label } from "@radix-ui/react-dropdown-menu";
-import JudgementForm from "@/components/form_components/JudgementForm";
+import JudgementForm from "@/components/form-components/JudgementForm";
 
 export default function Page() {
   return (

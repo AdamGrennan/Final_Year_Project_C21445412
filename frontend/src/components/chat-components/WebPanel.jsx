@@ -19,11 +19,6 @@ export const WebPanel = ({ links = [] }) => {
               >
                 {link.title || "Untitled"}
               </a>
-              {link.snippet && (
-                <p className="text-gray-500 text-xs mt-1 line-clamp-3">
-                  {link.snippet}
-                </p>
-              )}
             </li>
           ))}
         </ul>

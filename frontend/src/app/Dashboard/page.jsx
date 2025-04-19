@@ -36,40 +36,41 @@ export default function Page() {
         setMostBiasedTime(data.mostBiasedTime);
         setNoisiestTime(data.noisiestTime);
         setInsights(data.insights);
-  
+        
         const combinedPieData = [
           ...Object.entries(data.biasCounts || {}).map(([name, value]) => ({
             name,
-            value,
+            value: Number(value),
             type: "Bias",
           })),
           ...Object.entries(data.noiseCounts || {}).map(([name, value]) => ({
             name,
-            value,
+            value: Number(value),
             type: "Noise",
           })),
         ];
+
 
         setPieData(combinedPieData);
       });
     }
   }, [user]);
-  
+
   return (
     <div className="grid grid-cols-3 gap-6 w-full px-6 pt-4">
       <div className="col-span-1 flex flex-col">
-        <FrequentTable userId={user.uid}/>
+        <FrequentTable userId={user.uid} />
         <div className="mt-10">
-          <PersonaType total={total} bias={mostFrequentBias} noise={mostFrequentNoise}/>
+          <PersonaType total={total} bias={mostFrequentBias} noise={mostFrequentNoise} />
         </div>
       </div>
 
       <div className="col-span-2 flex justify-end">
-        <DashboardCarousel userId={user.uid} 
-        total={total} pieData={pieData} 
-        topThemeWithBias={biasTheme} topThemeWithNoise={noiseTheme} 
-        trendInsights={trendInsights} mostBiasedTime={mostBiasedTime}
-        noisiestTime={noisiestTime} insights={insights}/>
+        <DashboardCarousel userId={user.uid}
+          total={total} pieData={pieData}
+          topThemeWithBias={biasTheme} topThemeWithNoise={noiseTheme}
+          trendInsights={trendInsights} mostBiasedTime={mostBiasedTime}
+          noisiestTime={noisiestTime} insights={insights} />
       </div>
     </div>
   );

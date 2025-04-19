@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "@/config/firebase";
 import { Button } from "@/components/ui/button";
-import TemplateSelect from "@/components/form_components/TemplateSelect";
+import TemplateSelect from "@/components/form-components/TemplateSelect";
 import { useUser } from "@/context/UserContext";
 import {
   FormControl,
@@ -62,7 +62,7 @@ const JudgementForm = () => {
 
       const judgeRef = await addDoc(collection(db, "judgement"), decisionData);
       judgmentInfo(decisionData);
-      router.push(`/Chat_Page/${judgeRef.id}`);
+      router.push(`/chat-page/${judgeRef.id}`);
     } catch (error) {
       console.error("Error saving judgement:", error);
       alert("Failed to save judgement.");

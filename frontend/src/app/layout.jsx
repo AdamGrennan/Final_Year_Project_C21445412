@@ -3,13 +3,13 @@
 import { UserProvider } from "@/context/UserContext";
 import { DecisionProvider } from "@/context/DecisionContext";
 import { JudgmentProvider } from "@/context/JudgementContext";
-import { MainSidebar } from "@/components/sidebar_components/MainSidebar";
+import { MainSidebar } from "@/components/sidebar-components/MainSidebar";
 import { usePathname } from "next/navigation";
 import "@/styles/global.css";
 
 export default function RootLayout({ children }) {
   const pathname = usePathname();
-  const noSidebarRoutes = ["/", "/Register"];
+  const noSidebarRoutes = ["/", "/register"];
   const isNoSidebarRoute = noSidebarRoutes.includes(pathname);
 
   return (

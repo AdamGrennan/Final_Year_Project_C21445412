@@ -4,7 +4,6 @@ import { db } from "@/config/firebase";
 import { collection, query, where, orderBy, getDocs, limit, doc, setDoc, serverTimestamp } from "firebase/firestore";
 import {
   newOccurrence,
-  frequencyChange,
   absentStreaks,
   detectionStreaks,
   topFrequentTrends
@@ -40,8 +39,6 @@ const useTrendAnalysis = (user, jid, bias, noise) => {
 
       const detectedTrends = [
         ...newOccurrence(allDecisions, bias, noise),
-        ...frequencyChange(allDecisions, "detectedBias"),
-        ...frequencyChange(allDecisions, "detectedNoise"),
         ...absentStreaks(allDecisions, allBiases, allNoises),
         ...detectionStreaks(allDecisions),
         ...topFrequentTrends(allDecisions, "detectedBias"),

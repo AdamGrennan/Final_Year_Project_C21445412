@@ -49,11 +49,11 @@ def advice_endpoint(client):
         The user made a decision titled {decision_title}, and {noise} was detected as a source of judgment noise.
         Conversation history: {context}.
         
-        Provide a clear, thoughtful paragraph directly to Adam explaining how they can reduce the influence of 
+        Provide a clear, thoughtful paragraph directly to user explaining how they can reduce the influence of 
         {noise} in his decision titled {decision_title}. Base it on the conversation history: {context}. 
         Use a friendly but insightful tone, offering practical mental steps or mindset changes they can use in similar future situations. Avoid numbered steps or bullet points—make it feel like helpful personal advice in one paragraph.
         """
-
+        
         try:
             response = client.chat.completions.create(
                 model="gpt-4",

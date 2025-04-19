@@ -3,31 +3,31 @@ import { useParams } from 'next/navigation'
 import { useRouter } from 'next/navigation';
 import { useDecision } from '@/context/DecisionContext';
 import * as React from "react";
-import Chat from "@/components/chat_components/Chat";
+import Chat from "@/components/chat-components/Chat";
 import { Button } from "@/components/ui/button";
 import { db } from "@/config/firebase";
 import { doc, serverTimestamp, writeBatch } from "firebase/firestore";
-import { fetchAdvice, fetchChatSummary } from '@/services/ApiService';
+import { fetchAdvice, fetchChatSummary, fetchLevelNoise, levelNoiseScores } from '@/services/ApiService';
 import { fetchChats } from '@/services/FirebaseService';
 import { useUser } from '@/context/UserContext';
 import { useJudgment } from '@/context/JudgementContext';
 import { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { uploadDashboardStats } from '@/utils/dashboardUtils/uploadDashboardStats';
-import { EmojiPanel } from '@/components/chat_components/Emojis';
-import { WebPanel } from '@/components/chat_components/WebPanel';
+import { EmojiPanel } from '@/components/chat-components/Emojis';
+import { WebPanel } from '@/components/chat-components/WebPanel';
 
 export default function Page() {
   const router = useRouter();
   const { judgementId } = useParams();
   const { user } = useUser();
   const { judgmentData } = useJudgment();
-  const { detectedNoise, detectedBias, biasSources, noiseSources, setAdvice } = useDecision();
+  const { detectedNoise, detectedBias, biasSources, noiseSources, setAdvice, detectNoise } = useDecision();
   const [buttonDisable, setButtonDisable] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [dots, setDots] = useState("");
   const [isThinking, setIsThinking] = useState(false);
-
+  const [relatedLinks, setRelatedLinks] = useState([]);
 
   useEffect(() => {
     if (isLoading) {
@@ -49,6 +49,40 @@ export default function Page() {
       return;
     }
 
+    const messages = await fetchChats(user, judgementId) || [];
+    const userScores = [];
+    
+    for (const msg of messages) {
+      if (msg.sender === "user") {
+        const result = await fetchLevelNoise(msg.text, user.uid, judgementId, false);
+        const label = result.detected_label;
+        const labelToScore = { lenient: 0, neutral: 1, harsh: 2 };
+        const score = labelToScore[label] !== undefined ? labelToScore[label] : 1;
+        userScores.push(score);
+      }
+    }
+    
+    let currentAvg = null;
+    
+    if (userScores.length > 0) {
+      currentAvg = userScores.reduce((sum, s) => sum + s, 0) / userScores.length;
+    
+      await levelNoiseScores({
+        action: "save",
+        userId: user.uid,
+        judgmentId: judgementId,
+        score: currentAvg,
+        type: "average",
+      });
+    
+      const deviationResult = await fetchLevelNoise("summary", user.uid, judgementId, false, currentAvg);
+    
+      if (deviationResult.type === "harsh" || deviationResult.type === "lenient") {
+        detectNoise("Level Noise", deviationResult.message);
+        detectedNoise.push("Level Noise");
+      }
+    }
+  
     const fbBias = Array.isArray(detectedBias) ? detectedBias.map(bias => ({
       bias,
       sources: Array.isArray(biasSources?.[bias]) ? biasSources[bias] : []
@@ -69,8 +103,6 @@ export default function Page() {
         updatedAt: serverTimestamp(),
       });
 
-      const messages = await fetchChats(user, judgementId) || [];
-
       const response = await fetchAdvice(judgmentData.title, messages, detectedBias, detectedNoise);
 
       const chatSummary = await fetchChatSummary(judgmentData.title, messages, detectedBias, detectedNoise, biasSources, noiseSources);
@@ -86,7 +118,7 @@ export default function Page() {
 
       await batch.commit();
       await uploadDashboardStats(user.uid);
-      router.push(`/Final_Report/${judgementId}`);
+      router.push(`/final-report/${judgementId}`);
 
     } catch (error) {
       console.error("Firebase Batch Update Error:", error);
@@ -110,6 +142,7 @@ export default function Page() {
         <Chat judgementId={judgementId}
           setFinishButtonDisable={setButtonDisable}
           setIsThinking={setIsThinking}
+          setRelatedLinks={setRelatedLinks}
         />
       </div>
       <div className="w-48 bg-white h-full flex flex-col p-4 border-l border-gray-200">
@@ -121,13 +154,8 @@ export default function Page() {
           <EmojiPanel isThinking={isThinking} />
         </div>
         <div className="flex-grow flex items-center justify-center">
-          <WebPanel />
+          <WebPanel links={relatedLinks} />
         </div>
-        {buttonDisable && (
-          <p className="mb-2 text-sm text-gray-500 text-center italic">
-            Send at least 2 messages to unlock your final report.
-          </p>
-        )}
         <Button
           onClick={finalReport}
           disabled={buttonDisable}

@@ -11,29 +11,41 @@ def insight_endpoint(client):
 
     def call_gpt(task_type):
         try:
+            if task_type == "strengths in decision-making":
+                system_prompt = (
+                    "You analyze decision-making behavior and return each strength as a short, positive, and personalized paragraph. "
+                    "Highlight habits, thought patterns, or decision styles that helped the user make thoughtful, reflective, or consistent decisions. "
+                    "Focus only on what the user is doing well — this should feel encouraging and affirming."
+                )
+            else: 
+                system_prompt = (
+                    "You analyze decision-making behavior and return each area for improvement as a short, constructive paragraph. "
+                    "Point out specific thinking patterns that may be limiting or flawed, and suggest how the user could improve or rethink their approach."
+                )
+
             response = client.chat.completions.create(
                 model="gpt-4",
                 messages=[
-                {"role": "system", "content": f"You analyze decision-making behavior and return each {task_type} as a short, personalized paragraph. Avoid using bullet points or markdown. Use second-person voice and write it as if you're reflecting with the user."},
-                {"role": "user", "content": f"""
-                You are analyzing a user’s decision-making patterns over time.
-                Below is the most recent decision followed by the five most recent previous decisions. Each contains the title, theme, detected bias and noise, and a summary. Compare them and identify clear patterns.
-                Additionally, here are some trends detected across their decisions:{trend_summary}
-                Be specific, reflective, and mention if patterns have been repeated across multiple decisions. Do not just give tips—explain how the user tends to think and how that affects decisions.
-                Current Decision:
-                {current_chat_summary}
-                Past Decisions:
-                {"\n\n".join(previous_chat_summaries)}"""}],
-                max_tokens=300,  
-                temperature=0.5  
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": f"""
+                    You are analyzing a user’s decision-making patterns over time.
+                    Below is the most recent decision followed by the five most recent previous decisions. Each contains the title, theme, detected bias and noise, and a summary.
+                    Additionally, here are some trends detected across their decisions:{trend_summary}
+                    Current Decision:{current_chat_summary}
+                    Past Decisions:{"\n\n".join(previous_chat_summaries)}
+                    Please return 2–3 personalized {task_type}."""}
+                ],
+                max_tokens=300,
+                temperature=0.5
             )
 
             raw_output = response.choices[0].message.content.strip()
-            feedback_lines = [line.strip().lstrip("-").strip() for line in raw_output.split("\n") if line.strip()] 
+            feedback_lines = [line.strip().lstrip("-").strip() for line in raw_output.split("\n") if line.strip()]
 
-            return feedback_lines[:3] if len(feedback_lines) >= 3 else feedback_lines 
+            return feedback_lines[:3] if len(feedback_lines) >= 3 else feedback_lines
 
         except Exception as e:
+            print("GPT error:", e)
             return ["Unable to generate summary due to an error."]
 
     return jsonify({

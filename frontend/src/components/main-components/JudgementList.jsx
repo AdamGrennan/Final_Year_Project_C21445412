@@ -16,9 +16,9 @@ const JudgementList = () => {
 
   const openDecision = (judgementId, isCompleted) => {
     if (isCompleted) {
-      router.push(`/Final_Report/${judgementId}?revisited=true`);
+      router.push(`/final-report/${judgementId}?revisited=true`);
     } else {
-      router.push(`/Chat_Page/${judgementId}`);
+      router.push(`/chat-page/${judgementId}`);
     }
   };
 
@@ -115,7 +115,7 @@ const JudgementList = () => {
                       {judgement.title}
                     </div>
                     <div className="font-light text-sm text-gray-700 break-words whitespace-normal mt-1">
-                      {judgement.description}
+                      {judgement.situation}
                     </div>
                     <div className="text-xs text-gray-500 mt-1">
                       {judgement.createdAt?.toDate()?.toLocaleDateString("en-US", {
