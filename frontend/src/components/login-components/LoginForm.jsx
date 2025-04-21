@@ -54,6 +54,11 @@ export function LoginForm() {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
+        if (!user.emailVerified) {
+          alert("Please verify your email before logging in.");
+          return;
+        }
+
         const docRef = doc(db, "users", user.uid);
         const docSnap = await getDoc(docRef);
 

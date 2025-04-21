@@ -30,7 +30,7 @@ export const DecisionStats = ({
           </div>
         </div>
 
-        <div className="flex flex-col mt-6">
+        <div className="flex flex-col mt-6 min-h-[250px] min-w-[300px]">
           <PieChart pieData={pieData} title="Distribution" />
         </div>
       </div>

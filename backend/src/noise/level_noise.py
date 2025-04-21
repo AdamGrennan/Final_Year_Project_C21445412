@@ -57,18 +57,17 @@ def level_noise_endpoint(pipe):
 
                 if len(previous_scores) >= 3:
                     avg = statistics.mean(previous_scores)
-                    std = statistics.stdev(previous_scores)
-                    threshold = max(0.3, 0.7 * std)
+                    threshold = 0.6 
 
                     if current_avg > avg + threshold:
                         response["type"] = "harsh"
-                        response["message"] = f"Compared to your previous decisions, your judgment in this case was notably more harsh. This may indicate a shift in tone or emotional response."
+                        response["message"] = "Compared to your previous decisions, this one was notably more harsh."
                     elif current_avg < avg - threshold:
                         response["type"] = "lenient"
-                        response["message"] = f"Compared to your previous decisions, your judgment in this case was notably more lenient. This may indicate a shift in tone or emotional response."
+                        response["message"] = "Compared to your previous decisions, this one was notably more lenient."
                     else:
-                        response["type"] = "neutral"
-                        response["message"] = "Your tone is consistent with previous decisions."
+                        response["type"] = "none"
+                        response["message"] = "No significant level noise detected."
 
             except Exception as error:
                 print(f"Logic error: {error}")

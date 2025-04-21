@@ -145,7 +145,7 @@ export default function Page() {
           setRelatedLinks={setRelatedLinks}
         />
       </div>
-      <div className="w-48 bg-white h-full flex flex-col p-4 border-l border-gray-200">
+      <div className="w-64 bg-white h-full flex flex-col p-4 border-l border-gray-200">
 
         <Label className="font-semibold text-base text-center mb-4">
           {judgmentData.title}
@@ -161,7 +161,7 @@ export default function Page() {
           disabled={buttonDisable}
           className="bg-PRIMARY text-white font-urbanist w-full hover:bg-opacity-80"
         >
-          Finish
+          View Report
         </Button>
       </div>
 

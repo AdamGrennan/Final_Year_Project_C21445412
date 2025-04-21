@@ -11,15 +11,21 @@ const DeleteModal = ({ userId, onClose }) => {
   const deleteAccount = async () => {
     try {
       const decisionsQuery = query(collection(db, "judgement"), where("userId", "==", userId));
+      const dashboardQuery = query(collection(db, "dashboard"), where("userId", "==", userId));
       const decisionSnapshots = await getDocs(decisionsQuery);
+      const dashboardSnapshots = await getDocs(dashboardQuery);
   
       const deleteDecisionPromises = decisionSnapshots.docs.map((docSnap) =>
         deleteDoc(doc(db, "judgement", docSnap.id))
       );
+  
+      const deleteDashboardPromises = dashboardSnapshots.docs.map((docSnap) =>
+        deleteDoc(doc(db, "dashboard", docSnap.id))
+      );
 
       const deleteUserDoc = deleteDoc(doc(db, "users", userId));
   
-      await Promise.all([...deleteDecisionPromises, deleteUserDoc]);
+      await Promise.all([...deleteDecisionPromises, ...deleteDashboardPromises, deleteUserDoc]);
   
       await deleteUser(auth.currentUser);
   
@@ -29,7 +35,6 @@ const DeleteModal = ({ userId, onClose }) => {
     }
   };
   
-
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
       <div className="p-8 border w-96 shadow-lg rounded-md bg-white">

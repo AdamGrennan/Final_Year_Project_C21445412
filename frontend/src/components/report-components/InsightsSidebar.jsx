@@ -61,7 +61,10 @@ const InsightsSidebar = ({ chatSummaries, judgementId, isRevisited }) => {
         </h3>
         <div className="space-y-2 mt-2">
           {strengths.map((item, i) => (
-            <p key={i} className="text-green-700 text-sm leading-snug">{item}</p>
+            <details key={i} className="text-green-700 text-sm leading-snug bg-green-100 p-2 rounded-md">
+              <summary className="cursor-pointer font-semibold">💪 Strength {i + 1}</summary>
+              <p className="mt-1">{item}</p>
+            </details>
           ))}
         </div>
       </div>
@@ -72,7 +75,10 @@ const InsightsSidebar = ({ chatSummaries, judgementId, isRevisited }) => {
         </h3>
         <div className="space-y-2 mt-2">
           {improvements.map((item, i) => (
-            <p key={i} className="text-green-700 text-sm leading-snug">{item}</p>
+            <details key={i} className="text-amber-700 text-sm leading-snug bg-amber-100 p-2 rounded-md">
+              <summary className="cursor-pointer font-semibold">🧠 Focus Area {i + 1}</summary>
+              <p className="mt-1">{item}</p>
+            </details>
           ))}
         </div>
       </div>

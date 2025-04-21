@@ -72,18 +72,18 @@ const JudgementList = () => {
   return (
     <div className="w-[500px] flex flex-col items-center">
       <ScrollArea className="h-[380px] w-[550px] rounded-md border bg-white p-4">
-        <div className="sticky top-0 z-10 bg-white px-4 py-3 flex items-center justify-center">
+        <div className="sticky top-0 bg-white px-4 py-3 flex items-center justify-center">
           <div className="flex bg-gray-100 rounded-full p-1 shadow-inner">
             <Button
               onClick={() => setFilter(true)}
               className={`w-28 h-8 text-xs font-medium rounded-full transition-all duration-300
-        ${filter ? "bg-PRIMARY text-white shadow-md scale-105" : "text-gray-700 hover:bg-gray-100"}`}>
+         ${filter ? "bg-PRIMARY text-white shadow-md scale-105" : "text-gray-700 hover:bg-gray-100"}`}>
               Completed
             </Button>
             <Button
               onClick={() => setFilter(false)}
               className={`w-28 h-8 text-xs font-medium rounded-full transition-all duration-300
-        ${!filter ? "bg-PRIMARY text-white shadow-md scale-105" : "text-gray-700 hover:bg-gray-100"}`}>
+         ${!filter ? "bg-PRIMARY text-white shadow-md scale-105" : "text-gray-700 hover:bg-gray-100"}`}>
               Not Completed
             </Button>
           </div>
@@ -94,10 +94,10 @@ const JudgementList = () => {
               <img
                 src="/images/man-thinking.svg"
                 alt="No Judgements"
-                className="w-[250px] object-contain mt-8"
+                className="w-[250px] object-contain mt-4"
               />
               <p className="text-sm font-urbanist font-medium text-PRIMARY italic">
-                No past decisions
+                No Past Decisions
               </p>
             </div>
           ) : (

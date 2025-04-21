@@ -7,6 +7,7 @@ import { FaCrown } from "react-icons/fa";
 import { AiFillFire } from "react-icons/ai";
 import useFetchTrends from "../../../utils/trendUtils/useTrendAnalysis";
 import useTrendData from "@/hooks/useTrendData";
+import { RxComponentNone } from "react-icons/rx";
 
 const Trends = ({ user, jid, bias, noise, isRevisited }) => {
   const { fetchedTrends } = useTrendData();
@@ -28,14 +29,20 @@ const Trends = ({ user, jid, bias, noise, isRevisited }) => {
     increase: <MdKeyboardDoubleArrowUp style={{ color: "red" }} />,
     decrease: <MdOutlineKeyboardDoubleArrowDown style={{ color: "green" }} />,
     streak: <AiFillFire className="text-PRIMARY" />,
-    "detection-streak": <BsArrowRepeat/>,
+    "detection-streak": <BsArrowRepeat />,
     "most-frequent": <FaCrown className="text-SECONDARY" />
   };
 
   return (
     <div>
       <ScrollArea>
-        {displayTrends.length === 0 ? <p className="font-urbanist text-gray-500">No Trends Detected </p> :
+        {displayTrends.length === 0 ?
+           <div className="flex flex-col items-center mt-20">
+            <span>
+              <RxComponentNone className="text-gray-400 h-12 w-12" />
+            </span>
+            <p className="font-urbanist text-gray-400 italic">No Trends Detected </p>
+          </div> :
           displayTrends.map((trend, index) => (
             <div key={index} className="w-full text-left flex flex-col items-center font-urbanist">
               <div className="flex justify-between items-center w-full px-2 py-1 rounded-md bg-gray-50 hover:bg-gray-100 transition">

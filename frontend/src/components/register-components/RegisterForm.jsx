@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import React, { useState } from "react";
 import { auth, db } from "@/config/firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { useRouter } from 'next/navigation';
 import { useUser } from "@/context/UserContext";
@@ -57,6 +57,7 @@ export function RegisterForm() {
     if (password.length > 6 && name && email) {
       await createUserWithEmailAndPassword(auth, email, password).then(async (userCredential) => {
         const user = userCredential.user;
+        await sendEmailVerification(user);
         console.log(user);
         await setDoc(doc(db, "users", user.uid), {
           name: name,
@@ -69,7 +70,8 @@ export function RegisterForm() {
         setUser({ name: name, email: email, uid: user.uid });
 
         console.log("User registered:", user.uid);
-        router.push('/main');
+        alert("Verification email sent! Please verify your email.");
+        router.push('/register');
       })
         .catch((error) => {
           const errorCode = error.code;

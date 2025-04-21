@@ -9,17 +9,16 @@ import {
   topFrequentTrends
 } from "./TrendStats";
 
-
-const useTrendAnalysis = (user, jid, bias, noise) => {
+const useTrendAnalysis = (user, judgementId, bias, noise) => {
   const [trends, setTrends] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchTrends();
-  }, [jid]);
+  }, [judgementId]);
 
   const fetchTrends = async () => {
-    if (!user || !user.uid || !jid) return;
+    if (!user || !user.uid || !judgementId) return;
 
     setLoading(true);
     try {
@@ -32,7 +31,7 @@ const useTrendAnalysis = (user, jid, bias, noise) => {
       );
 
       const querySnapshot = await getDocs(decisionsQuery);
-      let allDecisions = querySnapshot.docs.map((doc) => doc.data()).filter(d => d.id !== jid);
+      let allDecisions = querySnapshot.docs.map((doc) => doc.data()).filter(d => d.id !== judgementId);
 
       const allBiases = [...new Set(allDecisions.flatMap(d => d.detectedBias?.map(b => b.bias) || []))];
       const allNoises = [...new Set(allDecisions.flatMap(d => d.detectedNoise?.map(n => n.noise) || []))];
@@ -63,13 +62,14 @@ const useTrendAnalysis = (user, jid, bias, noise) => {
 
 
   const saveTrends = async (detectedTrends) => {
-    if (!jid || !detectedTrends.length) return;
+    if (!judgementId || !detectedTrends.length) return;
 
     try {
-      const trendRef = doc(db, "trends", jid);
+      const trendRef = doc(db, "trends", judgementId);
 
       await setDoc(trendRef, {
-        jid,
+        userId: user.uid,
+        judgementId: judgementId,
         trends: detectedTrends,
         createdAt: serverTimestamp(),
       });

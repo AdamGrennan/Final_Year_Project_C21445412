@@ -67,7 +67,7 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking, setRelatedLi
     const newMessage = { text: messageContent, sender: "user", createdAt: new Date() };
     setMessages((prev) => [...prev, newMessage]);
     setInput("");
-
+/*
     if (messageContent.length > 15) {
       const query = `${judgmentData?.title || ""} ${messageContent}`;
       const serpLinks = await fetchSerp(query);
@@ -78,7 +78,7 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking, setRelatedLi
         return unique.slice(0, 5);
       });
     }
-
+*/
     if (!messages.some(msg => msg.sender === "user")) {
       setFinishButtonDisable(false);
     }

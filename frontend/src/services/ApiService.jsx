@@ -1,5 +1,6 @@
 
 export const fetchGPTResponse = async (input,messages,setDisplayedText,patternContext,userId,judgementId) => {
+  try{
   const response = await fetch('http://127.0.0.1:5000/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -32,9 +33,14 @@ export const fetchGPTResponse = async (input,messages,setDisplayedText,patternCo
     accumulatedText += chunk; 
     setDisplayedText(accumulatedText); 
   }
+}catch (error) {
+  console.error("Error fetching GPT response:", error);
+  setDisplayedText("Error generating response.");
+}
 };
 
 export const fetchBERTResponse = async (input) => {
+  try{
   const response = await fetch('http://127.0.0.1:5000/bert', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -46,9 +52,15 @@ export const fetchBERTResponse = async (input) => {
   }
 
   return response.json();
+}catch(error){
+  console.error("Error fetching BERT response:", error);
+  return { error: "Error fetching BERT response" };
+
+}
 };
 
 export const fetchLevelNoise = async (input, userId, judgementId, currentAvg = null) => {
+  try{
   const body = {
     input: input.trim(),
     user_id: userId,
@@ -71,9 +83,14 @@ export const fetchLevelNoise = async (input, userId, judgementId, currentAvg = n
   }
 
   return await response.json();
+}catch(error){
+  console.error("Error fetching Level Noise response:", error);
+  return { error: "Error fetching Level Noise response" };
+}
 };
 
 export const levelNoiseScores = async ({ action, userId, judgmentId, score, type = "average" }) => {
+  try{
   const response = await fetch("http://127.0.0.1:5000/level_noise_scores", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -86,14 +103,23 @@ export const levelNoiseScores = async ({ action, userId, judgmentId, score, type
     }),
   });
 
+  if (!response.ok) {
+    throw new Error(`LevelNoise Score error: ${response.status}`);
+  }
+
   const data = await response.json();
   if (action === "fetch") {
     return data.scores || [];
   }
   return data;
+}catch(error){
+  console.error("Error fetching Level Noise Scores response:", error);
+  return { error: "Error fetching Level Noise Scores response" };
+}
 };
 
 export const fetchPatternNoise = async (userId, judgmentId, theme, message, detectedBias, detectedNoise) => {
+  try{
   const response = await fetch('http://127.0.0.1:5000/pattern_noise', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -112,6 +138,10 @@ export const fetchPatternNoise = async (userId, judgmentId, theme, message, dete
   }
 
   return response.json();
+}catch(error){
+  console.error("Error fetching Pattern Noise response:", error);
+  return { error: "Error fetching Pattern Noise response:" };
+}
 }
 
 export const openingMessage = async (judgmentData, name) => {
@@ -137,19 +167,20 @@ export const openingMessage = async (judgmentData, name) => {
     if (!response.ok) {
       console.error(`Failed to send opening message: ${response.status} ${response.statusText}`);
       const errorText = await response.text();
-      console.error("Server Response:", errorText);
-      return { error: `Server responded with status ${response.status}: ${errorText}` };
+      console.error("Sonus Response:", errorText);
+      return { error: `Sonus responded with status ${response.status}: ${errorText}` };
     }
 
     const data = await response.json();
     if (!data.bias_feedback) {
-      console.warn("Warning: No 'bias_feedback' in response!", data);
+      console.warn("Warning: No 'bias feedback' in response!", data);
     }
 
     return data;
 
   } catch (error) {
-    return { error: "Network error: Failed to reach the server." };
+    console.error("Error Opening Message.");
+    return { error: "Error Opening Message." };
   }
 };
 
@@ -194,7 +225,8 @@ export const fetchAdvice = async (title, messageContent, detectedBias, detectedN
     const data = await response.json();
     return data;
   } catch (error) {
-    return "Error generating advice.";
+    console.error("Error generating advice.");
+    return { error: "Error generating advice." };
   }
 };
 
@@ -216,7 +248,8 @@ export const fetchChatSummary = async (title, messageContent, detectedBias, dete
     const data = await response.json();
     return data;
   } catch (error) {
-    return "Error generating chat summary.";
+    console.error("Error generating chat summary.");
+    return { error: "Error generating chat summary." };
   }
 }
 
@@ -250,7 +283,8 @@ export const fetchNewsAPI = async (messageContent) => {
     const data = await response.json();
     return data;
   } catch (error) {
-    return "Error generating news articles.";
+    console.error("Error generating news articles.");
+    return { error: "Error generating news articles." };
   }
 };
 
@@ -269,10 +303,11 @@ export const fetchDashboardInsights = async (decisions, trends) => {
     const data = await response.json();
     return data;
   } catch (error) {
-    return "Error fetching dashboard insights.";
+    console.error("Error fetching dashboard insights.");
+    return { error: "Error fetching dashboard insights." };
   }
 };
-
+/*
 export const fetchSerp = async (query) => {
   try{
   const response = await fetch("http://127.0.0.1:5000/serp", {
@@ -284,7 +319,8 @@ export const fetchSerp = async (query) => {
   const data = await response.json();
   return data.links || [];
  }catch (error) {
-    return "Error fetching dashboard insights.";
+     console.error("Error fetching SERP.");
+    return { error: "Error fetching SERP." };
   }
 };
-
+*/

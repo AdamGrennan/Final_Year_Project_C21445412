@@ -104,7 +104,7 @@ export const RecentDecision = ({ userId, insights }) => {
           })}
         </div>
       ) : (
-        <p className="text-gray-500 text-sm">No recent decisions found.</p>
+        <p className="text-gray-400 text-sm">No Recent Decisions Found.</p>
       )}
     </div>
   );  

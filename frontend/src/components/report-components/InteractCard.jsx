@@ -25,7 +25,7 @@ const InteractCard = ({user, decision, isRevisited}) => {
 
     const isSubmitDisable = !(feedback.helpful && feedback.perspectiveChanged);
     return (
-        <div className="bg-white flex flex-col items-center justify-center text-center w-full">
+        <div className="bg-white flex flex-col items-center justify-center text-center w-full mt-20">
             {isRevisited ? (
                 <p className="font-urbanist text-gray-500 italic">Feedback is not available for revisited decisions.</p>
             ) : (
@@ -66,7 +66,7 @@ const InteractCard = ({user, decision, isRevisited}) => {
                         </Button>
                     </>
                 ) : (
-                    <div className="flex flex-col items-center justify-center mt-4 space-x-2 justify-center items-center text-PRIMARY">
+                    <div className="mt-20 flex flex-col items-center justify-center mt-4 space-x-2 justify-center items-center text-PRIMARY">
                         <BiSolidBadgeCheck size={24} />
                         <p className="font-urbanist text-lg">Thank You For Your Feedback!</p>
                     </div>
