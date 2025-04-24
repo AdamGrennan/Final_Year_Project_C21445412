@@ -32,7 +32,7 @@ def advice_endpoint(client):
                     {"role": "system", "content": "You provide direct, structured, and practical advice to help users mitigate bias."},
                     {"role": "user", "content": prompt}
                 ],
-                max_tokens=150,  
+                max_tokens=200,  
                 temperature=0.5,
                 stop=["\n"] 
             )
@@ -61,7 +61,7 @@ def advice_endpoint(client):
                     {"role": "system", "content": "You give actionable strategies to help users reduce judgment noise in their decisions."},
                     {"role": "user", "content": prompt}
                 ],
-                max_tokens=150,  
+                max_tokens=200,  
                 temperature=0.5
             )
 

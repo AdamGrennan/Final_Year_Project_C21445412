@@ -1,5 +1,6 @@
 "use client";
 import { SuggestionsSidebar } from "@/components/report-components/SuggestionsSidebar";
+import BarChart from "@/components/report-components/chart-components/BarChart";
 import Trends from "@/components/report-components/trend-components/Trends";
 import { useDecision } from '@/context/DecisionContext';
 import { useUser } from '@/context/UserContext';
@@ -132,9 +133,15 @@ export default function Page() {
               Trends and Patterns
             </h2>
             <div className="bg-gray-50 h-auto flex flex-col md:flex-row items-start justify-between p-8 space-y-8 md:space-y-0 md:space-x-8">
-            <div className="w-full md:w-3/3 h-[375px] bg-white rounded-lg shadow-md p-6 space-y-4 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-SECONDARY scrollbar-track-GRAAY">
+            <div className="w-full md:w-1.5/3 h-[375px] bg-white rounded-lg shadow-md p-6 space-y-4 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-SECONDARY scrollbar-track-GRAAY">
               <h3 className="text-center font-urbanist text-black text-base font-semibold border-b border-PRIMARY pb-2">
-               Recent Decision Insights
+               Suggestions
+              </h3>
+              <BarChart bias={detectedBias} noise={detectedNoise}/>
+            </div> 
+            <div className="w-full md:w-1.5/3 h-[375px] bg-white rounded-lg shadow-md p-6 space-y-4 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-SECONDARY scrollbar-track-GRAAY">
+              <h3 className="text-center font-urbanist text-black text-base font-semibold border-b border-PRIMARY pb-2">
+               Suggestions
               </h3>
               <SuggestionsSidebar chatSummaries={chatSummaries} judgementId={judgementId} isRevisited={isRevisited}/>
             </div> 

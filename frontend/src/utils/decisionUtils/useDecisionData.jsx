@@ -9,7 +9,7 @@ const useDecisionData = (isRevisited) => {
   const { detectedBias,
     detectedNoise, setDetectedNoise, setDetectedBias,
     biasSources, noiseSources, setBiasSources,
-    setNoiseSources, setAdvice, setStrengths, setImprovements } = useDecision();
+    setNoiseSources, setAdvice, setSuggestions} = useDecision();
   const { judgementId } = useParams();
 
   useEffect(() => {
@@ -40,16 +40,14 @@ const useDecisionData = (isRevisited) => {
               noiseSources[n.noise] = n.sources || [];
             });
             const adviceData = decisionData.advice || {};
-            const strengthData = decisionData.strengths || [];
-            const improvementData = decisionData.improvements || [];
+            const suggestionData = decisionData.suggestions || [];
 
             setBiasSources({ ...biasSources });
             setNoiseSources({ ...noiseSources });
             setAdvice(adviceData);
             setDetectedBias([...detectedBiasesArray]);
             setDetectedNoise([...detectedNoiseArray]);
-            setStrengths([...strengthData]); 
-            setImprovements([...improvementData]); 
+            setSuggestions([...suggestionData]); 
 
           } else {
             console.error("No such document!");

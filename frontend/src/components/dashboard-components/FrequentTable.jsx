@@ -59,9 +59,8 @@ export const FrequentTable = ({ userId }) => {
           data.map((item, index) => (
             <div
               key={index}
-              className="h-14 bg-white flex flex-col items-center bg-gray-100 p-4 rounded-lg shadow-md w-24"
-            >
-              <div className="w-16 h-14 font-urbanist">
+              className="w-24 bg-white p-4 rounded-lg shadow-md flex flex-col items-center justify-center">
+              <div className="w-16 h-16 mb-2">
                 <CircularProgressbar
                   value={item.percentage}
                   text={`${item.percentage}%`}
@@ -73,10 +72,11 @@ export const FrequentTable = ({ userId }) => {
                   })}
                 />
               </div>
-              <p className="font-urbanist text-xs text-center mt-3 font-medium">
+              <p className="font-urbanist text-xs text-center font-medium">
                 {item.label}
               </p>
             </div>
+
           ))
         ) : (
           <div className="flex flex-col items-center ml-10">

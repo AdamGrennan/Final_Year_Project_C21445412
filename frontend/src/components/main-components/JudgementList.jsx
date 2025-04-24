@@ -115,7 +115,7 @@ const JudgementList = () => {
                       {judgement.title}
                     </div>
                     <div className="font-light text-sm text-gray-700 break-words whitespace-normal mt-1">
-                      {judgement.situation}
+                      {judgement.details.situation}
                     </div>
                     <div className="text-xs text-gray-500 mt-1">
                       {judgement.createdAt?.toDate()?.toLocaleDateString("en-US", {
