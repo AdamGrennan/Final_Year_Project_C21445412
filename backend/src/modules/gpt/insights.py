@@ -2,53 +2,37 @@ from flask import request, jsonify
 
 def insight_endpoint(client):
     data = request.json
+    current_chat_summary = data.get('chatSummary', "")
 
-    current_chat_summary = data.get('currentChatSummary', "No summary available")
-    previous_chat_summaries = data.get('previousChatSummaries', [])  
-    trends = data.get('trends', [])
+    try:
+        system_prompt = (
+            "You provide practical, thoughtful, and supportive suggestions to help a user improve their current decision-making process. "
+            "Focus only on the current decision. Each suggestion should be 1–2 sentences max and framed as something they could try. "
+            "Make it encouraging and helpful, not critical or overly formal."
+        )
+        user_content = f"""
+        A user is making the following decision. It includes a description of decision, user expectations, and any detected biases or noise.
+        Current Decision: {current_chat_summary}
+        Please return 2–3 helpful 'Try this:' suggestions for improving this specific decision.
+        """
 
-    trend_summary = "\n".join([t.get("message", "") for t in trends]) if trends else "No trends detected."
+        response = client.chat.completions.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_content}
+            ],
+            max_tokens=300,
+            temperature=0.5
+        )
 
-    def call_gpt(task_type):
-        try:
-            if task_type == "strengths in decision-making":
-                system_prompt = (
-                    "You analyze decision-making behavior and return each strength as a short, positive, and personalized paragraph. "
-                    "Highlight habits, thought patterns, or decision styles that helped the user make thoughtful, reflective, or consistent decisions. "
-                    "Focus only on what the user is doing well — this should feel encouraging and affirming."
-                )
-            else: 
-                system_prompt = (
-                    "You analyze decision-making behavior and return each area for improvement as a short, constructive paragraph. "
-                    "Point out specific thinking patterns that may be limiting or flawed, and suggest how the user could improve or rethink their approach."
-                )
+        raw_output = response.choices[0].message.content.strip()
+        suggestions = [line.strip().lstrip("-").strip() for line in raw_output.split("\n") if line.strip()]
 
-            response = client.chat.completions.create(
-                model="gpt-4",
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": f"""
-                    You are analyzing a user’s decision-making patterns over time.
-                    Below is the most recent decision followed by the five most recent previous decisions. Each contains the title, theme, detected bias and noise, and a summary.
-                    Additionally, here are some trends detected across their decisions:{trend_summary}
-                    Current Decision:{current_chat_summary}
-                    Past Decisions:{"\n\n".join(previous_chat_summaries)}
-                    Please return 2–3 personalized {task_type}."""}
-                ],
-                max_tokens=300,
-                temperature=0.5
-            )
-
-            raw_output = response.choices[0].message.content.strip()
-            feedback_lines = [line.strip().lstrip("-").strip() for line in raw_output.split("\n") if line.strip()]
-
-            return feedback_lines[:3] if len(feedback_lines) >= 3 else feedback_lines
-
-        except Exception as e:
-            print("GPT error:", e)
-            return ["Unable to generate summary due to an error."]
+    except Exception as e:
+        print("GPT error:", e)
+        suggestions = ["Unable to generate suggestions."]
 
     return jsonify({
-        "Strengths": call_gpt("strengths in decision-making"),
-        "Improvements": call_gpt("areas for improvement")
+        "suggestions": suggestions[:3] if len(suggestions) >= 3 else suggestions
     })

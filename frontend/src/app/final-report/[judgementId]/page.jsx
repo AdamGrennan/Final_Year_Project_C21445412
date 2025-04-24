@@ -1,5 +1,5 @@
 "use client";
-import SummarySideBar from "@/components/report-components/InsightsSidebar";
+import { SuggestionsSidebar } from "@/components/report-components/SuggestionsSidebar";
 import Trends from "@/components/report-components/trend-components/Trends";
 import { useDecision } from '@/context/DecisionContext';
 import { useUser } from '@/context/UserContext';
@@ -136,7 +136,7 @@ export default function Page() {
               <h3 className="text-center font-urbanist text-black text-base font-semibold border-b border-PRIMARY pb-2">
                Recent Decision Insights
               </h3>
-              <SummarySideBar chatSummaries={chatSummaries} judgementId={judgementId} isRevisited={isRevisited}/>
+              <SuggestionsSidebar chatSummaries={chatSummaries} judgementId={judgementId} isRevisited={isRevisited}/>
             </div> 
           </div>
           </div>
