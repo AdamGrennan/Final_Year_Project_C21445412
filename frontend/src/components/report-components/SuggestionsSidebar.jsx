@@ -37,7 +37,7 @@ export const SuggestionsSidebar = ({ chatSummaries, judgementId, isRevisited }) 
     <div className="w-full rounded-md p-2 shadow-sm">
       <div className="space-y-2">
         {suggestions?.map((item, i) => (
-          <div key={i} className="text-white text-sm leading-snug bg-SECONDARY p-3 rounded-md">
+          <div key={i} className="text-white text-sm leading-snug bg-PRIMARY p-3 rounded-md">
             <p>{item}</p>
           </div>
         ))}

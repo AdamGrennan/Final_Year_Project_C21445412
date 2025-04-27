@@ -1,11 +1,8 @@
-import logging
 from flask import request, jsonify
 from newsapi import NewsApiClient
 from sklearn.metrics.pairwise import cosine_similarity
 import spacy
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 newsapi = NewsApiClient(api_key='ff2821922ae545f1b0a770cc8bf2d7c3')
 nlp = spacy.load("en_core_web_sm")
@@ -37,19 +34,11 @@ def news_api_endpoint(sbert_model):
         
         keywords = extract_keywords(input_text)
         query = " OR ".join(keywords)
-        
-        query = " OR ".join(keywords)
 
         if not query.strip():
-         logger.warning("No keywords found for query.")
          return jsonify({
         "recency_bias_detected": False,
-        "message": "No keywords could be extracted from the input text."
-    }), 200
-
-
-        logger.info(f"Keywords extracted: {keywords}")
-        logger.info(f"Final Query used: {query}")
+        "message": "No keywords could be extracted from the input text."}), 200
         
         articles = newsapi.get_everything(
             q=query,
@@ -62,7 +51,7 @@ def news_api_endpoint(sbert_model):
             error_code = articles.get("code", "unknown_error")
             error_msg = articles.get("message", "No message provided")
 
-            logger.error(f"NewsAPI Error - Code: {error_code}, Message: {error_msg}")
+            print(f"NewsAPI Error - Code: {error_code}, Message: {error_msg}")
 
             if error_code == "rateLimited":
                 return jsonify({
@@ -97,7 +86,7 @@ def news_api_endpoint(sbert_model):
         article_title = article_texts[article_match]
         article_similarity = round(float(similarities[article_match]), 2)
 
-        logger.info(f"Most Similar Article: {article_title} (Similarity: {article_similarity})")
+        print(f"Most Similar Article: {article_title} (Similarity: {article_similarity})")
 
         if article_similarity >= 0.5:
             return jsonify({
@@ -115,5 +104,4 @@ def news_api_endpoint(sbert_model):
             }), 200
 
     except Exception as e:
-        logger.exception("Unexpected error occurred in news_api_endpoint.")
         return jsonify({"error": "Internal server error", "details": str(e)}), 500

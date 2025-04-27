@@ -28,9 +28,6 @@ export const uploadDashboardStats = async (userId) => {
     const biasThemes = dashboardData.biasThemes || {};
     const noiseThemes = dashboardData.noiseThemes || {};
 
-    const biasTimes = { Morning: 0, Afternoon: 0, Evening: 0, Night: 0 };
-    const noiseTimes = { Morning: 0, Afternoon: 0, Evening: 0, Night: 0 };
-
     let totalDecisions = dashboardData.totalDecisions || 0;
     let completedDecisions = dashboardData.completedDecisions || 0;
     const biasCounts = dashboardData.biasDecisionCounts || {};
@@ -39,6 +36,9 @@ export const uploadDashboardStats = async (userId) => {
 
     const newDecisionIds = [];
     let insights = "";
+
+    const biasTimes = { Morning: 0, Afternoon: 0, Evening: 0, Night: 0 };
+    const noiseTimes = { Morning: 0, Afternoon: 0, Evening: 0, Night: 0 };
 
     const getTime = (timestamp) => {
       const date = timestamp?.toDate?.();
@@ -55,50 +55,53 @@ export const uploadDashboardStats = async (userId) => {
       const decision = doc.data();
       const decisionId = doc.id;
 
-      if (processedDecisionIds.includes(decisionId)) return;
-
-      totalDecisions++;
-      newDecisionIds.push(decisionId);
-
-      if (decision.isCompleted) completedDecisions++;
-
-      const uniqueBiases = new Set();
-      const uniqueNoises = new Set();
-
-      if (Array.isArray(decision.detectedBias)) {
-        decision.detectedBias.forEach((item) => {
-          if (typeof item === "object" && typeof item.bias === "string") {
-            uniqueBiases.add(item.bias.trim());
-          }
-        });
-      }
-
-      if (Array.isArray(decision.detectedNoise)) {
-        decision.detectedNoise.forEach((item) => {
-          if (typeof item === "object" && typeof item.noise === "string") {
-            uniqueNoises.add(item.noise.trim());
-          }
-        });
-      }
-
-      uniqueBiases.forEach((biasLabel) => {
-        biasCounts[biasLabel] = (biasCounts[biasLabel] || 0) + 1;
-      });
-
-      uniqueNoises.forEach((noiseLabel) => {
-        noiseCounts[noiseLabel] = (noiseCounts[noiseLabel] || 0) + 1;
-      });
-
       const time = getTime(decision.createdAt);
       if (time) {
-        if (uniqueBiases.size > 0) biasTimes[time]++;
-        if (uniqueNoises.size > 0) noiseTimes[time]++;
+        const hasBias = Array.isArray(decision.detectedBias) && decision.detectedBias.length > 0;
+        const hasNoise = Array.isArray(decision.detectedNoise) && decision.detectedNoise.length > 0;
+
+        if (hasBias) biasTimes[time]++;
+        if (hasNoise) noiseTimes[time]++;
       }
 
-      const theme = decision.theme || "Unknown";
-      if (theme) {
-        if (uniqueBiases.size > 0) biasThemes[theme] = (biasThemes[theme] || 0) + 1;
-        if (uniqueNoises.size > 0) noiseThemes[theme] = (noiseThemes[theme] || 0) + 1;
+      if (!processedDecisionIds.includes(decisionId)) {
+        totalDecisions++;
+        newDecisionIds.push(decisionId);
+
+        if (decision.isCompleted) completedDecisions++;
+
+        const uniqueBiases = new Set();
+        const uniqueNoises = new Set();
+
+        if (Array.isArray(decision.detectedBias)) {
+          decision.detectedBias.forEach((item) => {
+            if (typeof item === "object" && typeof item.bias === "string") {
+              uniqueBiases.add(item.bias.trim());
+            }
+          });
+        }
+
+        if (Array.isArray(decision.detectedNoise)) {
+          decision.detectedNoise.forEach((item) => {
+            if (typeof item === "object" && typeof item.noise === "string") {
+              uniqueNoises.add(item.noise.trim());
+            }
+          });
+        }
+
+        uniqueBiases.forEach((biasLabel) => {
+          biasCounts[biasLabel] = (biasCounts[biasLabel] || 0) + 1;
+        });
+
+        uniqueNoises.forEach((noiseLabel) => {
+          noiseCounts[noiseLabel] = (noiseCounts[noiseLabel] || 0) + 1;
+        });
+
+        const theme = decision.theme || "Unknown";
+        if (theme) {
+          if (uniqueBiases.size > 0) biasThemes[theme] = (biasThemes[theme] || 0) + 1;
+          if (uniqueNoises.size > 0) noiseThemes[theme] = (noiseThemes[theme] || 0) + 1;
+        }
       }
     });
 
@@ -116,15 +119,24 @@ export const uploadDashboardStats = async (userId) => {
       return maxKey;
     };
 
-    const getMaxKey = (obj) =>
-      Object.keys(obj).reduce((a, b) => (obj[a] > obj[b] ? a : b), "None");
+    const getMaxTime = (obj) => {
+      let maxKey = null;
+      let maxCount = -1; 
+      for (const key in obj) {
+        if (obj[key] > maxCount) {
+          maxCount = obj[key];
+          maxKey = key;
+        }
+      }
+      return maxCount > 0 ? maxKey : "None";
+    };
 
     const mostFrequentBias = getMostFrequent(biasCounts);
     const mostFrequentNoise = getMostFrequent(noiseCounts);
     const topThemeWithBias = getMostFrequent(biasThemes);
     const topThemeWithNoise = getMostFrequent(noiseThemes);
-    const mostBiasedTime = getMaxKey(biasTimes);
-    const noisiestTime = getMaxKey(noiseTimes);
+    const mostBiasedTime = getMaxTime(biasTimes);
+    const noisiestTime = getMaxTime(noiseTimes);
 
     const completedQuery = query(
       collection(db, "judgement"),

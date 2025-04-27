@@ -26,48 +26,48 @@ export default function Page() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
                 <div className="group bg-white shadow-md p-4 rounded-xl hover:bg-gray-200 transform hover:scale-105 transition-all duration-300">
                     <div className="text-center">
-                        <LuBicepsFlexed className="w-6 h-6 mb-1 mx-auto text-gray-800 group-hover:text-SECONDARY transition-colors duration-300" />
-                        <h2 className="text-xl font-semibold mb-2 text-gray-800 group-hover:text-SECONDARY transition-colors duration-300">
+                        <LuBicepsFlexed className="w-6 h-6 mb-1 mx-auto text-gray-800 group-hover:text-PRIMARY transition-colors duration-300" />
+                        <h2 className="text-xl font-semibold mb-2 text-gray-800 group-hover:text-PRIMARY transition-colors duration-300">
                             Overconfidence Bias
                         </h2>
                     </div>
-                    <p className="text-gray-600 text-sm">
+                    <p className="text-gray-600 text-sm  text-center">
                         The tendency to overestimate our knowledge, abilities, or the accuracy of our predictions—leading to risky decisions.
                     </p>
                 </div>
 
                 <div className="group bg-white shadow-md p-4 rounded-xl hover:bg-gray-200 transform hover:scale-105 transition-all duration-300">
                     <div className="text-center">
-                        <FaAnchor className="w-6 h-6 mb-1 mx-auto text-gray-800 group-hover:text-SECONDARY transition-colors duration-300" />
-                        <h2 className="text-xl font-semibold mb-2 text-gray-800 group-hover:text-SECONDARY transition-colors duration-300">
+                        <FaAnchor className="w-6 h-6 mb-1 mx-auto text-gray-800 group-hover:text-PRIMARY transition-colors duration-300" />
+                        <h2 className="text-xl font-semibold mb-2 text-gray-800 group-hover:text-PRIMARY transition-colors duration-300">
                             Anchoring Bias
                         </h2>
                     </div>
-                    <p className="text-gray-600 text-sm">
+                    <p className="text-gray-600 text-sm  text-center">
                         The tendency to rely heavily on the first piece of information encountered (the “anchor”) when making decisions.
                     </p>
                 </div>
 
                 <div className="group bg-white shadow-md p-4 rounded-xl hover:bg-gray-200 transform hover:scale-105 transition-all duration-300">
                     <div className="text-center">
-                        <FaMagnifyingGlass className="w-6 h-6 mb-1 mx-auto text-gray-800 group-hover:text-SECONDARY transition-colors duration-300" />
-                        <h2 className="text-xl font-semibold mb-2 text-gray-800 group-hover:text-SECONDARY transition-colors duration-300">
+                        <FaMagnifyingGlass className="w-6 h-6 mb-1 mx-auto text-gray-800 group-hover:text-PRIMARY transition-colors duration-300" />
+                        <h2 className="text-xl font-semibold mb-2 text-gray-800 group-hover:text-PRIMARY transition-colors duration-300">
                             Confirmation Bias
                         </h2>
                     </div>
-                    <p className="text-gray-600 text-sm">
+                    <p className="text-gray-600 text-sm  text-center">
                         The tendency to seek out or interpret information in a way that confirms our preexisting beliefs.
                     </p>
                 </div>
 
                 <div className="group bg-white shadow-md p-4 rounded-xl hover:bg-gray-200 transform hover:scale-105 transition-all duration-300">
                     <div className="text-center">
-                        <FaHourglassHalf className="w-6 h-6 mb-1 mx-auto text-gray-800 group-hover:text-SECONDARY transition-colors duration-300" />
-                        <h2 className="text-xl font-semibold mb-2 text-gray-800 group-hover:text-SECONDARY transition-colors duration-300">
+                        <FaHourglassHalf className="w-6 h-6 mb-1 mx-auto text-gray-800 group-hover:text-PRIMARY transition-colors duration-300" />
+                        <h2 className="text-xl font-semibold mb-2 text-gray-800 group-hover:text-PRIMARY transition-colors duration-300">
                             Recency Bias
                         </h2>
                     </div>
-                    <p className="text-gray-600 text-sm">
+                    <p className="text-gray-600 text-sm  text-center">
                         The tendency to give greater importance to the most recent events or information over older data.
                     </p>
                 </div>
@@ -86,36 +86,36 @@ export default function Page() {
                 <div className="flex flex-wrap justify-center gap-6">
                     <div className="group bg-white shadow-md p-4 rounded-xl w-[270px] hover:bg-gray-200 transform hover:scale-105 transition-all duration-300">
                         <div className="text-center">
-                            <MdOutlineShowChart className="w-6 h-6 mb-1 mx-auto text-gray-800 group-hover:text-SECONDARY transition-colors duration-300" />
-                            <h2 className="text-xl font-semibold mb-2 text-gray-800 group-hover:text-SECONDARY transition-colors duration-300">
+                            <MdOutlineShowChart className="w-6 h-6 mb-1 mx-auto text-gray-800 group-hover:text-PRIMARY transition-colors duration-300" />
+                            <h2 className="text-xl font-semibold mb-2 text-gray-800 group-hover:text-PRIMARY transition-colors duration-300">
                                 Pattern Noise
                             </h2>
                         </div>
-                        <p className="text-gray-600 text-sm">
+                        <p className="text-gray-600 text-sm  text-center">
                             Systematic variation in judgment due to individual tendencies—like two judges consistently disagreeing despite having the same info.
                         </p>
                     </div>
 
                     <div className="group bg-white shadow-md p-4 rounded-xl w-[270px] hover:bg-gray-200 transform hover:scale-105 transition-all duration-300">
                         <div className="text-center">
-                            <PiScalesFill className="w-6 h-6 mb-1 mx-auto text-gray-800 group-hover:text-SECONDARY transition-colors duration-300" />
-                            <h2 className="text-xl font-semibold mb-2 text-gray-800 group-hover:text-SECONDARY transition-colors duration-300">
+                            <PiScalesFill className="w-6 h-6 mb-1 mx-auto text-gray-800 group-hover:text-PRIMARY transition-colors duration-300" />
+                            <h2 className="text-xl font-semibold mb-2 text-gray-800 group-hover:text-PRIMARY transition-colors duration-300">
                                 Level Noise
                             </h2>
                         </div>
-                        <p className="text-gray-600 text-sm">
+                        <p className="text-gray-600 text-sm text-center">
                             Differences in average judgment levels across individuals—like some being harsher or more lenient overall.
                         </p>
                     </div>
 
                     <div className="group bg-white shadow-md p-4 rounded-xl w-[270px] hover:bg-gray-200 transform hover:scale-105 transition-all duration-300">
                         <div className="text-center">
-                            <FaCloudShowersHeavy className="w-6 h-6 mb-1 mx-auto text-gray-800 group-hover:text-SECONDARY transition-colors duration-300" />
-                            <h2 className="text-xl font-semibold mb-2 text-gray-800 group-hover:text-SECONDARY transition-colors duration-300">
+                            <FaCloudShowersHeavy className="w-6 h-6 mb-1 mx-auto text-gray-800 group-hover:text-PRIMARY transition-colors duration-300" />
+                            <h2 className="text-xl font-semibold mb-2 text-gray-800 group-hover:text-PRIMARY transition-colors duration-300">
                                 Occasion Noise
                             </h2>
                         </div>
-                        <p className="text-gray-600 text-sm">
+                        <p className="text-gray-600 text-sm  text-center">
                             Inconsistency caused by external factors like time of day, mood, hunger, or even weather when making judgments.
                         </p>
                     </div>

@@ -6,8 +6,8 @@ import torch
 import numpy as np
 from sklearn.metrics import f1_score, precision_score, recall_score
 from sklearn.model_selection import train_test_split
-from modules.bert.dataset import BiasDataset
-from modules.bert.data_load import load_data
+from src.modules.bert.dataset import BiasDataset
+from src.modules.bert.data_load import load_data
 
 # Train Model
 def train_model(csv_file, model_name='bert-base-uncased', batch_size=32, epochs=4, early_stop_patience=2):
@@ -15,7 +15,7 @@ def train_model(csv_file, model_name='bert-base-uncased', batch_size=32, epochs=
     tokenizer = BertTokenizer.from_pretrained(model_name)
 
     # Load data
-    sentences, labels = load_data(csv_file)
+    sentences, labels, bias_labels = load_data(csv_file)
 
     # Split data into training and validation set
     sentence_train, sentence_val, label_train, label_val = train_test_split(
@@ -39,6 +39,7 @@ def train_model(csv_file, model_name='bert-base-uncased', batch_size=32, epochs=
 
     # Optimizer & Loss Function
     optimizer = AdamW(model.parameters(), lr=1e-5, weight_decay=0.01) 
+    
     criterion = nn.BCEWithLogitsLoss()
 
     # Early stopping setup
@@ -104,8 +105,8 @@ def train_model(csv_file, model_name='bert-base-uncased', batch_size=32, epochs=
             best_val_loss = avg_val_loss
             patience_counter = 0  
             print("Saving best model...")
-            model.save_pretrained('./models/sonus_model')
-            tokenizer.save_pretrained('./models/sonus_tokenizer')
+            model.save_pretrained('./models/sonus_v2_model')
+            tokenizer.save_pretrained('./models/sonus_v2_tokenizer')
         else:
             patience_counter += 1
             print(f"No improvement. Patience: {patience_counter}/{early_stop_patience}")
@@ -114,4 +115,4 @@ def train_model(csv_file, model_name='bert-base-uncased', batch_size=32, epochs=
                 print(f"Early stopping at epoch {epoch + 1}")
                 break 
 
-    return model, tokenizer
+    return model, tokenizer, bias_labels

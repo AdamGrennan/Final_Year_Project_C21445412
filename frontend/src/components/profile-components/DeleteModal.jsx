@@ -12,8 +12,14 @@ const DeleteModal = ({ userId, onClose }) => {
     try {
       const decisionsQuery = query(collection(db, "judgement"), where("userId", "==", userId));
       const dashboardQuery = query(collection(db, "dashboard"), where("userId", "==", userId));
+      const chatQuery = query(collection(db, "chat"), where("userId", "==", userId));
+      const levelQuery = query(collection(db, "level_noise"), where("userId", "==", userId));
+      const trendQuery = query(collection(db, "trends"), where("userId", "==", userId));
       const decisionSnapshots = await getDocs(decisionsQuery);
+      const chatSnapshots = await getDocs(chatQuery);
       const dashboardSnapshots = await getDocs(dashboardQuery);
+      const levelSnapshots = await getDocs(levelQuery);
+      const trendSnapshots = await getDocs(trendQuery);
   
       const deleteDecisionPromises = decisionSnapshots.docs.map((docSnap) =>
         deleteDoc(doc(db, "judgement", docSnap.id))
@@ -23,9 +29,22 @@ const DeleteModal = ({ userId, onClose }) => {
         deleteDoc(doc(db, "dashboard", docSnap.id))
       );
 
+      const deleteChatPromises = chatSnapshots.docs.map((docSnap) =>
+        deleteDoc(doc(db, "chat", docSnap.id))
+      );
+
+      const levelPromises = levelSnapshots.docs.map((docSnap) =>
+        deleteDoc(doc(db, "level_noise", docSnap.id))
+      );
+
+      const trendPromises = trendSnapshots.docs.map((docSnap) =>
+        deleteDoc(doc(db, "trends", docSnap.id))
+      );
+
       const deleteUserDoc = deleteDoc(doc(db, "users", userId));
   
-      await Promise.all([...deleteDecisionPromises, ...deleteDashboardPromises, deleteUserDoc]);
+      await Promise.all([...trendPromises ,...levelPromises ,...deleteChatPromises, ...deleteDecisionPromises, 
+        ...deleteDashboardPromises, deleteUserDoc]);
   
       await deleteUser(auth.currentUser);
   

@@ -9,13 +9,17 @@ import {
   topFrequentTrends
 } from "./TrendStats";
 
-const useTrendAnalysis = (user, judgementId, bias, noise) => {
+const useTrendAnalysis = (user, judgementId, bias, noise, isRevisited ) => {
   const [trends, setTrends] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetchTrends();
-  }, [judgementId]);
+    if (!isRevisited) {
+      fetchTrends();
+    }
+  }, [judgementId, isRevisited]);
+  
+  
 
   const fetchTrends = async () => {
     if (!user || !user.uid || !judgementId) return;
@@ -84,7 +88,5 @@ const useTrendAnalysis = (user, judgementId, bias, noise) => {
 
   return { trends, fetchTrends, loading };
 };
-
-
 
 export default useTrendAnalysis;

@@ -1,5 +1,8 @@
 
-export const fetchGPTResponse = async (input,messages,setDisplayedText,patternContext,userId,judgementId) => {
+export const fetchGPTResponse = async (input,messages,setDisplayedText,
+  patternContext,userId,judgementId,
+  detectedBias,detectedNoise, recencyInfo, messageCount, setPromptOptions,
+  setShowPromptSelector) => {
   try{
   const response = await fetch('http://127.0.0.1:5000/chat', {
     method: 'POST',
@@ -8,13 +11,15 @@ export const fetchGPTResponse = async (input,messages,setDisplayedText,patternCo
       input: (input || "").trim(),
       userId: userId || "",              
       judgementId: judgementId || "",    
+      patternContext,
+      detectedBias,
+      detectedNoise,
+      recencyInfo,
+      messageCount,
       context: messages.map((msg) => ({
         sender: msg.sender || "user",
         text: msg.text || "",
-        detectedBias: msg.detectedBias || [],
-        detectedNoise: msg.detectedNoise || [],
       })),
-      patternContext,
     }),
   });
   if (!response.ok) {
@@ -27,12 +32,25 @@ export const fetchGPTResponse = async (input,messages,setDisplayedText,patternCo
   let accumulatedText = ""; 
   while (true) {
     const { value, done } = await reader.read();
-    if (done) break;
-
     const chunk = decoder.decode(value, { stream: true });
     accumulatedText += chunk; 
     setDisplayedText(accumulatedText); 
+
+    if(done){
+      const parser = (prompt) => {
+        const lines = prompt.split("\n").filter(line => /^\d\.\s/.test(line.trim()));
+        return lines.map(line => line.slice(2).trim());
+      };
+    
+      const prompts = parser(accumulatedText);
+    
+      if (prompts.length >= 1) {
+        setPromptOptions(prompts);
+        setShowPromptSelector(true);
+      }
+    }
   }
+
 }catch (error) {
   console.error("Error fetching GPT response:", error);
   setDisplayedText("Error generating response.");
@@ -59,7 +77,7 @@ export const fetchBERTResponse = async (input) => {
 }
 };
 
-export const fetchLevelNoise = async (input, userId, judgementId, currentAvg = null) => {
+export const fetchLevelNoise = async (input, userId, judgementId) => {
   try{
   const body = {
     input: input.trim(),
@@ -67,10 +85,6 @@ export const fetchLevelNoise = async (input, userId, judgementId, currentAvg = n
     judgment_id: judgementId,
     save: false
   };
-
-  if (currentAvg !== null) {
-    body.current_avg = currentAvg;
-  }
 
   const response = await fetch('http://127.0.0.1:5000/level_noise', {
     method: 'POST',
@@ -89,7 +103,7 @@ export const fetchLevelNoise = async (input, userId, judgementId, currentAvg = n
 }
 };
 
-export const levelNoiseScores = async ({ action, userId, judgmentId, score, type = "average" }) => {
+export const levelNoiseScores = async ({ action, userId, judgmentId, score}) => {
   try{
   const response = await fetch("http://127.0.0.1:5000/level_noise_scores", {
     method: "POST",
@@ -99,7 +113,6 @@ export const levelNoiseScores = async ({ action, userId, judgmentId, score, type
       user_id: userId,
       judgment_id: judgmentId,
       score,
-      type,
     }),
   });
 
@@ -154,9 +167,6 @@ export const openingMessage = async (judgmentData, name) => {
         name: name || "No Name Provided",
         details: {
           situation: judgmentData?.details?.situation || "",
-          options: judgmentData?.details?.options || "",
-          influences: judgmentData?.details?.influences || "",
-          goal: judgmentData?.details?.goal || "",
         },
         theme: judgmentData?.theme || "No Template",
         input: "",

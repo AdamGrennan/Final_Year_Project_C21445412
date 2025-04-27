@@ -60,7 +60,7 @@ def news_api():
 
 @app.route('/chat', methods=['POST'])
 def chat():
-    return chat_endpoint(model, tokenizer, bias_labels, client)
+    return chat_endpoint(client)
 
 @app.route('/source', methods=['POST'])
 def source():

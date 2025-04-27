@@ -39,7 +39,7 @@ const BiasCard = ({ bias, noise, biasSources, noiseSources, advice }) => {
   };
 
   const detailsMap = {
-    "Recency Bias":
+    "Recency  Bias":
     "Recency Bias is a cognitive bias where people give greater importance to recent events, experiences, or information while ignoring or underestimating older data. This bias can lead to distorted decision-making, as individuals may believe that recent occurrences are more significant, predictive, or representative than they actually are. For example, an investor may assume that a stock performing well in the past few weeks will continue to rise, ignoring long-term trends. In everyday life, recency bias can also affect judgment in areas like hiring decisions, where interviewers might favor candidates they met last, or in news consumption, where people overestimate the importance of the latest headlines. This tendency to overweight recent information can result in impulsive choices and a failure to consider the broader historical context.",
     "Overconfidence Bias":
       "Overconfidence bias is a tendency to overestimate our own abilities, knowledge, or decision-making accuracy. This can lead to risky choices and ignoring critical feedback.",

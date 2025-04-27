@@ -72,13 +72,12 @@ export default function Page() {
         userId: user.uid,
         judgmentId: judgementId,
         score: currentAvg,
-        type: "average",
       });
     
-      const deviationResult = await fetchLevelNoise("summary", user.uid, judgementId, false, currentAvg);
+      const result = await fetchLevelNoise("fetch_level_noise", user.uid, judgementId, false);
     
-      if (deviationResult.type === "harsh" || deviationResult.type === "lenient") {
-        detectNoise("Level Noise", deviationResult.message);
+      if (result.type === "harsh" || result.type === "lenient") {
+        detectNoise("Level Noise", result.message);
         detectedNoise.push("Level Noise");
       }
     }

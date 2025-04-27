@@ -26,13 +26,16 @@ const JudgementList = () => {
     try {
       setTimeout(async () => {
         const chatQuery = query(collection(db, "chat"), where("judgementId", "==", judgementId));
-        const trendQuery = query(collection(db, "trends"), where("jid", "==", judgementId));
+        const trendQuery = query(collection(db, "trends"), where("judgementId", "==", judgementId));
+        const levelNoiseQuery = query(collection(db, "level_noise"), where("judgmentId", "==", judgementId));
         const chatDocs = await getDocs(chatQuery);
         const trendDocs = await getDocs(trendQuery);
+        const levelDocs = await getDocs(levelNoiseQuery);
 
         const deleteChats = chatDocs.docs.map((chatDoc) => deleteDoc(chatDoc.ref));
         const deleteTrends = trendDocs.docs.map((trendDoc) => deleteDoc(trendDoc.ref));
-        await Promise.all(deleteChats, deleteTrends);
+        const deleteLevel = levelDocs.docs.map((levelDoc) => deleteDoc(levelDoc.ref));
+        await Promise.all(deleteChats, deleteTrends, deleteLevel);
 
         const judgeRef = doc(db, "judgement", judgementId);
         await deleteDoc(judgeRef);

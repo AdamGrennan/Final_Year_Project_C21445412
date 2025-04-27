@@ -20,8 +20,6 @@ def fetch_chats(user_id, db):
     return messages
 
 def is_pattern_noise(current_messages, past_messages, sbert_model):
-    print("Running is_pattern_noise()")
-
     current_texts = " | ".join([msg["text"] for msg in current_messages[-3:]])
     past_texts = " | ".join([msg["text"] for msg in past_messages[-3:]])
 
@@ -29,14 +27,14 @@ def is_pattern_noise(current_messages, past_messages, sbert_model):
         print("Not enough chat messages for comparison")
         return False
 
-    current_vector = sbert_model.encode([current_texts])[0]
-    past_vector = sbert_model.encode([past_texts])[0]
+    current_encoded_messages = sbert_model.encode([current_texts])[0]
+    past_encoded_messages = sbert_model.encode([past_texts])[0]
 
-    similarity = cosine_similarity([current_vector], [past_vector])[0][0]
+    similarity = cosine_similarity([current_encoded_messages], [past_encoded_messages])[0][0]
     print(f"Pattern Noise Similarity Score: {similarity}")
 
     for msg in past_messages:
-        print("Past noise raw value:", msg.get("detected_noise", []))
+        print("Past noise value:", msg.get("detected_noise", []))
 
     past_has_bias = any(
         bias for msg in past_messages for bias in msg.get("detected_bias", []) if bias and bias != "None"

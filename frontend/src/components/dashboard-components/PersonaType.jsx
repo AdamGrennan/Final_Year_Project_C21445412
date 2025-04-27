@@ -6,11 +6,15 @@ export const PersonaType = ({ total, bias, noise }) => {
 
 
   useEffect(() => {
-    if (total >= 5) {
+    if (total >= 3) {
+      console.log("Bias:", bias);
+      console.log("Noise:", noise);
       const profile = getPersona(bias, noise);
+      console.log("Generated Persona Profile:", profile);
       setPersona({ ...profile, bias, noise });
     }
   }, [total, bias, noise]);
+  
 
   return (
     <div>

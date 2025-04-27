@@ -1,7 +1,7 @@
 from flask import request, jsonify
 from sklearn.metrics.pairwise import cosine_similarity
 import requests
-from utils.pattern_noise_util import fetch_chats, is_pattern_noise
+from src.services.pattern_noise_service import fetch_chats, is_pattern_noise
 
 def pattern_noise_endpoint(sbert_model, db, threshold=0.5):
     data = request.json
@@ -36,9 +36,13 @@ def pattern_noise_endpoint(sbert_model, db, threshold=0.5):
     pattern_noise_sources = []
 
     for i, score in enumerate(similarities):
+        similar_chat = all_user_chats[i]
+        
+        if similar_chat.get("judgementId") == judgment_id:
+            continue  
+        
         score = float(score) 
         if score > threshold:
-            similar_chat = all_user_chats[i]
             print(f"Similar Chat (Score: {score}): {similar_chat}")
 
             past_chat_messages = [similar_chat]
@@ -67,8 +71,7 @@ def pattern_noise_endpoint(sbert_model, db, threshold=0.5):
 
                 pattern_noise_sources.append({
                  "judgmentId": judgment_id,
-                 "source": source_summary
-                    })
+                 "source": source_summary})
 
                 similar_decisions.append({
                  "judgmentId": judgment_id,

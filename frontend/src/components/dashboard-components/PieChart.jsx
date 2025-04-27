@@ -63,7 +63,7 @@ const PieChart = ({ pieData }) => {
   return (
     <div className="bg-white p-4 w-[300px] self-start">
       <div className="w-full h-[300px]">
-        <p className="text-md font-semibold mb-2 text-center">Bias & Noise Distribution</p>
+        <p className="text-md font-semibold mb-2 text-center">Bias and Noise Overview</p>
         <Pie data={chartData} options={options} />
       </div>
     </div>

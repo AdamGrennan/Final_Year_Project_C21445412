@@ -25,9 +25,6 @@ const formSchema = z.object({
   theme: z.string().min(2, { message: "Please select a template." }),
   details: z.object({
     situation: z.string().min(4, { message: "Situation is required." }),
-    options: z.string().optional(),
-    influences: z.string().optional(),
-    goal: z.string().optional(),
   }),
 });
 
@@ -108,9 +105,6 @@ const JudgementForm = () => {
                 )}
               />
             </div>
-          </section>
-
-          <section className="space-y-4">
             <FormField
               control={form.control}
               name="details.situation"
@@ -128,63 +122,7 @@ const JudgementForm = () => {
                 </FormItem>
               )}
             />
-
-            <details className="mt-2 border-t pt-4 text-sm text-gray-600">
-              <summary className="cursor-pointer font-urbanist font-semibold text-SECONDARY">
-                Add more context (optional)
-              </summary>
-              <div className="mt-4 space-y-4">
-                <FormField
-                  control={form.control}
-                  name="details.options"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="font-urbanist">Options you're considering</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="e.g. Take job offer, stay put"
-                          {...field}
-                          className="font-urbanist border border-gray-300 bg-white focus:border-SECONDARY focus:ring-SECONDARY "
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="details.influences"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="font-urbanist">What's influencing you?</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="e.g. Deadline next week, manager conflict"
-                          {...field}
-                          className="font-urbanist border border-gray-300 bg-white focus:border-SECONDARY focus:ring-SECONDARY "
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="details.goal"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="font-urbanist">Ideal outcome</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="e.g. Better work-life balance"
-                          {...field}
-                          className="font-urbanist border border-gray-300 bg-white focus:border-SECONDARY focus:ring-SECONDARY "
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </details>
-          </section>
+            </section>
 
           <div className="flex justify-center items-center pt-4">
             <Button

@@ -130,18 +130,18 @@ export default function Page() {
         <SwiperSlide>
           <div className="w-full text-center bg-gray-50">
             <h2 className="font-urbanist text-2xl font-semibold text-PRIMARY">
-              Trends and Patterns
+             Decision Analysis
             </h2>
             <div className="bg-gray-50 h-auto flex flex-col md:flex-row items-start justify-between p-8 space-y-8 md:space-y-0 md:space-x-8">
             <div className="w-full md:w-1.5/3 h-[375px] bg-white rounded-lg shadow-md p-6 space-y-4 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-SECONDARY scrollbar-track-GRAAY">
               <h3 className="text-center font-urbanist text-black text-base font-semibold border-b border-PRIMARY pb-2">
-               Suggestions
+               Detection Frequency
               </h3>
               <BarChart bias={detectedBias} noise={detectedNoise}/>
             </div> 
             <div className="w-full md:w-1.5/3 h-[375px] bg-white rounded-lg shadow-md p-6 space-y-4 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-SECONDARY scrollbar-track-GRAAY">
               <h3 className="text-center font-urbanist text-black text-base font-semibold border-b border-PRIMARY pb-2">
-               Suggestions
+               Decision Suggestions
               </h3>
               <SuggestionsSidebar chatSummaries={chatSummaries} judgementId={judgementId} isRevisited={isRevisited}/>
             </div> 
@@ -152,13 +152,13 @@ export default function Page() {
         <SwiperSlide>
           <div className="w-full text-center bg-gray-50">
             <h2 className="font-urbanist text-2xl font-semibold text-PRIMARY">
-              Summary Of Your Decision
+             Decision Analysis
             </h2>
           </div>
           <div className="bg-gray-50 flex flex-col md:flex-row items-start justify-between w-full space-y-6 md:space-y-0 md:space-x-6 mt-8">
             <div className="w-full md:w-2/3 h-[375px] bg-white rounded-lg shadow-md p-6 space-y-4 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-SECONDARY scrollbar-track-GRAAY">
               <h3 className="bg-white text-center font-urbanist text-black text-xl font-semibold border-b border-PRIMARY pb-2">
-                Decision Insights
+                Decision Trends
               </h3>
               <Trends user={user} jid={judgementId} bias={detectedBias} noise={detectedNoise} isRevisited={isRevisited}/>
             </div>

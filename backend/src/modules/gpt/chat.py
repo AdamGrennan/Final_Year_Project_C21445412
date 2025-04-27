@@ -1,8 +1,9 @@
 from flask import request, Response, jsonify
-from modules.bert.predict import predict_bias
 import time
 from services.feedback_service import FeedbackService
-from modules.gpt.prompts import get_opening_message, get_system_prompt
+from flask import request, Response, jsonify
+from services.feedback_service import FeedbackService
+from services.message_builder import MessageBuilder
 
 def get_created_at(chat):
     return chat.get("createdAt", float("-inf"))  
@@ -12,117 +13,68 @@ def stream_response(text):
         yield word + " "
         time.sleep(0.1)
 
-def chat_endpoint(model, tokenizer, bias_labels, client):
+def chat_endpoint(client):
     data = request.json
     name = data.get("name", "").strip() or "User"
     title = data.get("title", "").strip() or "No Title Provided"
     details = data.get("details", {})
     situation = details.get("situation", "").strip()
-    options = details.get("options", "").strip()
-    influences = details.get("influences", "").strip()
-    goal = details.get("goal", "").strip()
     statement = data.get("input", "").strip()
     context = data.get("context", [])
     detectedNoise = data.get("detectedNoise", [])
     detectedBias = data.get("detectedBias", [])
     pattern_context = data.get("patternContext")
-    
-    print("CHAT TEST", detectedNoise)
-    print("CHAT TEST", detectedBias)
+    recencyInfo = data.get("recencyInfo", "")
+    message_count = data.get("messageCount", 0)
 
     try:
         if not statement and title:
+            from modules.gpt.prompts import get_opening_message
             opening_message = get_opening_message(name, title)
             return jsonify({"bias_feedback": opening_message}), 200
 
-        detected_biases = predict_bias(model, tokenizer, statement, bias_labels)
-        detected_biases = [bias for bias in detected_biases if bias in bias_labels]
-        
         feedback_service = FeedbackService()
         feedback_data = feedback_service.fetch_feedback(data.get("userId"))
         previous_chats = feedback_service.fetch_chats_for_decision(data.get("userId"), data.get("judgementId"))
         chat_instruction = feedback_service.generate_instruction(feedback_data, previous_chats)
-        print(f"[Chat] Creating feedback-based instruction: {chat_instruction}")
-        
-        doc_id = None
+
         if feedback_data:
-         doc = feedback_data[0]
-         doc_id = doc.get("id") 
-        if doc_id:
-            feedback_service.mark_feedback(doc_id)
+            feedback_service.mark_feedback(feedback_data[0].get("id"))
 
+        builder = MessageBuilder(name, title, situation, chat_instruction)
 
-        messages = [
-            {
-                "role": "system",
-                "content": 
-                    get_system_prompt(name, title, situation, options, influences, goal, chat_instruction),
-            }
-        ]
+        if message_count >= 1: 
+             builder.build_prompt_suggestions() 
+
+        builder.build_open_message()
+        builder.build_noise_bias_message(detectedBias, detectedNoise)
         
-        if pattern_context:
-         previous_title = pattern_context.get("title", "")
-         previous_summary = pattern_context.get("summary", "")
+        if recencyInfo:  
+         builder.build_recency_message(recencyInfo)
+         
+        builder.build_system_message()
+        builder.build_pattern_message(pattern_context)
+        builder.build_context_message(context)
 
-         messages.append({
-        "role": "system",
-        "content": (
-            f"The user previously made a similar decision titled '{previous_title}'. "
-            f"Here’s a summary of that decision: '{previous_summary}'. "
-            "Use this to help tailor your response and encourage the user to reflect."
-        )
-            })
-             
-        if detectedBias or detectedNoise:
-            messages.append({
-        "role": "system",
-        "content": (
-            "Note: The user's current message was associated with the following:\n"
-            f"Biases: {', '.join(detectedBias) if detectedBias else 'None'}\n"
-            f"Noise: {', '.join(detectedNoise) if detectedNoise else 'None'}\n"
-            "Use this to inform your response — for example, suggest reflection or reframe their thinking if relevant."
-        )
-    })
-
-        last_system_message = None 
-
+        last_system_message = None
         if context:
-            sorted_context = sorted(context, key=get_created_at)
+            sorted_context = sorted(context, key=lambda c: c.get("createdAt", float("-inf")))
+            for chat in sorted_context:
+                if chat.get("sender") == "GPT":
+                    last_system_message = chat.get("text", "").strip()
 
-            for idx, chat in enumerate(sorted_context):
-                sender = chat.get("sender", "Unknown")
-                past_message = chat.get("text", "").strip()
+        builder.build_user_response(statement, last_system_message)
 
-                if not past_message:
-                    continue
-
-                role = "assistant" if sender == "GPT" else "user"
-                messages.append({"role": role, "content": past_message})
-
-                if role == "assistant":
-                    last_system_message = past_message
-
-        if statement:
-            if last_system_message:
-                statement = f"User follows up: {statement} (This is in response to: '{last_system_message}')"
-                messages.append(
-                    {
-                        "role": "system",
-                        "content": f"Reminder: The user's last message is a direct response to your previous answer: '{last_system_message}'.",
-                    }
-                )
-            else:
-                statement = f"User states: {statement}"
-
-            messages.append({"role": "user", "content": statement})
+        messages = builder.get_messages()
 
         context_length = sum(len(msg["content"].split()) for msg in messages)
+        
         if context_length > 100:
-         response_tokens = 250
+         response_tokens = 300
         elif len(statement.split()) > 15:
-         response_tokens = 200
+         response_tokens = 250
         else:
-         response_tokens = 120
+         response_tokens = 150
 
         response = client.chat.completions.create(
             model="gpt-4",

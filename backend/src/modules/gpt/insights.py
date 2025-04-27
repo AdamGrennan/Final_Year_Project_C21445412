@@ -1,4 +1,5 @@
 from flask import request, jsonify
+import re
 
 def insight_endpoint(client):
     data = request.json
@@ -6,14 +7,15 @@ def insight_endpoint(client):
 
     try:
         system_prompt = (
-            "You provide practical, thoughtful, and supportive suggestions to help a user improve their current decision-making process. "
-            "Focus only on the current decision. Each suggestion should be 1–2 sentences max and framed as something they could try. "
-            "Make it encouraging and helpful, not critical or overly formal."
+            "You provide practical, supportive suggestions to help a user improve their current decision-making. "
+            "Focus only on the current decision. Each suggestion should be 1–2 sentences max. "
+            "Present them as a short, clearly separated list (not in a single paragraph)."
         )
+
         user_content = f"""
-        A user is making the following decision. It includes a description of decision, user expectations, and any detected biases or noise.
+        A user is making the following decision. It includes a description of the decision, user expectations, and any detected biases or noise.
         Current Decision: {current_chat_summary}
-        Please return 2–3 helpful 'Try this:' suggestions for improving this specific decision.
+        Please return 2–3 helpful suggestions for improving this specific decision.
         """
 
         response = client.chat.completions.create(
@@ -26,13 +28,20 @@ def insight_endpoint(client):
             temperature=0.5
         )
 
-        raw_output = response.choices[0].message.content.strip()
-        suggestions = [line.strip().lstrip("-").strip() for line in raw_output.split("\n") if line.strip()]
+        output = response.choices[0].message.content.strip()
+        strip_output = output.splitlines()
+
+        suggestions = []
+        for i in strip_output:
+            clean_line = re.sub(r"^\s*(?:-|\d+\.)\s*", "", i)
+            if len(clean_line.strip()) > 10:
+                suggestions.append(clean_line.strip())
+        suggestions = suggestions[:3]
 
     except Exception as e:
         print("GPT error:", e)
-        suggestions = ["Unable to generate suggestions."]
+        suggestions = ["Unable to generate suggestions due to an error."]
 
     return jsonify({
-        "suggestions": suggestions[:3] if len(suggestions) >= 3 else suggestions
+        "suggestions": suggestions
     })

@@ -19,6 +19,9 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking, setRelatedLi
   const [isChatBusy, setIsChatBusy] = useState(false);
   const [input, setInput] = useState("");
   const [buttonDisable, setButtonDisable] = useState(false);
+  const [showPromptSelector, setShowPromptSelector] = useState(false);
+  const [promptOptions, setPromptOptions] = useState([]);
+  const [recencyInfo, setRecencyInfo] = useState(null);
   const hasInitialized = useRef(false);
 
   const createChat = async () => {
@@ -87,15 +90,7 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking, setRelatedLi
       let detectedBias = [];
       let detectedNoise = [];
 
-      //await saveChats(user, judgementId, [newMessage], [], []);
-
       const bertData = await fetchBERTResponse(messageContent);
-      /*
-      if (bertData.predictions) {
-        detectedBias = bertData.predictions.filter((bias) => bias !== "Neutral" && bias !== "OccasionNoise");
-        console.log("Detected Bias", detectedBias)
-      }
-        */
       if (bertData.predictions) {
         bertData.predictions.forEach((label) => {
           if (label === "Neutral") return;
@@ -161,6 +156,23 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking, setRelatedLi
 
       setIsThinking(true);
       setIsChatBusy(true);
+      
+      const newsAPI = await fetchNewsAPI(messageContent);
+
+      if (newsAPI?.recency_bias_detected) {
+        console.log("Possible Recency Bias detected:", newsAPI.most_similar_article.title);
+
+        const recencySource = `It seems you may have read [${newsAPI.most_similar_article.title}], which could be affecting your judgment.`;
+
+        detectBias("Recency Bias", recencySource);
+        detectedBias.push("Recency Bias");
+        setRecencyInfo(newsAPI.most_similar_article.title);
+      } else {
+        console.log("No Recency Bias detected");
+      }
+
+      await saveChats(user, judgementId, [{ ...newMessage }], detectedBias, detectedNoise);
+
       const gptResponse = { text: "", sender: "GPT" };
       setMessages((prev) => [...prev, gptResponse]);
 
@@ -177,30 +189,21 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking, setRelatedLi
           }
           return updatedMessages;
         });
+
       }, patternContext,
         user?.uid,
         judgementId,
         detectedBias,
-        detectedNoise);
+        detectedNoise,
+        recencyInfo,
+        messageCount,
+        setPromptOptions,
+        setShowPromptSelector);
       setIsThinking(false);
       setIsChatBusy(false);
 
       await saveChats(user, judgementId, [gptResponse], detectedBias, detectedNoise);
 
-      const newsAPI = await fetchNewsAPI(messageContent);
-
-      if (newsAPI?.recency_bias_detected) {
-        console.log("Possible Recency Bias detected:", newsAPI.most_similar_article.title);
-
-        const recencySource = `It seems you may have read [${newsAPI.most_similar_article.title}], which could be affecting your judgment.`;
-
-        detectBias("Recency Bias", recencySource);
-        detectedBias.push("Recency Bias");
-      } else {
-        console.log("No Recency Bias detected");
-      }
-
-      await saveChats(user, judgementId, [{ ...newMessage }], detectedBias, detectedNoise);
 
     } catch (error) {
       console.error("ERROR, Can't connect to BERT OR GPT", error.message || error);
@@ -232,9 +235,17 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking, setRelatedLi
     fetchPreviousChats();
   }, [judgementId]);
 
+  const handleChoice = async (selectedText) => {
+    const newMessage = { text: selectedText, sender: "user", createdAt: new Date() };
+    setMessages((prev) => [...prev, newMessage]);
+    setInput("");
+    setShowPromptSelector(false); 
+    await onSend(selectedText);
+  };
+  
   return (
     <div className="h-[425px]">
-      <MessageList messages={messages} />
+      <MessageList messages={messages} promptOptions={promptOptions} showPromptSelector={showPromptSelector} chosenPrompt={handleChoice} />
       <MessageSender input={input} setInput={setInput} onSend={onSend} buttonDisable={buttonDisable} />
     </div>
   );

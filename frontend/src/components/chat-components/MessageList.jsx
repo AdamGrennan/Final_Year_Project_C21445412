@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from "react";
+import { PromptSelector } from "./PromptSelector";
 
-const MessageList = ({ messages }) => {
+const MessageList = ({ messages, promptOptions, showPromptSelector, chosenPrompt }) => {
     const scrollRef = useRef(null);
 
     const scrollToBottom = () => {
@@ -26,6 +27,9 @@ const MessageList = ({ messages }) => {
         <div className="flex flex-col h-[100%] bg-GRAAY">
             <div className="flex-1 overflow-y-scroll h-[400px] p-4 scrollbar-thin scrollbar-thumb-SECONDARY scrollbar-track-GRAAY">
                 <div className="flex flex-col gap-2">
+                    {showPromptSelector && promptOptions.length > 0 && (
+                        <PromptSelector prompts={promptOptions} onSelect={chosenPrompt} />
+                    )}
                     {messages.map((message, index) => (
                         <div
                             key={index}
@@ -40,7 +44,7 @@ const MessageList = ({ messages }) => {
                                     : "flex-start",
                             }}
                         >
-                            <div dangerouslySetInnerHTML={{ __html: formatText(message.text) }}/>
+                            <div dangerouslySetInnerHTML={{ __html: formatText(message.text) }} />
                         </div>
                     ))}
                 </div>

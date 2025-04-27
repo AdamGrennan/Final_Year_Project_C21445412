@@ -7,8 +7,9 @@ import { MdModeEdit } from "react-icons/md";
 import EditModal from "@/components/profile-components/EditModal";
 import DeleteModal from "@/components/profile-components/DeleteModal";
 import { updatePassword } from "firebase/auth";
-import { updateDoc, doc} from "firebase/firestore";
+import { updateDoc, doc } from "firebase/firestore";
 import { useUser } from "@/context/UserContext";
+import { FaUser } from "react-icons/fa";
 
 
 export default function ProfilePage() {
@@ -30,7 +31,7 @@ export default function ProfilePage() {
       if (fieldToEdit === "name") {
         const userRef = doc(db, "users", user.uid);
         await updateDoc(userRef, { name: value });
-        updateUser({ name: value});
+        updateUser({ name: value });
 
       } else if (fieldToEdit === "password") {
         await updatePassword(auth.currentUser, value);
@@ -38,7 +39,7 @@ export default function ProfilePage() {
       }
       setShowEditModal(false);
     } catch (error) {
-    console.error("PROFILE", error);
+      console.error("PROFILE", error);
     }
   };
 
@@ -50,8 +51,10 @@ export default function ProfilePage() {
   return (
     <div className="flex justify-start p-12">
       <div className="w-2/3 mx-auto p-4 bg-white rounded-lg shadow-md p-6">
-        <Label className="font-urbanist text-PRIMARY text-2xl font-bold mb-2">Profile</Label>
-
+        <div className="flex items-center gap-2">
+          <FaUser className="text-PRIMARY" />
+          <Label className="font-urbanist text-PRIMARY text-2xl font-bold">Profile</Label>
+        </div>
         <div className="mb-4">
           <Label className="font-urbanist font-semibold">Email:</Label>
           <div className="flex items-center">
