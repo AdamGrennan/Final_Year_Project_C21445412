@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input";
 import { useJudgment } from "@/context/JudgementContext";
 
 const formSchema = z.object({
-  title: z.string().min(4, { message: "Title must be at least 4 characters." }).max(20),
+  title: z.string().min(4, { message: "Title must be at least 4 characters." }).max(40),
   theme: z.string().min(2, { message: "Please select a template." }),
   details: z.object({
     situation: z.string().min(4, { message: "Situation is required." }),
@@ -30,7 +30,6 @@ const formSchema = z.object({
 
 const JudgementForm = () => {
   const { judgmentInfo } = useJudgment();
-  const [date, setDate] = useState(new Date());
   const { user } = useUser();
   const router = useRouter();
   const form = useForm({
@@ -71,8 +70,6 @@ const JudgementForm = () => {
       <FormProvider {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <section>
-            <h3 className="text-xl font-semibold font-urbanist text-gray-700">Decision Details</h3>
-            <div className="w-[150px] border-b border-PRIMARY"></div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <FormField
                 control={form.control}

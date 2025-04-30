@@ -44,7 +44,7 @@ def bert():
 
 @app.route('/pattern_noise', methods=['POST'])
 def pattern_noise():
-    return pattern_noise_endpoint(sbert_model, db)
+    return pattern_noise_endpoint(sbert_model)
 
 @app.route('/level_noise', methods=['POST'])
 def level_noise():

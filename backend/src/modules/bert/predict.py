@@ -1,6 +1,6 @@
 import torch
 
-def predict_bias(model, tokenizer, statement, bias_labels, threshold=0.6):
+def predict_bias(model, tokenizer, statement, bias_labels, threshold=0.65):
     
     inputs = tokenizer(statement, return_tensors='pt', padding=True, truncation=True, max_length=128)
 

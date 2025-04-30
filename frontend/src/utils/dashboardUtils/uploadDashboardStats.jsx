@@ -28,13 +28,11 @@ export const uploadDashboardStats = async (userId) => {
     const biasThemes = dashboardData.biasThemes || {};
     const noiseThemes = dashboardData.noiseThemes || {};
 
-    let totalDecisions = dashboardData.totalDecisions || 0;
+    let totalDecisions = 0;
     let completedDecisions = dashboardData.completedDecisions || 0;
     const biasCounts = dashboardData.biasDecisionCounts || {};
     const noiseCounts = dashboardData.noiseDecisionCounts || {};
-    const processedDecisionIds = dashboardData.processedDecisionIds || [];
 
-    const newDecisionIds = [];
     let insights = "";
 
     const biasTimes = { Morning: 0, Afternoon: 0, Evening: 0, Night: 0 };
@@ -53,7 +51,6 @@ export const uploadDashboardStats = async (userId) => {
 
     querySnapshot.forEach((doc) => {
       const decision = doc.data();
-      const decisionId = doc.id;
 
       const time = getTime(decision.createdAt);
       if (time) {
@@ -64,9 +61,7 @@ export const uploadDashboardStats = async (userId) => {
         if (hasNoise) noiseTimes[time]++;
       }
 
-      if (!processedDecisionIds.includes(decisionId)) {
         totalDecisions++;
-        newDecisionIds.push(decisionId);
 
         if (decision.isCompleted) completedDecisions++;
 
@@ -102,10 +97,8 @@ export const uploadDashboardStats = async (userId) => {
           if (uniqueBiases.size > 0) biasThemes[theme] = (biasThemes[theme] || 0) + 1;
           if (uniqueNoises.size > 0) noiseThemes[theme] = (noiseThemes[theme] || 0) + 1;
         }
-      }
+      
     });
-
-    if (newDecisionIds.length === 0) return;
 
     const getMostFrequent = (obj) => {
       let maxKey = null;
@@ -149,13 +142,11 @@ export const uploadDashboardStats = async (userId) => {
     const recentDecisions = completedSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
     if (recentDecisions.length > 0) {
-      const dashboardData = await fetchDashboardInsights(recentDecisions);
-      if (dashboardData?.insights) {
-        insights = dashboardData.insights;
+      const insightsData  = await fetchDashboardInsights(recentDecisions);
+      if (insightsData ?.insights) {
+        insights = insightsData .insights;
       }
     }
-
-    const updatedDecisionIds = [...processedDecisionIds, ...newDecisionIds];
 
     await setDoc(
       dashboardRef,
@@ -173,7 +164,6 @@ export const uploadDashboardStats = async (userId) => {
         topThemeWithNoise,
         mostBiasedTime,
         noisiestTime,
-        processedDecisionIds: updatedDecisionIds,
         insights,
         updatedAt: serverTimestamp(),
       },

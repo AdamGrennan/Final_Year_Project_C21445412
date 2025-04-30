@@ -28,24 +28,30 @@ export const absentStreaks = (allDecisions, allBiases, allNoises) => {
     for (let i = allDecisions.length - 1; i >= 0; i--) {
       const items = allDecisions[i][type] || [];
       const names = items.map(item => item.bias || item.noise);
-  
+
       if (names.includes(label)) break;
       streak++;
     }
-  
+
     return streak;
   };
 
   allBiases.forEach(b => {
     const streak = getStreak(b, "detectedBias");
-    if (streak >= 3) {
+    const prevDetected = allDecisions.some(d =>
+      (d.detectedBias || []).some(x => x.bias === b)
+    );
+    if (prevDetected && streak >= 3) {
       streaks.push({ message: `${b} hasn't been detected in the last ${streak} decisions`, type: "absence-streak" });
     }
   });
 
   allNoises.forEach(n => {
     const streak = getStreak(n, "detectedNoise");
-    if (streak >= 3) {
+    const prevDetected = allDecisions.some(d =>
+      (d.detectedNoise || []).some(x => x.noise === n)
+    );
+    if (prevDetected && streak >= 3) {
       streaks.push({ message: `${n} hasn't been detected in the last ${streak} decisions`, type: "absence-streak" });
     }
   });
@@ -66,9 +72,15 @@ export const detectionStreaks = (allDecisions) => {
       streaks[item] = (streaks[item] || 0) + 1;
     });
 
+    const currentItems = new Set(allItems);
     Object.keys(streaks).forEach(item => {
-      if (!allItems.includes(item)) delete streaks[item];
+      if (!currentItems.has(item)) streaks[item] = 0;
     });
+
+    allItems.forEach(item => {
+      streaks[item] = (streaks[item] || 0) + 1;
+    });
+
   }
 
   Object.entries(streaks).forEach(([item, count]) => {
@@ -86,7 +98,8 @@ export const topFrequentTrends = (allDecisions, type) => {
   for (const decision of allDecisions) {
     const items = decision[type] || [];
     items.forEach(({ bias, noise }) => {
-      const label = bias || noise;
+      if (bias) counts[bias] = (counts[bias] || 0) + 1;
+      if (noise) counts[noise] = (counts[noise] || 0) + 1;
       counts[label] = (counts[label] || 0) + 1;
     });
   }

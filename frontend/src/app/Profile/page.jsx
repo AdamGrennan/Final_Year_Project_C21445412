@@ -10,7 +10,7 @@ import { updatePassword } from "firebase/auth";
 import { updateDoc, doc } from "firebase/firestore";
 import { useUser } from "@/context/UserContext";
 import { FaUser } from "react-icons/fa";
-
+import { db, auth } from "@/config/firebase";
 
 export default function ProfilePage() {
   const { user } = useUser();
@@ -34,6 +34,13 @@ export default function ProfilePage() {
         updateUser({ name: value });
 
       } else if (fieldToEdit === "password") {
+        const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@.#$!%*?&])[A-Za-z\d@.#$!%*?&]{8,15}$/;
+
+        if (!regex.test(value)) {
+          alert("Password must be 8-15 characters long, include uppercase, lowercase, a number, and a special character.");
+          return;
+        }
+        
         await updatePassword(auth.currentUser, value);
         alert("Password updated successfully.");
       }

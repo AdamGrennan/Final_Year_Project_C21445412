@@ -88,7 +88,7 @@ def news_api_endpoint(sbert_model):
 
         print(f"Most Similar Article: {article_title} (Similarity: {article_similarity})")
 
-        if article_similarity >= 0.5:
+        if article_similarity >= 0.45:
             return jsonify({
                 "recency_bias_detected": True,
                 "most_similar_article": {

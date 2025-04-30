@@ -1,5 +1,3 @@
-from modules.gpt.prompts import get_opening_message
-from modules.gpt.prompts import get_opening_message, get_system_prompt
 
 class MessageBuilder:
     def __init__(self, name, title, situation, chat_instruction):
@@ -10,36 +8,51 @@ class MessageBuilder:
         self.messages = []
 
     def build_open_message(self):
-        self.messages.append({
-            "role": "system",
-            "content": get_opening_message(self.name, self.title)
-        })
-
-    def build_noise_bias_message(self, detectedBias, detectedNoise):
-        if detectedBias or detectedNoise:
-            bias_noise = ""
-            if detectedBias:
-                bias_noise += f" biases {', '.join(detectedBias)}"
-            if detectedNoise:
-                if bias_noise:
-                    bias_noise += " and"
-                bias_noise += f" noise factors {', '.join(detectedNoise)}"
-
             self.messages.append({
-                "role": "system",
-                "content": (
-                    f"Reminder: User {self.name}'s latest decision may involve{bias_noise}. "
-                    "Encourage reflection without assuming error."
-                )
-            })
-
-    def build_system_message(self):
-        self.messages.append({
             "role": "system",
-            "content": get_system_prompt(
-                self.name, self.title, self.situation, self.chat_instruction
+            "content": (
+                f"You are SONUS, an assistant helping users reflect on decision-making biases and noise. "
+                f"User {self.name} is thinking about '{self.title}' with situation '{self.situation}'. Be friendly and conversational. "
+                f"Start by greeting the user and asking what first thoughts come to mind about their decision."
             )
-        })
+                })
+
+    def build_system_message(self, detectedBias, detectedNoise):
+        print("BUILDER", detectedBias)
+        print("BUILDER", detectedNoise)
+        base_prompt = (
+             "You are SONUS, a conversational assistant helping users reflect on decisions. "
+            "Focus on being helpful, natural, and open-ended. "
+        )
+        if detectedBias and detectedNoise:
+            context_info = (
+            f"The user might be influenced by {', '.join(detectedBias)} and {', '.join(detectedNoise)}. "
+            "Gently help them reflect on this without being heavy-handed."
+        )
+        elif detectedBias:
+            context_info = (
+            f"The user might be influenced by {', '.join(detectedBias)}. "
+            "Help them reflect lightly if relevant."
+        )
+        elif detectedNoise:
+            context_info = (
+            f"The user might experience {', '.join(detectedNoise)} during this decision. "
+            "Encourage thoughtful reflection naturally."
+        )
+        else:
+            context_info = "Assist the user in thinking through their decision naturally."
+            
+        if self.chat_instruction:
+            extra_hint = f"Additional hint: {self.chat_instruction}"
+        else:
+            extra_hint = ""
+
+        final_prompt = base_prompt + context_info + " " + extra_hint
+
+        self.messages.append({
+        "role": "system",
+        "content": final_prompt.strip()
+            })
 
     def build_pattern_message(self, pattern_context):
         if pattern_context:
@@ -80,29 +93,15 @@ class MessageBuilder:
                 statement = f"User states: {statement}"
 
             self.messages.append({"role": "user", "content": statement})
-            
-    def build_prompt_suggestions(self):
-        self.messages.append({
-            "role": "system",
-            "content": (
-                "**IMPORTANT**: After giving your main advice, you MUST suggest exactly 3 next steps the user could take."
-                "\n\nList them clearly like this:"
-                "\n1. [First suggestion]"
-                "\n2. [Second suggestion]"
-                "\n3. [Third suggestion]"
-                "\n\nMake sure to number them exactly. Do not skip this step."
-            )
-        })
-
-        
+     
     def build_recency_message(self, recencyInfo):
         if recencyInfo:
             self.messages.append({
             "role": "system",
             "content": (
-                f"Note: The user may have recently read an article titled '{recencyInfo}'. "
-                "Consider mentioning gently that recent news could affect decision-making. "
-                "Do not accuse just reflect and encourage thoughtful consideration."
+                f"The user may have recently seen an article titled '{recencyInfo}'. "
+                "If it's relevant to their input, you can mention that recent information can sometimes influence decision-making more than older facts. "
+                "Avoid assuming the user actually read or referenced this article."
             )
         })
 

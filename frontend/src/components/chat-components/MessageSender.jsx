@@ -32,18 +32,16 @@ const MessageSender = ({ input, setInput, onSend, buttonDisable }) => {
     }
   };
 
-
   return (
     <>
     <div className="flex p-3 bg-GRAAY">
       <Input
-        type="text"
         value={input}
         disabled={buttonDisable}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyPress}
         placeholder="Enter Your Message..."
-        className="font-urbanist flex-1 p-2.5 rounded-lg shadow-sm mr-2.5 bg-white border-none focus:border-SECONDARY focus:ring-SECONDARY focus:outline-none"
+        className="font-urbanist flex-1 p-2.5 rounded-lg shadow-sm mr-2.5 bg-white border-none focus:border-SECONDARY focus:ring-SECONDARY focus:outline-none resize-none h-10"
       />
       <Button className="bg-PRIMARY text-white w-8 h-8 rounded-full hover:bg-opacity-80 mr-2"
         onClick={() => onSend(input)}

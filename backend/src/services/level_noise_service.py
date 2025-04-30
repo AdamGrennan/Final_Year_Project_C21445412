@@ -15,13 +15,14 @@ class LevelNoiseService:
         })
         return jsonify({"Level Noise Service": "OK"}), 200
 
-    def fetch_scores(self, user_id, limit=20):
+    def fetch_scores(self, user_id, limit=6):
         docs = self.db.collection('level_noise')\
-            .where("userId", "==", user_id)\
-            .order_by("timestamp", direction=firestore.Query.DESCENDING)\
-            .limit(limit).stream()
+        .where("userId", "==", user_id)\
+        .order_by("timestamp", direction=firestore.Query.DESCENDING)\
+        .limit(limit).stream()
 
-        return [doc.to_dict()["score"] for doc in docs]
+        return [(doc.to_dict()["judgmentId"], doc.to_dict()["score"]) for doc in docs]
+
     
     def fetch_score_by_decision(self, user_id, judgment_id):
         docs = self.db.collection('level_noise')\

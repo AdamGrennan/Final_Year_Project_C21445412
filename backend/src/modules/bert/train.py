@@ -4,13 +4,13 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 import torch
 import numpy as np
-from sklearn.metrics import f1_score, precision_score, recall_score
+from sklearn.metrics import f1_score, precision_score, recall_score, classification_report
 from sklearn.model_selection import train_test_split
-from src.modules.bert.dataset import BiasDataset
-from src.modules.bert.data_load import load_data
+from modules.bert.dataset import BiasDataset
+from modules.bert.data_load import load_data
 
 # Train Model
-def train_model(csv_file, model_name='bert-base-uncased', batch_size=32, epochs=4, early_stop_patience=2):
+def train_model(csv_file, model_name='bert-base-uncased', batch_size=32, epochs=10, early_stop_patience=2):
     # Load tokenizer
     tokenizer = BertTokenizer.from_pretrained(model_name)
 
@@ -33,8 +33,8 @@ def train_model(csv_file, model_name='bert-base-uncased', batch_size=32, epochs=
     model = BertForSequenceClassification.from_pretrained(
         model_name,
         num_labels=6,
-        attention_probs_dropout_prob=0.2, 
-        hidden_dropout_prob=0.2
+        attention_probs_dropout_prob=0.1, 
+        hidden_dropout_prob=0.1
     )
 
     # Optimizer & Loss Function
@@ -82,7 +82,7 @@ def train_model(csv_file, model_name='bert-base-uncased', batch_size=32, epochs=
                 val_loss += criterion(outputs.logits, labels).item()
 
                 sigmoid_score = torch.sigmoid(outputs.logits)
-                predicted_classes = (sigmoid_score >= 0.7).int().cpu().numpy()
+                predicted_classes = (sigmoid_score >= 0.65).int().cpu().numpy()
 
                 all_predictions.append(predicted_classes)
                 all_labels.append(labels.cpu().numpy())
@@ -99,14 +99,17 @@ def train_model(csv_file, model_name='bert-base-uncased', batch_size=32, epochs=
         recall = recall_score(all_labels, all_predictions, average='macro')
 
         print(f'F1 Score: {f1:.4f}, Precision: {precision:.4f}, Recall: {recall:.4f}')
+        
+        print("Detailed per-label metrics:")
+        print(classification_report(all_labels, all_predictions, target_names=bias_labels))
 
         # Save only the best model after each epoch
         if avg_val_loss < best_val_loss:
             best_val_loss = avg_val_loss
             patience_counter = 0  
             print("Saving best model...")
-            model.save_pretrained('./models/sonus_v2_model')
-            tokenizer.save_pretrained('./models/sonus_v2_tokenizer')
+            model.save_pretrained('./models/sonus_v3_model')
+            tokenizer.save_pretrained('./models/sonus_v3_tokenizer')
         else:
             patience_counter += 1
             print(f"No improvement. Patience: {patience_counter}/{early_stop_patience}")

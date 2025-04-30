@@ -1,7 +1,7 @@
-"use client"
-import { deleteUser } from "firebase/auth";
+"use client";
+import { deleteUser, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 import { auth, db } from "@/config/firebase";
-import { collection, query, where, getDocs, deleteDoc, updateDoc, doc } from "firebase/firestore";
+import { collection, query, where, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
 
@@ -15,45 +15,71 @@ const DeleteModal = ({ userId, onClose }) => {
       const chatQuery = query(collection(db, "chat"), where("userId", "==", userId));
       const levelQuery = query(collection(db, "level_noise"), where("userId", "==", userId));
       const trendQuery = query(collection(db, "trends"), where("userId", "==", userId));
+
       const decisionSnapshots = await getDocs(decisionsQuery);
-      const chatSnapshots = await getDocs(chatQuery);
       const dashboardSnapshots = await getDocs(dashboardQuery);
+      const chatSnapshots = await getDocs(chatQuery);
       const levelSnapshots = await getDocs(levelQuery);
       const trendSnapshots = await getDocs(trendQuery);
-  
+
       const deleteDecisionPromises = decisionSnapshots.docs.map((docSnap) =>
         deleteDoc(doc(db, "judgement", docSnap.id))
       );
-  
       const deleteDashboardPromises = dashboardSnapshots.docs.map((docSnap) =>
         deleteDoc(doc(db, "dashboard", docSnap.id))
       );
-
       const deleteChatPromises = chatSnapshots.docs.map((docSnap) =>
         deleteDoc(doc(db, "chat", docSnap.id))
       );
-
-      const levelPromises = levelSnapshots.docs.map((docSnap) =>
+      const deleteLevelPromises = levelSnapshots.docs.map((docSnap) =>
         deleteDoc(doc(db, "level_noise", docSnap.id))
       );
-
-      const trendPromises = trendSnapshots.docs.map((docSnap) =>
+      const deleteTrendPromises = trendSnapshots.docs.map((docSnap) =>
         deleteDoc(doc(db, "trends", docSnap.id))
       );
 
       const deleteUserDoc = deleteDoc(doc(db, "users", userId));
-  
-      await Promise.all([...trendPromises ,...levelPromises ,...deleteChatPromises, ...deleteDecisionPromises, 
-        ...deleteDashboardPromises, deleteUserDoc]);
-  
+
+      await Promise.all([
+        ...deleteDecisionPromises,
+        ...deleteDashboardPromises,
+        ...deleteChatPromises,
+        ...deleteLevelPromises,
+        ...deleteTrendPromises,
+        deleteUserDoc,
+      ]);
+
       await deleteUser(auth.currentUser);
-  
+
       router.push("/");
     } catch (error) {
-      console.error("Error deleting account:", error);
+      if (error.code === "auth/requires-recent-login") {
+        try {
+          const password = prompt("Please enter your password to confirm account deletion:");
+
+          if (!password) {
+            alert("Password is required to delete your account.");
+            return;
+          }
+
+          const credential = EmailAuthProvider.credential(
+            auth.currentUser.email,
+            password
+          );
+
+          await reauthenticateWithCredential(auth.currentUser, credential);
+          await deleteUser(auth.currentUser);
+          router.push("/");
+        } catch (reauthError) {
+          console.error("Error during reauthentication:", reauthError);
+          alert("Failed to reauthenticate. Please try again.");
+        }
+      } else {
+        console.error("Error deleting account:", error);
+      }
     }
   };
-  
+
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
       <div className="p-8 border w-96 shadow-lg rounded-md bg-white">

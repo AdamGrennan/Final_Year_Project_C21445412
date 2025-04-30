@@ -7,7 +7,7 @@ import { fetchChats, saveChats, fetchDecisionDetails } from "@/services/Firebase
 import MessageList from "./MessageList";
 import MessageSender from "./MessageSender";
 import { useJudgment } from "@/context/JudgementContext";
-import { openingMessage, fetchBERTResponse, fetchGPTResponse, fetchSerp, fetchPatternNoise, fetchSource, fetchNewsAPI } from "@/services/ApiService";
+import { openingMessage, fetchBERTResponse, fetchChatResponse, fetchSerp, fetchPatternNoise, fetchSource, fetchNewsAPI } from "@/services/ApiService";
 
 const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking, setRelatedLinks }) => {
   const [pastDecisions, setPastDecisions] = useState([]);
@@ -19,8 +19,6 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking, setRelatedLi
   const [isChatBusy, setIsChatBusy] = useState(false);
   const [input, setInput] = useState("");
   const [buttonDisable, setButtonDisable] = useState(false);
-  const [showPromptSelector, setShowPromptSelector] = useState(false);
-  const [promptOptions, setPromptOptions] = useState([]);
   const [recencyInfo, setRecencyInfo] = useState(null);
   const hasInitialized = useRef(false);
 
@@ -70,7 +68,7 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking, setRelatedLi
     const newMessage = { text: messageContent, sender: "user", createdAt: new Date() };
     setMessages((prev) => [...prev, newMessage]);
     setInput("");
-/*
+
     if (messageContent.length > 15) {
       const query = `${judgmentData?.title || ""} ${messageContent}`;
       const serpLinks = await fetchSerp(query);
@@ -81,7 +79,6 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking, setRelatedLi
         return unique.slice(0, 5);
       });
     }
-*/
     if (!messages.some(msg => msg.sender === "user")) {
       setFinishButtonDisable(false);
     }
@@ -162,7 +159,7 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking, setRelatedLi
       if (newsAPI?.recency_bias_detected) {
         console.log("Possible Recency Bias detected:", newsAPI.most_similar_article.title);
 
-        const recencySource = `It seems you may have read [${newsAPI.most_similar_article.title}], which could be affecting your judgment.`;
+        const recencySource = `It seems you may have read ${newsAPI.most_similar_article.title}, which could be affecting your judgment.`;
 
         detectBias("Recency Bias", recencySource);
         detectedBias.push("Recency Bias");
@@ -177,7 +174,7 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking, setRelatedLi
       setMessages((prev) => [...prev, gptResponse]);
 
       console.log("Sending to GPT:", messageContent);
-      await fetchGPTResponse(messageContent, messages, (newText) => {
+      await fetchChatResponse(messageContent, messages, (newText) => {
         setMessages((prev) => {
           const updatedMessages = [...prev];
           const lastMessageIndex = updatedMessages.length - 1;
@@ -195,10 +192,7 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking, setRelatedLi
         judgementId,
         detectedBias,
         detectedNoise,
-        recencyInfo,
-        messageCount,
-        setPromptOptions,
-        setShowPromptSelector);
+        recencyInfo,);
       setIsThinking(false);
       setIsChatBusy(false);
 
@@ -234,18 +228,10 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking, setRelatedLi
 
     fetchPreviousChats();
   }, [judgementId]);
-
-  const handleChoice = async (selectedText) => {
-    const newMessage = { text: selectedText, sender: "user", createdAt: new Date() };
-    setMessages((prev) => [...prev, newMessage]);
-    setInput("");
-    setShowPromptSelector(false); 
-    await onSend(selectedText);
-  };
   
   return (
     <div className="h-[425px]">
-      <MessageList messages={messages} promptOptions={promptOptions} showPromptSelector={showPromptSelector} chosenPrompt={handleChoice} />
+      <MessageList messages={messages} />
       <MessageSender input={input} setInput={setInput} onSend={onSend} buttonDisable={buttonDisable} />
     </div>
   );

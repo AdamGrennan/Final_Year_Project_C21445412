@@ -1,8 +1,7 @@
 
-export const fetchGPTResponse = async (input,messages,setDisplayedText,
+export const fetchChatResponse = async (input,messages,setDisplayedText,
   patternContext,userId,judgementId,
-  detectedBias,detectedNoise, recencyInfo, messageCount, setPromptOptions,
-  setShowPromptSelector) => {
+  detectedBias,detectedNoise, recencyTitle) => {
   try{
   const response = await fetch('http://127.0.0.1:5000/chat', {
     method: 'POST',
@@ -14,8 +13,7 @@ export const fetchGPTResponse = async (input,messages,setDisplayedText,
       patternContext,
       detectedBias,
       detectedNoise,
-      recencyInfo,
-      messageCount,
+      recencyTitle,
       context: messages.map((msg) => ({
         sender: msg.sender || "user",
         text: msg.text || "",
@@ -35,20 +33,7 @@ export const fetchGPTResponse = async (input,messages,setDisplayedText,
     const chunk = decoder.decode(value, { stream: true });
     accumulatedText += chunk; 
     setDisplayedText(accumulatedText); 
-
-    if(done){
-      const parser = (prompt) => {
-        const lines = prompt.split("\n").filter(line => /^\d\.\s/.test(line.trim()));
-        return lines.map(line => line.slice(2).trim());
-      };
-    
-      const prompts = parser(accumulatedText);
-    
-      if (prompts.length >= 1) {
-        setPromptOptions(prompts);
-        setShowPromptSelector(true);
-      }
-    }
+    if (done) break; 
   }
 
 }catch (error) {
@@ -175,24 +160,23 @@ export const openingMessage = async (judgmentData, name) => {
     });
 
     if (!response.ok) {
-      console.error(`Failed to send opening message: ${response.status} ${response.statusText}`);
       const errorText = await response.text();
-      console.error("Sonus Response:", errorText);
+      console.error(`Failed to send opening message: ${response.status} ${response.statusText}`);
+      console.error("Sonus Response:", errorText);  // 🛠 Log full backend error
       return { error: `Sonus responded with status ${response.status}: ${errorText}` };
     }
+    
 
-    const data = await response.json();
-    if (!data.bias_feedback) {
-      console.warn("Warning: No 'bias feedback' in response!", data);
-    }
+    const textData = await response.text(); 
 
-    return data;
+    return { bias_feedback: textData };  
 
   } catch (error) {
-    console.error("Error Opening Message.");
+    console.error("Error Opening Message.", error);
     return { error: "Error Opening Message." };
   }
 };
+
 
 export const fetchSource = async (messageContent, detectedBias, detectedNoise) => {
   try {
@@ -315,7 +299,7 @@ export const fetchDashboardInsights = async (decisions, trends) => {
     return { error: "Error fetching dashboard insights." };
   }
 };
-/*
+
 export const fetchSerp = async (query) => {
   try{
   const response = await fetch("http://127.0.0.1:5000/serp", {
@@ -328,7 +312,7 @@ export const fetchSerp = async (query) => {
   return data.links || [];
  }catch (error) {
      console.error("Error fetching SERP.");
-    return { error: "Error fetching SERP." };
+     return [];
   }
 };
-*/
+

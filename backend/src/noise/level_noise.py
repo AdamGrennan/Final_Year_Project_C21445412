@@ -32,10 +32,10 @@ def level_noise_endpoint(pipe):
             current_score = service.fetch_score_by_decision(user_id, judgment_id)
             print(f"Current Score for Judgment {judgment_id}: {current_score}")
 
-            all_scores = service.fetch_scores(user_id)
-            past_scores = [s for s in all_scores if s != current_score][:2]
+            all_decisions = service.fetch_scores(user_id)
+            past_scores = [score for (j_id, score) in all_decisions if j_id != judgment_id][:5]
 
-            if len(past_scores) < 2:
+            if len(past_scores) < 3:
                 print("Not enough past scores for comparison.")
                 return jsonify({
                     "type": "none",
@@ -45,13 +45,13 @@ def level_noise_endpoint(pipe):
 
             avg = statistics.mean(past_scores)
             std_dev = statistics.stdev(past_scores)
-            threshold = std_dev if std_dev > 0 else 0.5
+            threshold = std_dev if std_dev > 0 else 0.25
             print(f"AVG: {avg} | STD_DEV: {std_dev} | THRESHOLD: {threshold}")
 
-            if current_score > avg + threshold:
+            if current_score >= avg + threshold:
                 type_ = "harsh"
                 message = "Compared to your usual decisions, this was notably more harsh."
-            elif current_score < avg - threshold:
+            elif current_score <= avg - threshold:
                 type_ = "lenient"
                 message = "Compared to your usual decisions, this was notably more lenient."
             else:

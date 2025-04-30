@@ -1,35 +1,9 @@
 import React from "react";
 
-const fallbackLinks = [
-  {
-    title: "How to Improve Your Decision-Making Skills",
-    url: "https://www.psychologytoday.com/us/articles/decision-making-tips",
-    source: "psychologytoday.com"
-  },
-  {
-    title: "Understanding Cognitive Biases",
-    url: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9274645/",
-    source: "ncbi.nlm.nih.gov"
-  },
-  {
-    title: "Level Noise vs. Bias: What's the Difference?",
-    url: "https://behavioralscientist.org/noise-book-summary/",
-    source: "behavioralscientist.org"
-  },
-  {
-    title: "How Confirmation Bias Influences Decisions",
-    url: "https://thedecisionlab.com/biases/confirmation-bias",
-    source: "thedecisionlab.com"
-  },
-  {
-    title: "Daniel Kahneman on Noise and Human Judgment",
-    url: "https://www.nobelprize.org/prizes/economic-sciences/2002/kahneman/lecture/",
-    source: "nobelprize.org"
-  }
-];
+
 
 export const WebPanel = ({ links = [] }) => {
-  const displayLinks = links.length > 0 ? links.slice(0, 5) : fallbackLinks;
+  const displayLinks = links.length > 0 ? links.slice(0, 5) : links;
 
   return (
     <div className="text-center font-urbanist h-64 border-l p-4 shadow-sm overflow-y-auto bg-yellow-50 border border-yellow-300 rounded text-yellow-900 text-sm">

@@ -22,18 +22,17 @@ export const FrequentTable = ({ userId }) => {
       try {
         const userDoc = await getDoc(doc(db, "dashboard", userId));
         if (userDoc.exists()) {
-          const { biasDecisionCounts, noiseDecisionCounts, totalDecisions } = userDoc.data();
+          const { biasDecisionCounts, noiseDecisionCounts } = userDoc.data();
 
-          if (totalDecisions > 0) {
-            const allCounts = {
-              ...biasDecisionCounts,
-              ...noiseDecisionCounts,
-            };
+          const allCounts = { ...biasDecisionCounts, ...noiseDecisionCounts };
 
+          const totalOccurrences = Object.values(allCounts).reduce((acc, count) => acc + count, 0);
+
+          if (totalOccurrences > 0) {
             const sortedData = Object.entries(allCounts)
               .map(([label, count]) => ({
                 label,
-                percentage: Math.round((count / totalDecisions) * 100),
+                percentage: Math.round((count / totalOccurrences) * 100),
               }))
               .sort((a, b) => b.percentage - a.percentage)
               .slice(0, 3);
@@ -48,6 +47,7 @@ export const FrequentTable = ({ userId }) => {
 
     fetchData();
   }, [userId]);
+
 
   return (
     <div>

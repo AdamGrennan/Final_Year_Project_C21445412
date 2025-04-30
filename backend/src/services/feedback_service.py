@@ -14,7 +14,7 @@ class FeedbackService:
             .limit(1)
             .stream()
         )
-        feedback_entries = [doc.to_dict() for doc in query]
+        feedback_entries = [{"id": doc.id, **doc.to_dict()} for doc in query]
         print(f"FEEDBACK SERVICE: Fetched feedback for user {user_id}: {feedback_entries}")
         return feedback_entries
 
@@ -62,10 +62,13 @@ class FeedbackService:
             parts.append("Their perspective changed — reinforce helpful reflection.")
 
         if previous_chats:
-             for chat in reversed(previous_chats):
-                if chat.get("sender") == "GPT" and chat.get("text"):
-                 text = chat["text"].strip().replace("\n", " ")
-                 parts.append(f'Last time, you said: "{text}". Consider improving clarity or tone based on feedback.')
-                 break
+            conversation = []
+            for chat in previous_chats:
+                sender = chat.get("sender")
+                text = chat.get("text", "").strip()
+                if text:
+                    conversation.append(f"{sender}: {text}")
 
+        conversation_text = " ".join(conversation)
+        parts.append(f"Here's the conversation so far: {conversation_text}. Adjust tone and style based on this and feedback.")
         return " ".join(parts)

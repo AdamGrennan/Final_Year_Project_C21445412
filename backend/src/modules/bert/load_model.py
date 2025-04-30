@@ -1,12 +1,12 @@
 from transformers import BertForSequenceClassification, BertTokenizer
-from src.modules.bert.data_load import load_data
+from modules.bert.data_load import load_data
 import pandas as pd
 import os
 
 def load_bias_model():
     # Load model and tokenizer
-    model = BertForSequenceClassification.from_pretrained("../models/sonus_v2_model")
-    tokenizer = BertTokenizer.from_pretrained("../models/sonus_v2_tokenizer")
+    model = BertForSequenceClassification.from_pretrained("../models/sonus_v3_model")
+    tokenizer = BertTokenizer.from_pretrained("../models/sonus_v3_tokenizer")
 
 
     # Load dataset to retrieve bias labels
