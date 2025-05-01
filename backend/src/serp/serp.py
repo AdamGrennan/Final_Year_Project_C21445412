@@ -10,12 +10,11 @@ SERP_API_KEY = os.getenv("SERPAPI_KEY")
 
 def serp_endpoint():
     data = request.json
-    user_query = data.get("query", "")
+    query = data.get("query", "")
 
     if not query or not SERP_API_KEY:
         return jsonify({"error": "Missing API key"}), 400
-    
-    query = f"{user_query} decision making guide OR tips OR advice"
+
 
     response = requests.get("https://serpapi.com/search", params={
         "engine": "google",

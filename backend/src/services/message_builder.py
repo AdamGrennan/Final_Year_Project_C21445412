@@ -8,39 +8,47 @@ class MessageBuilder:
         self.messages = []
 
     def build_open_message(self):
-            self.messages.append({
-            "role": "system",
-            "content": (
-                f"You are SONUS, an assistant helping users reflect on decision-making biases and noise. "
-                f"User {self.name} is thinking about '{self.title}' with situation '{self.situation}'. Be friendly and conversational. "
-                f"Start by greeting the user and asking what first thoughts come to mind about their decision."
-            )
-                })
+        self.messages.append({
+        "role": "system",
+        "content": (
+            f"You are SONUS, an assistant helping users reflect on decisions. "
+            f"User {self.name} is considering a decision titled '{self.title} with situation '{self.situation}'. "
+            f"Start the conversation in a warm, conversational tone. "
+            f"Do not use bullet points. Instead, ask the user casually what their initial thoughts or feelings are. "
+            f"Keep it light — you're here to guide reflection, not evaluate."
+        )
+    })
+
 
     def build_system_message(self, detectedBias, detectedNoise):
-        print("BUILDER", detectedBias)
-        print("BUILDER", detectedNoise)
         base_prompt = (
              "You are SONUS, a conversational assistant helping users reflect on decisions. "
-            "Focus on being helpful, natural, and open-ended. "
+             "Focus on being helpful, natural, and open-ended. "
+             "Feel free to use light, appropriate emojis to reinforce tone — especially at the end of a message."
         )
         if detectedBias and detectedNoise:
             context_info = (
             f"The user might be influenced by {', '.join(detectedBias)} and {', '.join(detectedNoise)}. "
-            "Gently help them reflect on this without being heavy-handed."
-        )
+                "Gently help them reflect on this without being heavy-handed. "
+                "Present your key points using bullet points that start with '- ' and use line breaks (\\n) between each point.")
         elif detectedBias:
             context_info = (
             f"The user might be influenced by {', '.join(detectedBias)}. "
-            "Help them reflect lightly if relevant."
-        )
+                "Gently help them reflect on this without being heavy-handed. "
+                "Present your key points using bullet points that start with '- ' and use line breaks (\\n) between each point.")
         elif detectedNoise:
             context_info = (
-            f"The user might experience {', '.join(detectedNoise)} during this decision. "
-            "Encourage thoughtful reflection naturally."
-        )
+            f"The user might be influenced by {', '.join(detectedNoise)}. "
+                "Gently help them reflect on this without being heavy-handed. "
+                "Present your key points using bullet points that start with '- ' and use line breaks (\\n) between each point.")
         else:
-            context_info = "Assist the user in thinking through their decision naturally."
+            context_info = (
+                "Assist the user in thinking through their decision naturally. "
+                "Start with a short one-line summary. "
+                "Then, present your key points using bullet points that start with '- ' and use line breaks (\\n) between each point. "
+                "Each bullet should be on a new line. "
+                "Avoid long paragraphs. "
+                "End with a helpful or reflective sentence if appropriate.")
             
         if self.chat_instruction:
             extra_hint = f"Additional hint: {self.chat_instruction}"
@@ -96,14 +104,16 @@ class MessageBuilder:
      
     def build_recency_message(self, recencyInfo):
         if recencyInfo:
+            short_title = recencyInfo.split(":")[0] if ":" in recencyInfo else recencyInfo.split(" ", 10)[0] + "..."
             self.messages.append({
             "role": "system",
             "content": (
-                f"The user may have recently seen an article titled '{recencyInfo}'. "
+                f"The user may have recently seen an article titled '{short_title}'. "
                 "If it's relevant to their input, you can mention that recent information can sometimes influence decision-making more than older facts. "
                 "Avoid assuming the user actually read or referenced this article."
             )
         })
+
 
     def get_messages(self):
         return self.messages

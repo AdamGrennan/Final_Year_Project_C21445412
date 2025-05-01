@@ -26,7 +26,6 @@ export const saveChats = async (user, judgementId, newMessages, detectedBias = [
   }
 };
 
-
 export const fetchChats = async (user, judgementId) => {
   if (!user?.uid || !judgementId) {
     console.error("Invalid user or judgementId.");

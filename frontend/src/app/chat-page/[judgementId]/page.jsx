@@ -51,7 +51,7 @@ export default function Page() {
 
     const messages = await fetchChats(user, judgementId) || [];
     const userScores = [];
-    
+
     for (const msg of messages) {
       if (msg.sender === "user") {
         const result = await fetchLevelNoise(msg.text, user.uid, judgementId, false);
@@ -61,27 +61,27 @@ export default function Page() {
         userScores.push(score);
       }
     }
-    
+
     let currentAvg = null;
-    
+
     if (userScores.length > 0) {
       currentAvg = userScores.reduce((sum, s) => sum + s, 0) / userScores.length;
-    
+
       await levelNoiseScores({
         action: "save",
         userId: user.uid,
         judgmentId: judgementId,
         score: currentAvg,
       });
-    
+
       const result = await fetchLevelNoise("fetch_level_noise", user.uid, judgementId, false);
-    
+
       if (result.type === "harsh" || result.type === "lenient") {
         detectNoise("Level Noise", result.message);
         detectedNoise.push("Level Noise");
       }
     }
-  
+
     const fbBias = Array.isArray(detectedBias) ? detectedBias.map(bias => ({
       bias,
       sources: Array.isArray(biasSources?.[bias]) ? biasSources[bias] : []
@@ -102,17 +102,35 @@ export default function Page() {
         updatedAt: serverTimestamp(),
       });
 
-      const response = await fetchAdvice(judgmentData.title, messages, detectedBias, detectedNoise);
+      const chatSummary = await fetchChatSummary(
+        judgmentData.title,
+        messages,
+        detectedBias,
+        detectedNoise,
+        biasSources,
+        noiseSources
+      );
 
-      const chatSummary = await fetchChatSummary(judgmentData.title, messages, detectedBias, detectedNoise, biasSources, noiseSources);
-
-      if (!response || !response.advice) {
-        console.error("Error: fetchAdvice returned an invalid response:", response);
-      } else if (!chatSummary) {
-        console.error("Error: fetchChatSummary returned an invalid response:", chatSummary);
+      if (chatSummary?.chat_summary) {
+        batch.update(judgeRef, { chatSummary: chatSummary.chat_summary });
       } else {
-        setAdvice(response.advice);
-        batch.update(judgeRef, { advice: response.advice, chatSummary: chatSummary.chat_summary });
+        console.error("Error: fetchChatSummary returned an invalid response:", chatSummary);
+      }
+
+      if (detectedBias.length > 0 || detectedNoise.length > 0) {
+        const response = await fetchAdvice(
+          judgmentData.title,
+          messages,
+          detectedBias,
+          detectedNoise
+        );
+
+        if (!response || !response.advice) {
+          console.error("Error: fetchAdvice returned an invalid response:", response);
+        } else {
+          setAdvice(response.advice);
+          batch.update(judgeRef, { advice: response.advice });
+        }
       }
 
       await batch.commit();
@@ -122,6 +140,7 @@ export default function Page() {
     } catch (error) {
       console.error("Firebase Batch Update Error:", error);
     }
+
   };
 
   return (

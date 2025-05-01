@@ -30,11 +30,11 @@ export const fetchChatResponse = async (input,messages,setDisplayedText,
   let accumulatedText = ""; 
   while (true) {
     const { value, done } = await reader.read();
+    if (done) break; 
     const chunk = decoder.decode(value, { stream: true });
     accumulatedText += chunk; 
-    setDisplayedText(accumulatedText); 
-    if (done) break; 
   }
+  setDisplayedText(accumulatedText); 
 
 }catch (error) {
   console.error("Error fetching GPT response:", error);

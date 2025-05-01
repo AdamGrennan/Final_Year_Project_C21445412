@@ -3,7 +3,9 @@ import { PiCloudRainFill } from "react-icons/pi";
 import { BsFillCloudLightningRainFill } from "react-icons/bs";
 import { FaScaleBalanced, FaEyeSlash, FaMasksTheater } from "react-icons/fa6";
 import { FaRegTired } from "react-icons/fa";
-import { GiNewspaper, GiCompass, GiBigWave, GiBullseye, GiAnchor, GiPerspectiveDiceSixFacesOne } from "react-icons/gi";
+import { GiNewspaper, GiCompass, GiBigWave, GiBullseye, GiAnchor, GiPerspectiveDiceSixFacesOne, GiStrong } from "react-icons/gi";
+import { MdOutlineVisibilityOff } from "react-icons/md";
+import { WiDayRainWind } from "react-icons/wi";
 
 const personaMap = {
   "Overconfidence Bias|N/A": {
@@ -13,7 +15,7 @@ const personaMap = {
   },
   "Confirmation Bias|N/A": {
     type: "Belief Seeker",
-    description: "You naturally look for info that matches what you already think. Awareness of this can help you explore alternative views more openly.",
+    description: "You instinctively seek information that supports your beliefs. Acknowledging this can open the door to broader perspectives.",
     icon: <FaEyeSlash className="text-3xl" />
   },
   "Anchoring Bias|N/A": {
@@ -38,7 +40,7 @@ const personaMap = {
   },
   "N/A|Pattern Noise": {
     type: "Unpredictable Reactor",
-    description: "You vary significantly from one decision to another. Consider what might be shifting your focus or reasoning each time.",
+    description: "Your decisions seem inconsistent. Reflect on what’s changing each time, your reasoning may be shifting without you noticing.",
     icon: <FaMasksTheater className="text-3xl" />
   },
   "Overconfidence Bias|Level Noise": {
@@ -48,8 +50,8 @@ const personaMap = {
   },
   "Overconfidence Bias|Occasion Noise": {
     type: "Overconfident Reactor",
-    description: "You make confident decisions, but your judgment is influenced by mood, time, or energy levels.",
-    icon: <LuBicepsFlexed className="text-3xl" />
+    description: "You project confidence, but your certainty can waver with your energy, stress, or the timing of a decision.",
+    icon: <GiStrong className="text-3xl" />
   },
   "Overconfidence Bias|Pattern Noise": {
     type: "Overconfident Wildcard",
@@ -60,7 +62,7 @@ const personaMap = {
   "Confirmation Bias|Level Noise": {
     type: "Confirmation Seeker",
     description: "You consistently seek out info that supports your views, even if that leads to repetitive blind spots.",
-    icon: <FaEyeSlash className="text-3xl" />
+    icon: <MdOutlineVisibilityOff  className="text-3xl" />
   },
   "Confirmation Bias|Occasion Noise": {
     type: "Swayed Thinker",
@@ -69,7 +71,7 @@ const personaMap = {
   },
   "Confirmation Bias|Pattern Noise": {
     type: "Selective Reactor",
-    description: "You favor your existing beliefs, but the way you apply them shifts from decision to decision.",
+    description: "You stick to your beliefs, but how they shape your decisions changes unpredictably.",
     icon: <FaMasksTheater className="text-3xl" />
   },
 
@@ -80,7 +82,7 @@ const personaMap = {
   },
   "Anchoring Bias|Occasion Noise": {
     type: "Flexible Thinker",
-    description: "You rely on early info, but how strongly you do so changes based on context.",
+    description: "You’re often influenced by first impressions, though how much varies with your mood or environment.",
     icon: <GiBigWave className="text-3xl" />
   },
   "Anchoring Bias|Pattern Noise": {
@@ -97,11 +99,11 @@ const personaMap = {
   "Recency Bias|Occasion Noise": {
     type: "The Reactionary",
     description: "You’re highly sensitive to what just happened, and your mood affects how you interpret it.",
-    icon: <PiCloudRainFill className="text-3xl" />
+    icon: <WiDayRainWind className="text-3xl" />
   },
   "Recency Bias|Pattern Noise": {
     type: "The Impulsive Reactor",
-    description: "You react to recent events, but how you react varies in unpredictable ways.",
+    description: "You respond to the latest events, but your reactions swing between extremes without a clear pattern.",
     icon: <BsFillCloudLightningRainFill className="text-3xl" />
   },
   "default": {

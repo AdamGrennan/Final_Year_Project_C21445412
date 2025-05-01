@@ -7,8 +7,8 @@ def get_created_at(chat):
     return chat.get("createdAt", float("-inf"))
 
 def stream_response(text):
-    for word in text.split():
-        yield word + " "
+    for chunk in text.splitlines(keepends=True): 
+        yield chunk
         time.sleep(0.05)
 
 def chat_endpoint(client):
@@ -23,10 +23,6 @@ def chat_endpoint(client):
     detectedBias = data.get("detectedBias", [])
     pattern_context = data.get("patternContext")
     recencyInfo = data.get("recencyInfo", "")
-    message_count = data.get("messageCount", 0)
-    
-    print("NOISE LOG", detectedNoise)
-    print("BIAS LOG", detectedBias)
 
     try:
         feedback_service = FeedbackService()

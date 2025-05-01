@@ -69,6 +69,7 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking, setRelatedLi
     setMessages((prev) => [...prev, newMessage]);
     setInput("");
 
+    /*
     if (messageContent.length > 15) {
       const query = `${judgmentData?.title || ""} ${messageContent}`;
       const serpLinks = await fetchSerp(query);
@@ -79,6 +80,7 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking, setRelatedLi
         return unique.slice(0, 5);
       });
     }
+      */
     if (!messages.some(msg => msg.sender === "user")) {
       setFinishButtonDisable(false);
     }
@@ -102,7 +104,6 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking, setRelatedLi
         console.log("Detected Bias", detectedBias);
         console.log("Detected Noise", detectedNoise);
       }
-
 
       await saveChats(user, judgementId, [newMessage], detectedBias, detectedNoise);
 
@@ -168,36 +169,26 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking, setRelatedLi
         console.log("No Recency Bias detected");
       }
 
-      await saveChats(user, judgementId, [{ ...newMessage }], detectedBias, detectedNoise);
-
-      const gptResponse = { text: "", sender: "GPT" };
-      setMessages((prev) => [...prev, gptResponse]);
-
       console.log("Sending to GPT:", messageContent);
-      await fetchChatResponse(messageContent, messages, (newText) => {
-        setMessages((prev) => {
-          const updatedMessages = [...prev];
-          const lastMessageIndex = updatedMessages.length - 1;
-          if (lastMessageIndex >= 0) {
-            updatedMessages[lastMessageIndex] = {
-              ...updatedMessages[lastMessageIndex],
-              text: newText,
-            };
-          }
-          return updatedMessages;
-        });
+      await fetchChatResponse(
+        messageContent,
+        messages,
+        async (newText) => {
+          const gptResponse = { text: newText, sender: "GPT", createdAt: new Date() };
 
-      }, patternContext,
+          setMessages((prev) => [...prev, gptResponse]);
+          await saveChats(user, judgementId, [gptResponse], detectedBias, detectedNoise);
+        },
+        patternContext,
         user?.uid,
         judgementId,
         detectedBias,
         detectedNoise,
-        recencyInfo,);
+        recencyInfo
+      );
+      
       setIsThinking(false);
       setIsChatBusy(false);
-
-      await saveChats(user, judgementId, [gptResponse], detectedBias, detectedNoise);
-
 
     } catch (error) {
       console.error("ERROR, Can't connect to BERT OR GPT", error.message || error);

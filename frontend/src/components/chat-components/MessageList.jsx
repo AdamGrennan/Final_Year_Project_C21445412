@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from "react";
+import { marked } from "marked";
 
 const MessageList = ({ messages }) => {
     const scrollRef = useRef(null);
@@ -8,11 +9,38 @@ const MessageList = ({ messages }) => {
             scrollRef.current.scrollIntoView({ behavior: "smooth" });
         }
     };
-
+    
     const formatText = (text) => {
-        return text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-    };
-
+        let formatted = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+        formatted = formatted.replace(/-\s+/g, "\n- ");
+      
+        const lines = formatted.split("\n");
+        let inList = false;
+        const htmlLines = [];
+      
+        lines.forEach((line) => {
+          if (line.trim().startsWith("- ")) {
+            if (!inList) {
+              htmlLines.push(
+                "<ul style='padding-left: 1rem; margin-top: 0.5rem; margin-bottom: 0.5rem; list-style-type: disc;'>"
+              );
+              inList = true;
+            }
+            htmlLines.push(`<li style="margin-bottom: 0.5rem;">${line.substring(2).trim()}</li>`);
+          } else {
+            if (inList) {
+              htmlLines.push("</ul>");
+              inList = false;
+            }
+            htmlLines.push(`<p style="margin-top: 0.5rem; margin-bottom: 0.5rem;">${line.trim()}</p>`);
+          }
+        });
+      
+        if (inList) htmlLines.push("</ul>");
+      
+        return htmlLines.join("");
+      };
+    
     useEffect(() => {
         scrollToBottom();
     }, []);

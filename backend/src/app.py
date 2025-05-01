@@ -25,7 +25,8 @@ from openai import OpenAI
 db = initialize_firebase()
 
 #GPT API key
-client = OpenAI(api_key="sk--6J0lHtxcBaT3MAGsCdv45c8e-ApLvzWOsQGbSFMU0T3BlbkFJU_iEG2lxrrnZJOdpd3OahPhtj5ecFBavR_DH-kBVMA")
+openai_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=openai_key)
 
 #LevelNoise zero point model
 pipe = pipeline(model="facebook/bart-large-mnli")

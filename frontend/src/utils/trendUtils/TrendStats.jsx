@@ -100,7 +100,6 @@ export const topFrequentTrends = (allDecisions, type) => {
     items.forEach(({ bias, noise }) => {
       if (bias) counts[bias] = (counts[bias] || 0) + 1;
       if (noise) counts[noise] = (counts[noise] || 0) + 1;
-      counts[label] = (counts[label] || 0) + 1;
     });
   }
 
