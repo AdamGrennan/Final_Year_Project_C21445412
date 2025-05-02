@@ -20,7 +20,9 @@ export const saveChats = async (user, judgementId, newMessages, detectedBias = [
         detectedNoise : detectedNoise,
         createdAt: serverTimestamp(), 
       });
+      console.log("✅ Chat saved:", msg.text);
     }
+
   } catch (error) {
     console.error("Failed to save chat:", error);
   }

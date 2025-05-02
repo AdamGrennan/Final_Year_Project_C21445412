@@ -1,4 +1,3 @@
-
 export const fetchChatResponse = async (input,messages,setDisplayedText,
   patternContext,userId,judgementId,
   detectedBias,detectedNoise, recencyTitle) => {
@@ -41,6 +40,7 @@ export const fetchChatResponse = async (input,messages,setDisplayedText,
   setDisplayedText("Error generating response.");
 }
 };
+
 
 export const fetchBERTResponse = async (input) => {
   try{
@@ -162,13 +162,12 @@ export const openingMessage = async (judgmentData, name) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`Failed to send opening message: ${response.status} ${response.statusText}`);
-      console.error("Sonus Response:", errorText);  // 🛠 Log full backend error
+      console.error("Sonus Response:", errorText); 
       return { error: `Sonus responded with status ${response.status}: ${errorText}` };
     }
     
 
     const textData = await response.text(); 
-
     return { bias_feedback: textData };  
 
   } catch (error) {

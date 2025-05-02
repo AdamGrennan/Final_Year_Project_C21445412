@@ -5,6 +5,7 @@ class FeedbackService:
         self.db = firestore.client()
         
     def fetch_feedback(self, user_id):
+        print("Entered fetch_feedback() with user_id:", user_id)
         feedback_ref = self.db.collection('feedback')
         query = (
             feedback_ref

@@ -42,7 +42,6 @@ def pattern_noise_endpoint(sbert_model, threshold=0.5):
             "patternNoiseSources": []
         })
 
-    # Encode the current input
     current_texts = message.strip()
     encoded_current_chat = sbert_model.encode([current_texts]).reshape(1, -1)
 

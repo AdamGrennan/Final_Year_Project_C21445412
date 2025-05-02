@@ -1,13 +1,13 @@
-import os, json
+import os
 from dotenv import load_dotenv
 import firebase_admin
 from firebase_admin import credentials, firestore
 
-load_dotenv()
-
 def initialize_firebase():
+    load_dotenv()
+    cred_path = os.getenv("FIREBASE_CREDENTIALS_PATH") 
     if not firebase_admin._apps:
-        key_data = os.getenv("FIREBASE_KEY")
-        cred = credentials.Certificate(json.loads(key_data))
+        cred = credentials.Certificate(cred_path)
         firebase_admin.initialize_app(cred)
+        print("Firebase initialized")
     return firestore.client()

@@ -23,7 +23,7 @@ def chat_endpoint(client):
     detectedBias = data.get("detectedBias", [])
     pattern_context = data.get("patternContext")
     recencyInfo = data.get("recencyInfo", "")
-
+    
     try:
         feedback_service = FeedbackService()
         feedback_data = feedback_service.fetch_feedback(data.get("userId"))
@@ -37,7 +37,6 @@ def chat_endpoint(client):
 
         if not statement:
             builder.build_open_message()
-
             messages = builder.get_messages()
 
             response = client.chat.completions.create(
@@ -47,6 +46,7 @@ def chat_endpoint(client):
                 temperature=0.7,
             )
 
+
             response_text = (
                 response.choices[0].message.content.strip()
                 if response.choices
@@ -54,28 +54,25 @@ def chat_endpoint(client):
             )
 
             return Response(stream_response(response_text), content_type="text/plain")
-        
-        if statement:
-            builder.build_system_message(detectedBias, detectedNoise)
-            builder.build_pattern_message(pattern_context)
-            builder.build_context_message(context)
 
-            if recencyInfo:  
-                builder.build_recency_message(recencyInfo)
+        builder.build_system_message(detectedBias, detectedNoise)
+        builder.build_pattern_message(pattern_context)
+        builder.build_context_message(context)
+
+        if recencyInfo:  
+            builder.build_recency_message(recencyInfo)
 
         last_system_message = None
         if context:
-            sorted_context = sorted(context, key=lambda c: c.get("createdAt", float("-inf")))
+            sorted_context = sorted(context, key=get_created_at)
             for chat in sorted_context:
                 if chat.get("sender") == "GPT":
                     last_system_message = chat.get("text", "").strip()
 
         builder.build_user_response(statement, last_system_message)
-
         messages = builder.get_messages()
 
         context_length = sum(len(msg["content"].split()) for msg in messages)
-
         if context_length > 100:
             response_tokens = 300
         elif len(statement.split()) > 15:

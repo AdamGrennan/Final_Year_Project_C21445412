@@ -1,6 +1,6 @@
 import sys
+from dotenv import load_dotenv
 import os
-
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from flask import Flask
@@ -25,8 +25,8 @@ from openai import OpenAI
 db = initialize_firebase()
 
 #GPT API key
-openai_key = os.getenv("OPENAI_API_KEY")
-client = OpenAI(api_key=openai_key)
+load_dotenv()
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 #LevelNoise zero point model
 pipe = pipeline(model="facebook/bart-large-mnli")
