@@ -3,3 +3,4 @@ backend/generate.py
 backend/gen
 backend/.env
 .vscode/
+backend/config/*.json
