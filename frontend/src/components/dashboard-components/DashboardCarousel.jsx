@@ -9,10 +9,34 @@ import {
 } from "@/components/ui/carousel";
 import { DecisionStats } from "./DecisionStats";
 import { RecentDecision } from "./RecentDecisions";
+import { useEffect, useState } from "react";
+import { levelNoiseScores } from "@/services/ApiService";
 
 export const DashboardCarousel = ({ userId, total, pieData,
-   topThemeWithBias, topThemeWithNoise, trendInsights, mostBiasedTime,
-  noisiestTime, insights}) => {
+  topThemeWithBias, topThemeWithNoise, trendInsights, mostBiasedTime,
+  noisiestTime, insights }) => {
+
+  const [levelNoise, setLevelNoise] = useState(null);
+
+  useEffect(() => {
+    const fetchLevelNoise = async () => {
+      try {
+        const response = await levelNoiseScores({ action: "fetch", userId });
+        const scores = response || [];
+        const numericScores = scores.map(([, score]) => score);
+        const sum = numericScores.reduce((acc, cur) => acc + cur, 0);
+        const avg = sum / numericScores.length;
+        setLevelNoise(avg.toFixed(2));
+      } catch (error) {
+        console.error("Error fetching average level score:", error);
+        setLevelNoise("N/A");
+      }
+    };
+  
+    fetchLevelNoise();
+  }, [userId]);
+  
+
 
   return (
     <div>
@@ -25,6 +49,7 @@ export const DashboardCarousel = ({ userId, total, pieData,
             <CarouselItem className="flex-shrink-0 w-full flex justify-center">
               <DecisionStats
                 total={total}
+                levelNoise={levelNoise}
                 pieData={pieData}
                 topThemeWithBias={topThemeWithBias}
                 topThemeWithNoise={topThemeWithNoise}
@@ -34,7 +59,7 @@ export const DashboardCarousel = ({ userId, total, pieData,
               />
             </CarouselItem>
             <CarouselItem className="flex-shrink-0 w-full flex justify-center">
-              <RecentDecision userId={userId} insights={insights}/>
+              <RecentDecision userId={userId} insights={insights} />
             </CarouselItem>
           </CarouselContent>
           <div className="absolute top-2 left-10">

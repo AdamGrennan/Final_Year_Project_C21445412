@@ -10,8 +10,8 @@ def insight_endpoint(client):
         system_prompt = (
             "You provide practical, supportive suggestions to help a user improve their current decision-making. "
             "Focus only on the current decision. Each suggestion should be 1–2 sentences max. "
-            "Present them as a short, clearly separated list (not in a single paragraph)."
-        )
+            "Present them as a short, clearly separated list (not in a single paragraph). "
+            "Write as if you're speaking directly to the user.")
 
         user_content = f"""
         A user is making the following decision. It includes a description of the decision, user expectations, and any detected biases or noise.

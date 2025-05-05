@@ -13,13 +13,21 @@ class PatternNoiseService:
         messages = []
         for doc in docs:
             data = doc.to_dict()
+            judgment_id = data.get("judgementId", "")
+            
+            title = ""
+            if judgment_id:
+                judgment_doc = self.db.collection("judgement").document(judgment_id).get()
+                if judgment_doc.exists:
+                    title = judgment_doc.to_dict().get("title", "")
+            
             if data:
                 messages.append({
                 "text": data.get("text", ""),
                 "judgementId": data.get("judgementId", ""),
                 "detected_bias": data.get("detectedBias", []),
                 "detected_noise": data.get("detectedNoise", []),
-                "title": data.get("title", ""),  
+                "title": title
             })
 
         print(f"Retrieved {len(messages)} total chat messages for user {user_id}")
@@ -61,7 +69,7 @@ class PatternNoiseService:
         print(f"Past has bias: {past_has_bias}, Past has noise: {past_has_noise}")
         print(f"Current has bias: {current_has_bias}, Current has noise: {current_has_noise}")
 
-        if similarity > 0.5 and not past_has_bias and not past_has_noise and (current_has_bias or current_has_noise):
+        if similarity > 0.3 and not past_has_bias and not past_has_noise and (current_has_bias or current_has_noise):
             print("Pattern Noise Detected!")
             return True
 

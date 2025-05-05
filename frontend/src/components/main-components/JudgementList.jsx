@@ -120,6 +120,9 @@ const JudgementList = () => {
                     <div className="font-light text-sm text-gray-700 break-words whitespace-normal mt-1">
                       {judgement.details.situation}
                     </div>
+                    <div className="text-xs text-amber-400 text-gray-500 mt-1">
+                      {judgement.theme}
+                    </div>
                     <div className="text-xs text-gray-500 mt-1">
                       {judgement.createdAt?.toDate()?.toLocaleDateString("en-US", {
                         year: "numeric",

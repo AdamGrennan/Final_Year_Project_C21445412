@@ -27,6 +27,7 @@ import Image from "next/image";
 const data = {
   navMain: [
     {
+      title: "",
       url: "#",
       items: [
         { title: "Account", url: "#" },

@@ -59,7 +59,6 @@ const PieChart = ({ pieData }) => {
     },
   };
 
-
   return (
     <div className="bg-white p-4 w-[300px] self-start">
       <div className="w-full h-[300px]">

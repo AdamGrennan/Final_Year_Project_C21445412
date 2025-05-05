@@ -25,13 +25,13 @@ export const uploadDashboardStats = async (userId) => {
     const dashboardSnap = await getDoc(dashboardRef);
     const dashboardData = dashboardSnap.exists() ? dashboardSnap.data() : {};
 
-    const biasThemes = dashboardData.biasThemes || {};
-    const noiseThemes = dashboardData.noiseThemes || {};
+    const biasThemes = {};
+    const noiseThemes = {};
 
     let totalDecisions = 0;
     let completedDecisions = dashboardData.completedDecisions || 0;
-    const biasCounts = dashboardData.biasDecisionCounts || {};
-    const noiseCounts = dashboardData.noiseDecisionCounts || {};
+    const biasCounts = {};
+    const noiseCounts = {};
 
     let insights = "";
 

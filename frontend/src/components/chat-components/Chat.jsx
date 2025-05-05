@@ -8,6 +8,8 @@ import MessageList from "./MessageList";
 import MessageSender from "./MessageSender";
 import { useJudgment } from "@/context/JudgementContext";
 import { openingMessage, fetchBERTResponse, fetchChatResponse, fetchSerp, fetchPatternNoise, fetchSource, fetchNewsAPI } from "@/services/ApiService";
+import { useToast } from "@/hooks/use-toast"
+
 
 const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking, setRelatedLinks }) => {
   const [pastDecisions, setPastDecisions] = useState([]);
@@ -21,6 +23,7 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking, setRelatedLi
   const [buttonDisable, setButtonDisable] = useState(false);
   const [recencyInfo, setRecencyInfo] = useState(null);
   const hasInitialized = useRef(false);
+  const { toast } = useToast();
 
   const createChat = async () => {
     if (messages.length > 0) return;
@@ -28,20 +31,18 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking, setRelatedLi
     if (user?.uid) {
       try {
         const openMessage = await openingMessage(
+          user.uid,
           {
             title: judgmentData?.title,
             theme: judgmentData?.theme,
             details: {
               situation: judgmentData?.details?.situation || "",
-              options: judgmentData?.details?.options || "",
-              influences: judgmentData?.details?.influences || "",
-              goal: judgmentData?.details?.goal || "",
             },
           },
           user.name
         );
 
-        if (openMessage.bias_feedback) {
+        if (openMessage.bias_feedback || openMessage.feedbackUsed) {
           const openingMessage = {
             text: openMessage.bias_feedback,
             sender: "GPT",
@@ -49,6 +50,15 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking, setRelatedLi
 
           setMessages([openingMessage]);
           saveChats(user, judgementId, [openingMessage], [], []);
+
+          if (openMessage.feedbackUsed) {
+            toast({
+              title: "Previous Feedback Used",
+              description: "Your feedback from the last chat is being used to improve this conversation.",
+              duration: 10000,
+              className: "bg-white text-black font-urbanist border border-gray-300",
+            });
+          }
         }
       } catch (error) {
         console.error("OPENING MESSAGE", error);
@@ -69,10 +79,10 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking, setRelatedLi
     setMessages((prev) => [...prev, newMessage]);
     setInput("");
 
-    /*
     if (messageContent.length > 15) {
       const query = `${judgmentData?.title || ""} ${messageContent}`;
       const serpLinks = await fetchSerp(query);
+      console.log("SERP LINKS:", serpLinks);
 
       setRelatedLinks((prev) => {
         const combined = [...prev, ...serpLinks];
@@ -80,7 +90,7 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking, setRelatedLi
         return unique.slice(0, 5);
       });
     }
-      */
+    
     if (!messages.some(msg => msg.sender === "user")) {
       setFinishButtonDisable(false);
     }
@@ -131,8 +141,9 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking, setRelatedLi
 
         if (similarDecisions && similarDecisions.length > 0) {
           if (patternNoiseSources && patternNoiseSources.length > 0) {
-            const patternNoiseSource = patternNoiseSources[0].source;
-            detectNoise("Pattern Noise", patternNoiseSource);
+            const patternNoiseTitle = patternNoiseSources[0].source || "a previous decision";
+            const patternNoiseSentence = `This may be inconsistent with your previous decision titled "${patternNoiseTitle}".`;
+            detectNoise("Pattern Noise", patternNoiseSentence);
             detectedNoise.push("Pattern Noise");
           }
 
@@ -154,17 +165,19 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking, setRelatedLi
 
       setIsThinking(true);
       setIsChatBusy(true);
-      
+
       const newsAPI = await fetchNewsAPI(messageContent);
 
       if (newsAPI?.recency_bias_detected) {
         console.log("Possible Recency Bias detected:", newsAPI.most_similar_article.title);
+        const fullTitle = newsAPI.most_similar_article.title || "";
+        const cleanTitle = fullTitle.includes(":") ? fullTitle.split(":")[0].trim() : fullTitle;
 
-        const recencySource = `It seems you may have read ${newsAPI.most_similar_article.title}, which could be affecting your judgment.`;
+        const recencySource = `It seems you may have read ${cleanTitle}, which could be affecting your judgment.`;
 
         detectBias("Recency Bias", recencySource);
         detectedBias.push("Recency Bias");
-        setRecencyInfo(newsAPI.most_similar_article.title);
+        setRecencyInfo(cleanTitle);
       } else {
         console.log("No Recency Bias detected");
       }
@@ -186,7 +199,7 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking, setRelatedLi
         detectedNoise,
         recencyInfo
       );
-      
+
       setIsThinking(false);
       setIsChatBusy(false);
 
@@ -219,7 +232,7 @@ const Chat = ({ judgementId, setFinishButtonDisable, setIsThinking, setRelatedLi
 
     fetchPreviousChats();
   }, [judgementId]);
-  
+
   return (
     <div className="h-[425px]">
       <MessageList messages={messages} />

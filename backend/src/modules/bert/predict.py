@@ -1,6 +1,13 @@
 import torch
 
-def predict_bias(model, tokenizer, statement, bias_labels, threshold=0.65):
+def predict_bias(model, tokenizer, statement, bias_labels):
+    bias_thresholds = {
+        "OverconfidenceBias": 0.9,
+        "ConfirmationBias": 0.65,
+        "AnchoringBias": 0.65,
+        "Neutral": 0.65,
+        "OccasionNoise": 0.65
+    }
     
     inputs = tokenizer(statement, return_tensors='pt', padding=True, truncation=True, max_length=128)
 
@@ -14,9 +21,10 @@ def predict_bias(model, tokenizer, statement, bias_labels, threshold=0.65):
     sigmoid_scores = torch.sigmoid(outputs.logits).squeeze()
 
     # Apply threshold to get binary labels
-    predicted_classes = (sigmoid_scores >= threshold).int().tolist()
-
-    # Map i to bias labels
-    predicted_biases = [bias_labels[i] for i in range(len(predicted_classes)) if predicted_classes[i] == 1]
+    predicted_biases = [
+        bias_labels[i]
+        for i in range(len(sigmoid_scores))
+        if sigmoid_scores[i] >= bias_thresholds.get(bias_labels[i], 0.65)
+    ]
     
     return predicted_biases

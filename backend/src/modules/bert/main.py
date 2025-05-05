@@ -6,7 +6,7 @@ import os
 
 if __name__ == "__main__":
     
-    if(os.path.exists('./models/sonus_v3_model') and os.path.exists('./models/sonus_v3_tokenizer')):
+    if(os.path.exists('./models/sonus_v2_model') and os.path.exists('./models/sonus_v2_tokenizer')):
         print("Loading the model...")
         model, tokenizer, bias_labels = load_bias_model()
     else:

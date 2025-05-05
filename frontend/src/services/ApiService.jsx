@@ -1,6 +1,6 @@
 export const fetchChatResponse = async (input,messages,setDisplayedText,
   patternContext,userId,judgementId,
-  detectedBias,detectedNoise, recencyTitle) => {
+  detectedBias,detectedNoise, recencyInfo) => {
   try{
   const response = await fetch('http://127.0.0.1:5000/chat', {
     method: 'POST',
@@ -12,7 +12,7 @@ export const fetchChatResponse = async (input,messages,setDisplayedText,
       patternContext,
       detectedBias,
       detectedNoise,
-      recencyTitle,
+      recencyInfo,
       context: messages.map((msg) => ({
         sender: msg.sender || "user",
         text: msg.text || "",
@@ -142,33 +142,31 @@ export const fetchPatternNoise = async (userId, judgmentId, theme, message, dete
 }
 }
 
-export const openingMessage = async (judgmentData, name) => {
+export const openingMessage = async (userId, judgmentData, name) => {
   try {
     const response = await fetch('http://127.0.0.1:5000/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        userId,
         title: judgmentData?.title || "No Title Provided",
         name: name || "No Name Provided",
         details: {
           situation: judgmentData?.details?.situation || "",
         },
-        theme: judgmentData?.theme || "No Template",
+        theme: judgmentData?.theme || "No Theme",
         input: "",
         context: [],
       }),
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
       console.error(`Failed to send opening message: ${response.status} ${response.statusText}`);
-      console.error("Sonus Response:", errorText); 
-      return { error: `Sonus responded with status ${response.status}: ${errorText}` };
+      return { error: `Sonus responded with status ${response.status}:` };
     }
-    
 
-    const textData = await response.text(); 
-    return { bias_feedback: textData };  
+    const { text, feedbackUsed } = await response.json();
+    return { bias_feedback: text, feedbackUsed };
 
   } catch (error) {
     console.error("Error Opening Message.", error);

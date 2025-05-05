@@ -5,7 +5,6 @@ class FeedbackService:
         self.db = firestore.client()
         
     def fetch_feedback(self, user_id):
-        print("Entered fetch_feedback() with user_id:", user_id)
         feedback_ref = self.db.collection('feedback')
         query = (
             feedback_ref
@@ -20,7 +19,6 @@ class FeedbackService:
         return feedback_entries
 
     def mark_feedback(self, doc_id):
-        print(f"FEEDBACK SERVICE: Marking feedback {doc_id} as used")
         feedback_ref = self.db.collection('feedback').document(doc_id)
         feedback_ref.update({"usedInNextChat": True})   
 
@@ -62,8 +60,8 @@ class FeedbackService:
         elif perspective == "yes":
             parts.append("Their perspective changed — reinforce helpful reflection.")
 
+        conversation = []
         if previous_chats:
-            conversation = []
             for chat in previous_chats:
                 sender = chat.get("sender")
                 text = chat.get("text", "").strip()

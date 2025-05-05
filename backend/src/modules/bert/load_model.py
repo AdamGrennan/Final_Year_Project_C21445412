@@ -5,8 +5,8 @@ import os
 
 def load_bias_model():
     # Load model and tokenizer
-    model = BertForSequenceClassification.from_pretrained("../models/sonus_v3_model")
-    tokenizer = BertTokenizer.from_pretrained("../models/sonus_v3_tokenizer")
+    model = BertForSequenceClassification.from_pretrained("../models/sonus_v2_model")
+    tokenizer = BertTokenizer.from_pretrained("../models/sonus_v2_tokenizer")
 
 
     # Load dataset to retrieve bias labels

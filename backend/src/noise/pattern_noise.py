@@ -4,7 +4,7 @@ from services.pattern_noise_service import PatternNoiseService
 
 service = PatternNoiseService()
 
-def pattern_noise_endpoint(sbert_model, threshold=0.5):
+def pattern_noise_endpoint(sbert_model, threshold=0.3):
     data = request.json
     user_id = data.get("user_id")
     judgment_id = data.get("judgementId")
